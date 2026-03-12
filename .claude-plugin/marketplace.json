@@ -1,0 +1,12 @@
+{
+  "name": "blairanderson-skills",
+  "owner": {
+    "name": "Blair Anderson",
+    "email": "blair81@gmail.com"
+  },
+  "metadata": {
+    "description": "Curated collection of production-ready Claude Code skills",
+    "version": "1.0.0"
+  },
+  "plugins": []
+}
