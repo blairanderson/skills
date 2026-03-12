@@ -6,7 +6,8 @@ allowed-tools:
   - Glob
   - Bash
   - AskUserQuestion
-description: End-to-end Rails authentication setup using Rails 8's built-in authentication generator (`bin/rails generate authentication`). MUST trigger when user mentions authentication, login, sign-up, user accounts, sessions, password reset, or authorization in a Rails context. Also trigger when the user mentions organizations, teams, roles, multi-tenancy, or account structures in a Rails app — these are natural extensions of authentication. Even simple requests like "add login" or "set up users" should trigger this skill.
+description: |
+  End-to-end Rails authentication setup using Rails 8's built-in authentication generator (`bin/rails generate authentication`). MUST trigger when user mentions authentication, login, sign-up, user accounts, sessions, password reset, or authorization in a Rails context. Also trigger when the user mentions organizations, teams, roles, multi-tenancy, or account structures in a Rails app — these are natural extensions of authentication. Even simple requests like "add login" or "set up users" should trigger this skill.
 ---
 
 # Rails Authentication — End to End
