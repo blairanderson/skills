@@ -14,90 +14,85 @@
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/garrytan/gstack.git",
-        "path": "plan-ceo-review"
+        "path": "plan-ceo-review",
+        "sha": "2aa745cb0e4331d683e727ec77385d04cdbb45a2"
       },
       "description": "CEO/founder-mode plan review — rethink the problem, find the 10-star product, challenge premises, expand scope",
       "author": {
         "name": "Garry Tan"
       },
       "category": "planning",
-      "tags": ["plan-review", "ceo", "product"],
-      "strict": false
+      "tags": [
+        "plan-review",
+        "ceo",
+        "product"
+      ],
+      "strict": false,
+      "version": "sha-2aa745c"
     },
     {
       "name": "gstack_plan-eng-review",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/garrytan/gstack.git",
-        "path": "plan-eng-review"
+        "path": "plan-eng-review",
+        "sha": "2aa745cb0e4331d683e727ec77385d04cdbb45a2"
       },
       "description": "Eng manager-mode plan review — lock in architecture, data flow, edge cases, test coverage, performance",
       "author": {
         "name": "Garry Tan"
       },
       "category": "planning",
-      "tags": ["plan-review", "engineering", "architecture"],
-      "strict": false
+      "tags": [
+        "plan-review",
+        "engineering",
+        "architecture"
+      ],
+      "strict": false,
+      "version": "sha-2aa745c"
     },
     {
       "name": "gstack_review",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/garrytan/gstack.git",
-        "path": "review"
+        "path": "review",
+        "sha": "2aa745cb0e4331d683e727ec77385d04cdbb45a2"
       },
       "description": "Pre-landing PR review — analyzes diff against main for SQL safety, LLM trust boundary violations, and structural issues",
       "author": {
         "name": "Garry Tan"
       },
       "category": "code-review",
-      "tags": ["review", "pr", "code-quality"],
-      "strict": false
+      "tags": [
+        "review",
+        "pr",
+        "code-quality"
+      ],
+      "strict": false,
+      "version": "sha-2aa745c"
     },
     {
       "name": "gstack_ship",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/garrytan/gstack.git",
-        "path": "ship"
+        "path": "ship",
+        "sha": "2aa745cb0e4331d683e727ec77385d04cdbb45a2"
       },
       "description": "Ship workflow — merge main, run tests, review diff, bump VERSION, update CHANGELOG, commit, push, create PR",
       "author": {
         "name": "Garry Tan"
       },
       "category": "deployment",
-      "tags": ["ship", "deploy", "pr", "changelog"],
-      "strict": false
-    },
-    {
-      "name": "code-spec",
-      "source": "./skills/code-spec",
-      "description": "Generate structured code specifications",
-      "author": {
-        "name": "Blair Anderson"
-      },
-      "category": "planning",
-      "tags": ["spec", "code-generation", "planning"]
-    },
-    {
-      "name": "rails-authentication",
-      "source": "./skills/rails-authentication",
-      "description": "End-to-end Rails 8 authentication setup with session management, OAuth, 2FA, and more",
-      "author": {
-        "name": "Blair Anderson"
-      },
-      "category": "rails",
-      "tags": ["rails", "authentication", "oauth", "2fa"]
-    },
-    {
-      "name": "git:cleanup_branch",
-      "source": "./cleanup",
-      "description": "Switch back to master, pull with rebase, and delete the current feature branch after a PR is merged",
-      "author": {
-        "name": "Blair Anderson"
-      },
-      "category": "git",
-      "tags": ["git", "branch", "cleanup", "workflow"]
+      "tags": [
+        "ship",
+        "deploy",
+        "pr",
+        "changelog"
+      ],
+      "strict": false,
+      "version": "sha-2aa745c"
     }
   ]
 }
