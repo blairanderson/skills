@@ -68,6 +68,26 @@
       "category": "deployment",
       "tags": ["ship", "deploy", "pr", "changelog"],
       "strict": false
+    },
+    {
+      "name": "code-spec",
+      "source": "./skills/code-spec",
+      "description": "Generate structured code specifications",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "planning",
+      "tags": ["spec", "code-generation", "planning"]
+    },
+    {
+      "name": "rails-authentication",
+      "source": "./skills/rails-authentication",
+      "description": "End-to-end Rails 8 authentication setup with session management, OAuth, 2FA, and more",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "rails",
+      "tags": ["rails", "authentication", "oauth", "2fa"]
     }
   ]
 }
