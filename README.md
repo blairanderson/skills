@@ -1,39 +1,90 @@
 # Claude Code Skills by Blair
 
-Production-ready skills for enhanced Claude Code development workflows.
+A curated marketplace of skills for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Install the whole collection or pick individual skills to supercharge your development workflow.
 
-## Installation
+## Quick Start
 
-Add this marketplace to your Claude Code:
+### 1. Add the marketplace
 
 ```shell
 /plugin marketplace add blairanderson/skills
 ```
 
-Then install individual skills:
+### 2. Browse available skills
+
+```shell
+/plugin search @blairanderson-skills
+```
+
+### 3. Install a skill
+
+Install everything:
 
 ```shell
 /plugin install @blairanderson-skills
 ```
 
+Or install a single skill by name:
+
+```shell
+/plugin install @blairanderson-skills/code-spec
+```
+
+### 4. Use it
+
+Once installed, skills activate automatically based on context. You can also invoke them directly:
+
+```
+/code-spec ProductVideos
+/cleanup
+```
+
 ## Available Skills
 
-| Skill | Description |
-|-------|-------------|
-| [code-spec](skills/code-spec) | Generate structured code specifications |
-| [rails-authentication](skills/rails-authentication) | End-to-end Rails 8 authentication setup with session management, OAuth, 2FA, and more |
-| [cleanup](cleanup) | Switch back to master, pull with rebase, and delete the current feature branch |
+| Skill | Category | Description |
+|-------|----------|-------------|
+| `code-spec` | Planning | Reverse-engineer a feature or project into a portable, implementation-ready specification |
+| `rails-authentication` | Rails | End-to-end Rails 8 authentication setup with session management, OAuth, and 2FA |
+| `git:cleanup_branch` | Git | Switch back to master, pull with rebase, and delete the current feature branch |
+
+This marketplace also includes skills from [gstack](https://github.com/garrytan/gstack) by Garry Tan:
+
+| Skill | Category | Description |
+|-------|----------|-------------|
+| `gstack:plan-ceo-review` | Planning | CEO/founder-mode plan review — rethink the problem, challenge premises, find the 10-star product |
+| `gstack:plan-eng-review` | Planning | Eng manager-mode plan review — lock in architecture, data flow, edge cases, and test coverage |
+| `gstack:review` | Code Review | Pre-landing PR review for SQL safety, LLM trust boundary violations, and structural issues |
+| `gstack:ship` | Deployment | Ship workflow — merge main, run tests, review diff, bump version, create PR |
+
+## How Skills Work
+
+Each skill is a `SKILL.md` file with YAML frontmatter that tells Claude Code when and how to use it:
+
+```markdown
+---
+name: my-skill
+description: When to activate this skill
+---
+
+# Instructions for Claude
+
+Steps, rules, and context go here.
+```
+
+When you install a skill, Claude Code reads the description to decide when to activate it automatically. No manual triggering required — just work normally and the right skill kicks in.
 
 ## Contributing
 
 Want to add your own skills to this marketplace?
 
 1. Fork this repository
-2. Create a new skill directory under `skills/`
-3. Write your `SKILL.md` following the [Agent Skills standard](https://agentskills.io)
+2. Create a new directory with a `SKILL.md` inside it
+3. Add a `.claude-plugin/plugin.json` with name, description, and version
 4. Add an entry to `.claude-plugin/marketplace.json`
 5. Submit a pull request
 
+See the [Agent Skills standard](https://agentskills.io) for the full `SKILL.md` spec.
+
 ## License
 
-MIT - See LICENSE file for details
+MIT — see [LICENSE](LICENSE) for details.
