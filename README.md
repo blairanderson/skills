@@ -51,10 +51,10 @@ This marketplace also includes skills from [gstack](https://github.com/garrytan/
 
 | Skill | Category | Description |
 |-------|----------|-------------|
-| `gstack:plan-ceo-review` | Planning | CEO/founder-mode plan review — rethink the problem, challenge premises, find the 10-star product |
-| `gstack:plan-eng-review` | Planning | Eng manager-mode plan review — lock in architecture, data flow, edge cases, and test coverage |
-| `gstack:review` | Code Review | Pre-landing PR review for SQL safety, LLM trust boundary violations, and structural issues |
-| `gstack:ship` | Deployment | Ship workflow — merge main, run tests, review diff, bump version, create PR |
+| `gstack_plan-ceo-review` | Planning | CEO/founder-mode plan review — rethink the problem, challenge premises, find the 10-star product |
+| `gstack_plan-eng-review` | Planning | Eng manager-mode plan review — lock in architecture, data flow, edge cases, and test coverage |
+| `gstack_review` | Code Review | Pre-landing PR review for SQL safety, LLM trust boundary violations, and structural issues |
+| `gstack_ship` | Deployment | Ship workflow — merge main, run tests, review diff, bump version, create PR |
 
 ## How Skills Work
 

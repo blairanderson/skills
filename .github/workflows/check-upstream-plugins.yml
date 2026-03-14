@@ -87,7 +87,7 @@ jobs:
             --title "Bump gstack plugins to sha-$SHA" \
             --body "$(cat <<'EOF'
           ## Summary
-          - Updated all `gstack:*` plugin entries to latest upstream commit
+          - Updated all `gstack_*` plugin entries to latest upstream commit
           - Upstream repo: garrytan/gstack
           - New SHA: ${{ steps.check.outputs.upstream_sha }}
 

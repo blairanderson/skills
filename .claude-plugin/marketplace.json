@@ -10,7 +10,7 @@
   },
   "plugins": [
     {
-      "name": "gstack:plan-ceo-review",
+      "name": "gstack_plan-ceo-review",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/garrytan/gstack.git",
@@ -25,7 +25,7 @@
       "strict": false
     },
     {
-      "name": "gstack:plan-eng-review",
+      "name": "gstack_plan-eng-review",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/garrytan/gstack.git",
@@ -40,7 +40,7 @@
       "strict": false
     },
     {
-      "name": "gstack:review",
+      "name": "gstack_review",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/garrytan/gstack.git",
@@ -55,7 +55,7 @@
       "strict": false
     },
     {
-      "name": "gstack:ship",
+      "name": "gstack_ship",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/garrytan/gstack.git",
