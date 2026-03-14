@@ -88,6 +88,16 @@
       },
       "category": "rails",
       "tags": ["rails", "authentication", "oauth", "2fa"]
+    },
+    {
+      "name": "git:cleanup_branch",
+      "source": "./cleanup",
+      "description": "Switch back to master, pull with rebase, and delete the current feature branch after a PR is merged",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "git",
+      "tags": ["git", "branch", "cleanup", "workflow"]
     }
   ]
 }

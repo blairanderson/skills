@@ -18,6 +18,11 @@ Then install individual skills:
 
 ## Available Skills
 
+| Skill | Description |
+|-------|-------------|
+| [code-spec](skills/code-spec) | Generate structured code specifications |
+| [rails-authentication](skills/rails-authentication) | End-to-end Rails 8 authentication setup with session management, OAuth, 2FA, and more |
+| [cleanup](cleanup) | Switch back to master, pull with rebase, and delete the current feature branch |
 
 ## Contributing
 
