@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:rubyonrails.org)",
-      "Bash(claude plugin:*)"
+      "Bash(claude plugin:*)",
+      "Bash(git push:*)"
     ]
   }
 }
