@@ -8,5 +8,66 @@
     "description": "Curated collection of production-ready Claude Code skills",
     "version": "1.0.0"
   },
-  "plugins": []
+  "plugins": [
+    {
+      "name": "gstack:plan-ceo-review",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/garrytan/gstack.git",
+        "path": "plan-ceo-review"
+      },
+      "description": "CEO/founder-mode plan review — rethink the problem, find the 10-star product, challenge premises, expand scope",
+      "author": {
+        "name": "Garry Tan"
+      },
+      "category": "planning",
+      "tags": ["plan-review", "ceo", "product"],
+      "strict": false
+    },
+    {
+      "name": "gstack:plan-eng-review",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/garrytan/gstack.git",
+        "path": "plan-eng-review"
+      },
+      "description": "Eng manager-mode plan review — lock in architecture, data flow, edge cases, test coverage, performance",
+      "author": {
+        "name": "Garry Tan"
+      },
+      "category": "planning",
+      "tags": ["plan-review", "engineering", "architecture"],
+      "strict": false
+    },
+    {
+      "name": "gstack:review",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/garrytan/gstack.git",
+        "path": "review"
+      },
+      "description": "Pre-landing PR review — analyzes diff against main for SQL safety, LLM trust boundary violations, and structural issues",
+      "author": {
+        "name": "Garry Tan"
+      },
+      "category": "code-review",
+      "tags": ["review", "pr", "code-quality"],
+      "strict": false
+    },
+    {
+      "name": "gstack:ship",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/garrytan/gstack.git",
+        "path": "ship"
+      },
+      "description": "Ship workflow — merge main, run tests, review diff, bump VERSION, update CHANGELOG, commit, push, create PR",
+      "author": {
+        "name": "Garry Tan"
+      },
+      "category": "deployment",
+      "tags": ["ship", "deploy", "pr", "changelog"],
+      "strict": false
+    }
+  ]
 }
