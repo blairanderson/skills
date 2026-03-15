@@ -3,7 +3,18 @@
     "allow": [
       "WebFetch(domain:rubyonrails.org)",
       "Bash(claude plugin:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(gh run:*)",
+      "Bash(UPSTREAM_URL=\"https://github.com/garrytan/gstack.git\")",
+      "Read(//Users/blairanderson/dev/skills/**)",
+      "Bash(git remote:*)",
+      "Bash(gh workflow:*)",
+      "Bash(gh api:*)",
+      "Bash(git add:*)",
+      "Bash(git pull:*)"
+    ],
+    "additionalDirectories": [
+      "/Users/blairanderson/dev/gstack"
     ]
   }
 }
