@@ -6,12 +6,12 @@
   },
   "metadata": {
     "description": "Curated collection of production-ready Claude Code skills",
-    "version": "1.0.1"
+    "version": "1.0.2"
   },
   "plugins": [
     {
       "name": "code-spec",
-      "source": "./skills/code-spec",
+      "source": "./plugins/code-spec",
       "description": "Generate structured code specifications",
       "author": {
         "name": "Blair Anderson"
@@ -21,7 +21,7 @@
     },
     {
       "name": "rails-authentication",
-      "source": "./skills/rails-authentication",
+      "source": "./plugins/rails-authentication",
       "description": "End-to-end Rails 8 authentication setup with session management, OAuth, 2FA, and more",
       "author": {
         "name": "Blair Anderson"
@@ -31,7 +31,7 @@
     },
     {
       "name": "git:cleanup_branch",
-      "source": "./cleanup",
+      "source": "./plugins/cleanup",
       "description": "Switch back to master, pull with rebase, and delete the current feature branch after a PR is merged",
       "author": {
         "name": "Blair Anderson"

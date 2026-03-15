@@ -11,7 +11,9 @@
       "Bash(gh workflow:*)",
       "Bash(gh api:*)",
       "Bash(git add:*)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Read(//Users/blairanderson/.claude/plugins/marketplaces/blairanderson-skills/.claude/**)",
+      "Read(//Users/blairanderson/.claude/plugins/marketplaces/blairanderson-skills/.claude-plugin/**)"
     ],
     "additionalDirectories": [
       "/Users/blairanderson/dev/gstack"
