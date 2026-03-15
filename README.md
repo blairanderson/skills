@@ -47,14 +47,7 @@ Once installed, skills activate automatically based on context. You can also inv
 | `rails-authentication` | Rails | End-to-end Rails 8 authentication setup with session management, OAuth, and 2FA |
 | `git:cleanup_branch` | Git | Switch back to master, pull with rebase, and delete the current feature branch |
 
-This marketplace also includes skills from [gstack](https://github.com/garrytan/gstack) by Garry Tan:
-
-| Skill | Category | Description |
-|-------|----------|-------------|
-| `gstack_plan-ceo-review` | Planning | CEO/founder-mode plan review — rethink the problem, challenge premises, find the 10-star product |
-| `gstack_plan-eng-review` | Planning | Eng manager-mode plan review — lock in architecture, data flow, edge cases, and test coverage |
-| `gstack_review` | Code Review | Pre-landing PR review for SQL safety, LLM trust boundary violations, and structural issues |
-| `gstack_ship` | Deployment | Ship workflow — merge main, run tests, review diff, bump version, create PR |
+Looking for Garry Tan's gstack skills? They're published separately at [blairanderson/gstack](https://github.com/blairanderson/gstack).
 
 ## How Skills Work
 
