@@ -35,7 +35,7 @@ jobs:
           echo "upstream_short=$UPSTREAM_SHORT" >> "$GITHUB_OUTPUT"
 
           # Extract current SHA from marketplace.json (if any)
-          CURRENT_SHA=$(jq -r '.plugins[] | select(.source.url == "'"$UPSTREAM_URL"'") | .source.sha // "none"' "$MARKETPLACE" | head -1)
+          CURRENT_SHA=$(jq -r --arg url "$UPSTREAM_URL" '.plugins[] | select((.source | type) == "object" and .source.url == $url) | .source.sha // "none"' "$MARKETPLACE" | head -1)
 
           echo "Current SHA: $CURRENT_SHA"
           echo "Upstream SHA: $UPSTREAM_SHA"
@@ -48,9 +48,9 @@ jobs:
 
           # Update all gstack plugin entries with new SHA and version
           TEMP=$(mktemp)
-          jq --arg sha "$UPSTREAM_SHA" --arg version "sha-$UPSTREAM_SHORT" '
+          jq --arg sha "$UPSTREAM_SHA" --arg version "sha-$UPSTREAM_SHORT" --arg url "$UPSTREAM_URL" '
             .plugins |= map(
-              if .source.url? == "'"$UPSTREAM_URL"'" then
+              if (.source | type) == "object" and .source.url == $url then
                 .source.sha = $sha | .version = $version
               else
                 .
