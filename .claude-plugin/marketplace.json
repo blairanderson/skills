@@ -38,6 +38,16 @@
       },
       "category": "git",
       "tags": ["git", "branch", "cleanup", "workflow"]
+    },
+    {
+      "name": "hotfix",
+      "source": "./plugins/hotfix",
+      "description": "Stay on master, commit changed files, pull with rebase, push, and watch GitHub workflow runs",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "git",
+      "tags": ["git", "hotfix", "deploy", "workflow"]
     }
   ]
 }

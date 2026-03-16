@@ -1,5 +1,5 @@
 {
-  "name": "git:cleanup_branch",
-  "description": "Switch back to master, pull with rebase, and delete the current feature branch",
+  "name": "hotfix",
+  "description": "Stay on master, commit changed files, pull with rebase, push, and watch GitHub workflow runs",
   "version": "1.0.0"
 }
