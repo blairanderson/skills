@@ -16,7 +16,11 @@
       "Bash(git pull *)",
       "Read(//Users/blairanderson/.claude/plugins/marketplaces/blairanderson-skills/.claude/**)",
       "Read(//Users/blairanderson/.claude/plugins/marketplaces/blairanderson-skills/.claude-plugin/**)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(for plugin:*)",
+      "Bash(do echo:*)",
+      "Read(//Users/blairanderson/dev/skills/plugins/**)",
+      "Bash(done)"
     ],
     "additionalDirectories": [
       "/Users/blairanderson/dev/gstack"
