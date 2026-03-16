@@ -1,0 +1,5 @@
+{
+  "name": "bump",
+  "description": "Bump the marketplace version, commit, and push to master",
+  "version": "1.0.0"
+}
