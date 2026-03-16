@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Curated collection of production-ready Claude Code skills",
-    "version": "1.0.4"
+    "version": "1.0.3"
   },
   "plugins": [
     {
@@ -48,16 +48,6 @@
       },
       "category": "git",
       "tags": ["git", "hotfix", "deploy", "workflow"]
-    },
-    {
-      "name": "bump",
-      "source": "./plugins/bump",
-      "description": "Bump the marketplace version, commit, and push to master",
-      "author": {
-        "name": "Blair Anderson"
-      },
-      "category": "release",
-      "tags": ["version", "bump", "release", "workflow"]
     }
   ]
 }

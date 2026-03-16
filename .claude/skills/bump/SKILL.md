@@ -5,7 +5,7 @@ description: Bump the marketplace version in the blairanderson/skills repo, comm
 
 # Bump — increment version, commit, push
 
-The skills repo at `/Users/blairanderson/dev/skills` has a marketplace manifest at `.claude-plugin/marketplace.json` with a `metadata.version` field using semver (e.g., `1.0.3`).
+The skills repo has a marketplace manifest at `.claude-plugin/marketplace.json` with a `metadata.version` field using semver (e.g., `1.0.3`).
 
 ## Steps
 
