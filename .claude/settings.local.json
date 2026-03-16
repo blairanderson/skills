@@ -20,7 +20,10 @@
       "Bash(for plugin:*)",
       "Bash(do echo:*)",
       "Read(//Users/blairanderson/dev/skills/plugins/**)",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(find:*)",
+      "Bash(echo \"FILE: /Users/blairanderson/dev/skills/plugins/$plugin/.claude-plugin/plugin.json\")",
+      "Read(//Users/blairanderson/dev/skills/plugins/$plugin/.claude-plugin/**)"
     ],
     "additionalDirectories": [
       "/Users/blairanderson/dev/gstack"
