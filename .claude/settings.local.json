@@ -1,20 +1,22 @@
 {
   "permissions": {
     "allow": [
+      "Edit",
       "WebFetch(domain:rubyonrails.org)",
-      "Bash(claude plugin:*)",
-      "Bash(git push:*)",
-      "Bash(gh run:*)",
+      "Bash(claude plugin *)",
+      "Bash(git push)",
+      "Bash(git push *)",
+      "Bash(gh run *)",
       "Bash(UPSTREAM_URL=\"https://github.com/garrytan/gstack.git\")",
       "Read(//Users/blairanderson/dev/skills/**)",
-      "Bash(git remote:*)",
-      "Bash(gh workflow:*)",
-      "Bash(gh api:*)",
-      "Bash(git add:*)",
-      "Bash(git pull:*)",
+      "Bash(git remote *)",
+      "Bash(gh workflow *)",
+      "Bash(gh api *)",
+      "Bash(git add *)",
+      "Bash(git pull *)",
       "Read(//Users/blairanderson/.claude/plugins/marketplaces/blairanderson-skills/.claude/**)",
       "Read(//Users/blairanderson/.claude/plugins/marketplaces/blairanderson-skills/.claude-plugin/**)",
-      "Bash(git commit:*)"
+      "Bash(git commit *)"
     ],
     "additionalDirectories": [
       "/Users/blairanderson/dev/gstack"
