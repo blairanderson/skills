@@ -22,8 +22,14 @@ When the Git Commit Policy above says `NOT_INITIALIZED`, run the full init flow:
 
 1. **Git commit preference**: Ask shared vs private, then run `${CLAUDE_SKILL_DIR}/task_loader init --git-commit true|false`
 2. **Statusline setup** (only if the Statusline Setup Check above says `STATUSLINE_NOT_CONFIGURED`):
-   - Use `AskUserQuestion` with question: "Do you want to add your task summary to your status line?" and suggestions: `["Yes please", "Not now", "No thanks and stop asking"]`
-   - **"Yes please"**: Use the `statusline-setup` agent to configure the user's status line to use the command `bash ~/.claude/statusline-command.sh` (type: command). This is the same statusline script that shows git info, path, website, and open tasks.
+   - Use `AskUserQuestion` with question: "Want to see your tasks in the Claude Code status line? It shows in_progress tasks first (▸ yellow), blocked (✗ red), then pending (· gray) — sorted oldest-first, up to 5 tasks." and suggestions: `["Yes please", "Not now", "No thanks and stop asking"]`
+   - **"Yes please"**: Use the `statusline-setup` agent to configure the user's status line to use the command `bash ~/.claude/statusline-command.sh` (type: command). Then ensure the statusline script exists at `~/.claude/statusline-command.sh`. If it doesn't exist, create it with a script that:
+     - Shows git branch with color (green parens for clean, red braces for dirty)
+     - Shows the current path in bold yellow
+     - Reads `.claude-statusline` config for an optional website URL (shown in cyan)
+     - Lists open tasks from `.tasks/` sorted: in_progress first, then blocked, then pending — each group sorted oldest-first by file creation time
+     - Uses colored prefixes: `▸` yellow for in_progress, `✗` red for blocked, `·` gray for pending
+     - Caps at 5 tasks with a count header like `Tasks (3):`
    - **"Not now"**: Continue without changes.
    - **"No thanks and stop asking"**: Write `statusline_asked=never` to `${CLAUDE_SKILL_DIR}/.global-config` (append if file exists, create if not). This suppresses the question in all future inits.
 
