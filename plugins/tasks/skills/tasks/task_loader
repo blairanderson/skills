@@ -1,0 +1,284 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TASK_DIR="${TASK_DIR:-.tasks}"
+
+# Parse YAML frontmatter value from a file (simple key: "value" or key: value)
+_get_field() {
+  local file="$1" key="$2"
+  local in_front=0
+  while IFS= read -r line; do
+    if [[ "$line" == "---" ]]; then
+      if [[ "$in_front" -eq 1 ]]; then break; fi
+      in_front=1
+      continue
+    fi
+    if [[ "$in_front" -eq 1 ]] && [[ "$line" == "${key}:"* ]]; then
+      local val="${line#"${key}:"}"
+      val="${val# }"           # trim leading space
+      val="${val#\"}"          # trim leading quote
+      val="${val%\"}"          # trim trailing quote
+      echo "$val"
+      return
+    fi
+  done < "$file"
+}
+
+cmd_table() {
+  if [[ ! -d "$TASK_DIR" ]]; then
+    echo "No tasks found in $TASK_DIR"
+    exit 0
+  fi
+
+  # Collect rows: id|status|name|description
+  local rows=()
+  for f in "$TASK_DIR"/*.md; do
+    [[ -f "$f" ]] || continue
+    local id
+    id="$(basename "$f" .md)"
+    local name status description
+    name="$(_get_field "$f" "name")"
+    status="$(_get_field "$f" "status")"
+    description="$(_get_field "$f" "description")"
+    rows+=("${id}|${status}|${name}|${description}")
+  done
+
+  if [[ ${#rows[@]} -eq 0 ]]; then
+    echo "No tasks found in $TASK_DIR"
+    exit 0
+  fi
+
+  # Compute max widths (start with header lengths)
+  local w_id=2 w_st=6 w_nm=4 w_ds=11
+  for row in "${rows[@]}"; do
+    IFS='|' read -r id st nm ds <<< "$row"
+    (( ${#id} > w_id )) && w_id=${#id}
+    (( ${#st} > w_st )) && w_st=${#st}
+    (( ${#nm} > w_nm )) && w_nm=${#nm}
+    (( ${#ds} > w_ds )) && w_ds=${#ds}
+  done
+
+  # Build format string and separator
+  local fmt="| %-${w_id}s | %-${w_st}s | %-${w_nm}s | %-${w_ds}s |"
+  local sep
+  sep=$(printf '+-%*s-+-%*s-+-%*s-+-%*s-+' "$w_id" '' "$w_st" '' "$w_nm" '' "$w_ds" '')
+  sep="${sep// /-}"
+
+  echo "$sep"
+  # shellcheck disable=SC2059
+  printf "$fmt\n" "ID" "Status" "Name" "Description"
+  echo "$sep"
+  for row in "${rows[@]}"; do
+    IFS='|' read -r id st nm ds <<< "$row"
+    # shellcheck disable=SC2059
+    printf "$fmt\n" "$id" "$st" "$nm" "$ds"
+  done
+  echo "$sep"
+}
+
+cmd_list() {
+  if [[ ! -d "$TASK_DIR" ]]; then
+    echo "No tasks found in $TASK_DIR"
+    exit 0
+  fi
+
+  local found=0
+  for f in "$TASK_DIR"/*.md; do
+    [[ -f "$f" ]] || continue
+    local id
+    id="$(basename "$f" .md)"
+    local name status description
+    name="$(_get_field "$f" "name")"
+    status="$(_get_field "$f" "status")"
+    description="$(_get_field "$f" "description")"
+    echo "${id} | ${status} | ${name} | ${description}"
+    found=1
+  done
+
+  if [[ "$found" -eq 0 ]]; then
+    echo "No tasks found in $TASK_DIR"
+  fi
+}
+
+cmd_show() {
+  local id="$1"
+  local file="$TASK_DIR/${id}.md"
+  if [[ ! -f "$file" ]]; then
+    echo "Task '${id}' not found" >&2
+    exit 1
+  fi
+  cat "$file"
+}
+
+cmd_create() {
+  local id="$1"; shift
+  local name="" description="" status="pending" body=""
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --name)       name="$2"; shift 2 ;;
+      --description) description="$2"; shift 2 ;;
+      --status)     status="$2"; shift 2 ;;
+      --body)       body="$2"; shift 2 ;;
+      *) echo "Unknown option: $1" >&2; exit 1 ;;
+    esac
+  done
+
+  if [[ -z "$name" ]]; then
+    echo "Usage: task_loader create <id> --name \"...\" --description \"...\"" >&2
+    exit 1
+  fi
+
+  mkdir -p "$TASK_DIR"
+  local file="$TASK_DIR/${id}.md"
+
+  cat > "$file" <<EOF
+---
+name: "${name}"
+description: "${description}"
+status: "${status}"
+---
+
+${body}
+EOF
+
+  echo "Created task: ${id}"
+  _git_commit_task "$file" "task"
+  cmd_show "$id"
+}
+
+cmd_update() {
+  local id="$1"; shift
+  local file="$TASK_DIR/${id}.md"
+
+  if [[ ! -f "$file" ]]; then
+    echo "Task '${id}' not found" >&2
+    exit 1
+  fi
+
+  # Parse options
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --name)
+        _update_field "$file" "name" "$2"; shift 2 ;;
+      --description)
+        _update_field "$file" "description" "$2"; shift 2 ;;
+      --status)
+        _update_field "$file" "status" "$2"; shift 2 ;;
+      *) echo "Unknown option: $1" >&2; exit 1 ;;
+    esac
+  done
+
+  echo "Updated task: ${id}"
+  cmd_show "$id"
+}
+
+_update_field() {
+  local file="$1" key="$2" value="$3"
+  local tmpfile="${file}.tmp"
+  local in_front=0 replaced=0
+
+  while IFS= read -r line; do
+    if [[ "$line" == "---" ]]; then
+      if [[ "$in_front" -eq 1 ]]; then
+        # Closing --- of frontmatter; if we haven't replaced, insert the field
+        if [[ "$replaced" -eq 0 ]]; then
+          echo "${key}: \"${value}\""
+        fi
+      fi
+      in_front=$(( 1 - in_front ))
+      echo "$line"
+      continue
+    fi
+    if [[ "$in_front" -eq 1 ]] && [[ "$line" == "${key}:"* ]]; then
+      echo "${key}: \"${value}\""
+      replaced=1
+    else
+      echo "$line"
+    fi
+  done < "$file" > "$tmpfile"
+
+  mv "$tmpfile" "$file"
+}
+
+cmd_delete() {
+  local id="$1"
+  local file="$TASK_DIR/${id}.md"
+  if [[ ! -f "$file" ]]; then
+    echo "Task '${id}' not found" >&2
+    exit 1
+  fi
+  rm "$file"
+  echo "Deleted task: ${id}"
+}
+
+# Initialize .tasks/ with git preference
+cmd_init() {
+  local git_commit="true"
+
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --git-commit) git_commit="$2"; shift 2 ;;
+      *) echo "Unknown option: $1" >&2; exit 1 ;;
+    esac
+  done
+
+  mkdir -p "$TASK_DIR"
+  echo "git_commit=${git_commit}" > "$TASK_DIR/.config"
+
+  if [[ "$git_commit" == "false" ]]; then
+    # Add .tasks/ to .gitignore if not already there
+    if [[ -f .gitignore ]]; then
+      if ! grep -qx '.tasks/' .gitignore 2>/dev/null; then
+        echo '.tasks/' >> .gitignore
+        echo "Added .tasks/ to .gitignore"
+      fi
+    else
+      echo '.tasks/' > .gitignore
+      echo "Created .gitignore with .tasks/"
+    fi
+    echo "Initialized .tasks/ in private/local mode (not committed to git)"
+  else
+    echo "Initialized .tasks/ in shared mode (tasks will be committed to git)"
+  fi
+}
+
+# Auto-commit a task file if git_commit is enabled
+_git_commit_task() {
+  local file="$1" action="$2"
+  local config="$TASK_DIR/.config"
+
+  # No config = not initialized, skip
+  [[ -f "$config" ]] || return 0
+
+  # Check preference
+  local pref
+  pref="$(grep '^git_commit=' "$config" 2>/dev/null | head -1 | cut -d= -f2)"
+  [[ "$pref" == "true" ]] || return 0
+
+  # Must be in a git repo
+  git rev-parse --git-dir &>/dev/null || return 0
+
+  # Stage and commit
+  git add "$file" 2>/dev/null || return 0
+  git commit -m "${action}: $(basename "$file" .md)" --no-gpg-sign -q 2>/dev/null || return 0
+  echo "Committed ${file}"
+}
+
+# Main dispatch
+command="${1:-}"
+shift || true
+
+case "$command" in
+  list)   cmd_list ;;
+  table)  cmd_table ;;
+  show)   cmd_show "${1:?Usage: task_loader show <id>}" ;;
+  create) cmd_create "${1:?Usage: task_loader create <id> --name ...}" "${@:2}" ;;
+  update) cmd_update "${1:?Usage: task_loader update <id> --status ...}" "${@:2}" ;;
+  delete) cmd_delete "${1:?Usage: task_loader delete <id>}" ;;
+  init)   cmd_init "$@" ;;
+  *)
+    echo "Usage: task_loader <list|table|show|create|update|delete|init> [args]"
+    exit 1
+    ;;
+esac

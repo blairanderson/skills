@@ -46,6 +46,8 @@ Once installed, skills activate automatically based on context. You can also inv
 | `code-spec` | Planning | Reverse-engineer a feature or project into a portable, implementation-ready specification |
 | `rails-authentication` | Rails | End-to-end Rails 8 authentication setup with session management, OAuth, and 2FA |
 | `git:cleanup_branch` | Git | Switch back to master, pull with rebase, and delete the current feature branch |
+| `hotfix` | Git | Stay on master, commit, pull with rebase, push, and watch GitHub workflows |
+| `tasks` | Productivity | Universal TODO and task tracker — manages tasks as markdown files in .tasks/ |
 
 Looking for Garry Tan's gstack skills? They're published separately at [blairanderson/gstack](https://github.com/blairanderson/gstack).
 

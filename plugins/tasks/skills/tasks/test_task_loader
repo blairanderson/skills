@@ -1,0 +1,352 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Test suite for task_loader
+# Uses a temp directory so tests never touch real .tasks/
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+LOADER="$SCRIPT_DIR/task_loader"
+TMPDIR_BASE="$(mktemp -d)"
+PASS=0
+FAIL=0
+
+cleanup() { rm -rf "$TMPDIR_BASE"; }
+trap cleanup EXIT
+
+# Helper: run task_loader with isolated TASK_DIR
+run() {
+  TASK_DIR="$TEST_DIR" "$LOADER" "$@"
+}
+
+# Helper: run and capture stderr too
+run_all() {
+  TASK_DIR="$TEST_DIR" "$LOADER" "$@" 2>&1
+}
+
+assert_eq() {
+  local label="$1" expected="$2" actual="$3"
+  if [[ "$expected" == "$actual" ]]; then
+    echo "  PASS: $label"
+    PASS=$((PASS + 1))
+  else
+    echo "  FAIL: $label"
+    echo "    expected: $expected"
+    echo "    actual:   $actual"
+    FAIL=$((FAIL + 1))
+  fi
+}
+
+assert_contains() {
+  local label="$1" needle="$2" haystack="$3"
+  if [[ "$haystack" == *"$needle"* ]]; then
+    echo "  PASS: $label"
+    PASS=$((PASS + 1))
+  else
+    echo "  FAIL: $label"
+    echo "    expected to contain: $needle"
+    echo "    actual: $haystack"
+    FAIL=$((FAIL + 1))
+  fi
+}
+
+assert_exit() {
+  local label="$1" expected_code="$2"
+  shift 2
+  local actual_code=0
+  TASK_DIR="$TEST_DIR" "$LOADER" "$@" >/dev/null 2>&1 || actual_code=$?
+  if [[ "$actual_code" -eq "$expected_code" ]]; then
+    echo "  PASS: $label"
+    PASS=$((PASS + 1))
+  else
+    echo "  FAIL: $label"
+    echo "    expected exit code: $expected_code"
+    echo "    actual exit code:   $actual_code"
+    FAIL=$((FAIL + 1))
+  fi
+}
+
+# ─── FIRST-RUN TESTS (no .tasks/ directory exists) ───────────────────────────
+
+echo "== First-run: no .tasks/ directory =="
+TEST_DIR="$TMPDIR_BASE/fresh/no-tasks-dir"
+
+# list on empty — should not error, should print "No tasks found"
+output="$(run list)"
+assert_contains "list with no .tasks dir prints message" "No tasks found" "$output"
+assert_exit "list with no .tasks dir exits 0" 0 list
+
+# show on missing dir — should fail
+assert_exit "show with no .tasks dir exits 1" 1 show "4R"
+
+# update on missing dir — should fail
+assert_exit "update with no .tasks dir exits 1" 1 update "4R" --status completed
+
+# delete on missing dir — should fail
+assert_exit "delete with no .tasks dir exits 1" 1 delete "4R"
+
+# ─── FIRST-RUN: create auto-creates .tasks/ ──────────────────────────────────
+
+echo ""
+echo "== First-run: create bootstraps .tasks/ directory =="
+TEST_DIR="$TMPDIR_BASE/fresh/bootstrap"
+
+output="$(run create 4R --name "First Task" --description "The very first task")"
+assert_contains "create prints confirmation" "Created task: 4R" "$output"
+
+# Verify directory was created
+if [[ -d "$TEST_DIR" ]]; then
+  echo "  PASS: .tasks/ directory was auto-created"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: .tasks/ directory was NOT created"
+  FAIL=$((FAIL + 1))
+fi
+
+# Verify file exists
+if [[ -f "$TEST_DIR/4R.md" ]]; then
+  echo "  PASS: 4R.md file was created"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: 4R.md file was NOT created"
+  FAIL=$((FAIL + 1))
+fi
+
+# ─── CREATE TESTS ─────────────────────────────────────────────────────────────
+
+echo ""
+echo "== Create: field validation =="
+TEST_DIR="$TMPDIR_BASE/create-tests"
+
+# Missing --name should fail
+assert_exit "create without --name exits 1" 1 create "5X"
+
+# Create with all fields
+output="$(run create A3 --name "Auth Flow" --description "Set up authentication" --body "Step 1: install devise")"
+assert_contains "create with all fields works" "Created task: A3" "$output"
+
+# Verify frontmatter content
+file_content="$(cat "$TEST_DIR/A3.md")"
+assert_contains "file has name" 'name: "Auth Flow"' "$file_content"
+assert_contains "file has description" 'description: "Set up authentication"' "$file_content"
+assert_contains "file has status pending" 'status: "pending"' "$file_content"
+assert_contains "file has body" "Step 1: install devise" "$file_content"
+
+# ─── LIST TESTS ───────────────────────────────────────────────────────────────
+
+echo ""
+echo "== List: with tasks =="
+TEST_DIR="$TMPDIR_BASE/list-tests"
+
+run create 2K --name "Task One" --description "First" --body "body1" >/dev/null
+run create 9Z --name "Task Two" --description "Second" --body "body2" >/dev/null
+
+output="$(run list)"
+assert_contains "list shows task 2K" "2K" "$output"
+assert_contains "list shows task 9Z" "9Z" "$output"
+assert_contains "list shows name" "Task One" "$output"
+assert_contains "list shows description" "First" "$output"
+
+# ─── SHOW TESTS ───────────────────────────────────────────────────────────────
+
+echo ""
+echo "== Show: existing task =="
+TEST_DIR="$TMPDIR_BASE/list-tests"  # reuse
+
+output="$(run show 2K)"
+assert_contains "show prints frontmatter" 'name: "Task One"' "$output"
+assert_contains "show prints body" "body1" "$output"
+
+# Show missing task
+assert_exit "show missing task exits 1" 1 show "ZZ"
+
+# ─── UPDATE TESTS ─────────────────────────────────────────────────────────────
+
+echo ""
+echo "== Update: change status =="
+TEST_DIR="$TMPDIR_BASE/list-tests"  # reuse
+
+output="$(run update 2K --status in_progress)"
+assert_contains "update prints confirmation" "Updated task: 2K" "$output"
+file_content="$(cat "$TEST_DIR/2K.md")"
+assert_contains "status was updated" 'status: "in_progress"' "$file_content"
+
+# Update name
+run update 2K --name "Task One (Renamed)" >/dev/null
+file_content="$(cat "$TEST_DIR/2K.md")"
+assert_contains "name was updated" 'name: "Task One (Renamed)"' "$file_content"
+# Status should still be in_progress (not reverted)
+assert_contains "status preserved after name update" 'status: "in_progress"' "$file_content"
+
+# Update missing task
+assert_exit "update missing task exits 1" 1 update "ZZ" --status completed
+
+# ─── DELETE TESTS ─────────────────────────────────────────────────────────────
+
+echo ""
+echo "== Delete =="
+TEST_DIR="$TMPDIR_BASE/list-tests"  # reuse
+
+output="$(run delete 9Z)"
+assert_contains "delete prints confirmation" "Deleted task: 9Z" "$output"
+
+if [[ ! -f "$TEST_DIR/9Z.md" ]]; then
+  echo "  PASS: file was removed"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: file still exists after delete"
+  FAIL=$((FAIL + 1))
+fi
+
+# Delete missing task
+assert_exit "delete missing task exits 1" 1 delete "ZZ"
+
+# ─── INIT TESTS ──────────────────────────────────────────────────────────────
+
+echo ""
+echo "== Init: shared mode =="
+TEST_DIR="$TMPDIR_BASE/init-shared"
+
+output="$(run init --git-commit true)"
+assert_contains "init shared prints confirmation" "shared mode" "$output"
+
+if [[ -f "$TEST_DIR/.config" ]]; then
+  echo "  PASS: .config was created"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: .config was NOT created"
+  FAIL=$((FAIL + 1))
+fi
+
+config_content="$(cat "$TEST_DIR/.config")"
+assert_eq "config has git_commit=true" "git_commit=true" "$config_content"
+
+echo ""
+echo "== Init: private mode =="
+TEST_DIR="$TMPDIR_BASE/init-private"
+# Create a temp working dir so .gitignore lands in the right place
+mkdir -p "$TMPDIR_BASE/init-private-workdir"
+pushd "$TMPDIR_BASE/init-private-workdir" >/dev/null
+TEST_DIR="$TMPDIR_BASE/init-private-workdir/.tasks"
+
+output="$(TASK_DIR="$TEST_DIR" "$LOADER" init --git-commit false)"
+assert_contains "init private prints confirmation" "private/local mode" "$output"
+
+config_content="$(cat "$TEST_DIR/.config")"
+assert_eq "config has git_commit=false" "git_commit=false" "$config_content"
+
+if [[ -f .gitignore ]] && grep -q '.tasks/' .gitignore; then
+  echo "  PASS: .tasks/ added to .gitignore"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: .tasks/ NOT added to .gitignore"
+  FAIL=$((FAIL + 1))
+fi
+
+popd >/dev/null
+
+echo ""
+echo "== Init: private mode idempotent .gitignore =="
+pushd "$TMPDIR_BASE/init-private-workdir" >/dev/null
+TEST_DIR="$TMPDIR_BASE/init-private-workdir/.tasks"
+
+# Run init again — should not duplicate the entry
+TASK_DIR="$TEST_DIR" "$LOADER" init --git-commit false >/dev/null
+count="$(grep -c '.tasks/' .gitignore)"
+assert_eq ".gitignore entry not duplicated" "1" "$count"
+
+popd >/dev/null
+
+# ─── AUTO-COMMIT: git integration ────────────────────────────────────────────
+
+echo ""
+echo "== Auto-commit: create in git repo with shared mode =="
+GIT_DIR="$TMPDIR_BASE/git-repo"
+mkdir -p "$GIT_DIR"
+pushd "$GIT_DIR" >/dev/null
+git init -q
+git commit --allow-empty -m "init" -q
+TEST_DIR="$GIT_DIR/.tasks"
+
+# Init in shared mode
+TASK_DIR="$TEST_DIR" "$LOADER" init --git-commit true >/dev/null
+
+# Create a task — should auto-commit
+output="$(TASK_DIR="$TEST_DIR" "$LOADER" create 5X --name "Git Task" --description "Test auto-commit" --body "body")"
+assert_contains "create prints committed" "Committed" "$output"
+
+# Check git log for the commit
+git_log="$(git log --oneline -1)"
+assert_contains "git log shows task commit" "5X" "$git_log"
+
+popd >/dev/null
+
+echo ""
+echo "== Auto-commit: create in git repo with private mode (no commit) =="
+GIT_DIR2="$TMPDIR_BASE/git-repo2"
+mkdir -p "$GIT_DIR2"
+pushd "$GIT_DIR2" >/dev/null
+git init -q
+git commit --allow-empty -m "init" -q
+TEST_DIR="$GIT_DIR2/.tasks"
+
+# Init in private mode
+TASK_DIR="$TEST_DIR" "$LOADER" init --git-commit false >/dev/null
+
+# Create a task — should NOT auto-commit
+output="$(TASK_DIR="$TEST_DIR" "$LOADER" create 6Y --name "Private Task" --description "No commit" --body "body")"
+if [[ "$output" != *"Committed"* ]]; then
+  echo "  PASS: private mode does not commit"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: private mode should not commit"
+  FAIL=$((FAIL + 1))
+fi
+
+popd >/dev/null
+
+echo ""
+echo "== Auto-commit: create without config (no commit) =="
+GIT_DIR3="$TMPDIR_BASE/git-repo3"
+mkdir -p "$GIT_DIR3"
+pushd "$GIT_DIR3" >/dev/null
+git init -q
+git commit --allow-empty -m "init" -q
+TEST_DIR="$GIT_DIR3/.tasks"
+
+# Create without init — no .config, should not commit
+output="$(TASK_DIR="$TEST_DIR" "$LOADER" create 8W --name "No Config" --description "No init" --body "body")"
+if [[ "$output" != *"Committed"* ]]; then
+  echo "  PASS: no config means no commit"
+  PASS=$((PASS + 1))
+else
+  echo "  FAIL: should not commit without config"
+  FAIL=$((FAIL + 1))
+fi
+
+popd >/dev/null
+
+# ─── USAGE / BAD INPUT ────────────────────────────────────────────────────────
+
+echo ""
+echo "== Bad input handling =="
+TEST_DIR="$TMPDIR_BASE/bad-input"
+
+# No command
+assert_exit "no command exits 1" 1
+
+# Unknown command
+assert_exit "unknown command exits 1" 1 foobar
+
+# Create with unknown flag
+assert_exit "create with unknown flag exits 1" 1 create X1 --name "Test" --bogus "val"
+
+# ─── RESULTS ──────────────────────────────────────────────────────────────────
+
+echo ""
+echo "================================"
+echo "Results: $PASS passed, $FAIL failed"
+echo "================================"
+
+if [[ "$FAIL" -gt 0 ]]; then
+  exit 1
+fi
