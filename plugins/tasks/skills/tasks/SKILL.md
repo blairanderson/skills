@@ -8,24 +8,24 @@ allowed-tools: Bash, Read, Write, Edit, Glob
 # Task Manager — The Universal TODO & Task Tracker
 
 ## Current Tasks
-!`~/.claude/skills/tasks/task_loader list 2>/dev/null || echo "No tasks yet."`
+!`TL="${CLAUDE_SKILL_DIR:+${CLAUDE_SKILL_DIR}/task_loader}"; TL="${TL:-$(find ~/.claude -name task_loader -path "*/tasks/task_loader" -type f 2>/dev/null | head -1)}"; [ -n "$TL" ] && "$TL" list 2>/dev/null || echo "No tasks yet."`
 
 ## Git Commit Policy
-!`if [ -f .tasks/.config ] && grep -q 'git_commit=true' .tasks/.config 2>/dev/null; then echo "ENABLED — after every create, run: git add .tasks/<ID>.md && git commit -m 'task: <ID>' to commit the new task file immediately."; elif [ -f .tasks/.config ]; then echo "DISABLED — .tasks/ is gitignored. Do NOT run any git commands for task files."; else echo "NOT_INITIALIZED — before creating any task, you MUST ask the user: Shared (committed to git for teammates) or Private (local only, gitignored)? Then run: ~/.claude/skills/tasks/task_loader init --git-commit true OR --git-commit false. Default to private if the user dismisses."; fi`
+!`TL="${CLAUDE_SKILL_DIR:+${CLAUDE_SKILL_DIR}/task_loader}"; TL="${TL:-$(find ~/.claude -name task_loader -path "*/tasks/task_loader" -type f 2>/dev/null | head -1)}"; if [ -f .tasks/.config ] && grep -q 'git_commit=true' .tasks/.config 2>/dev/null; then echo "ENABLED — after every create, run: git add .tasks/<ID>.md && git commit -m 'task: <ID>' to commit the new task file immediately."; elif [ -f .tasks/.config ]; then echo "DISABLED — .tasks/ is gitignored. Do NOT run any git commands for task files."; else echo "NOT_INITIALIZED — before creating any task, you MUST ask the user: Shared (committed to git for teammates) or Private (local only, gitignored)? Then run: $TL init --git-commit true OR --git-commit false. Default to private if the user dismisses."; fi`
 
 ## Statusline Setup Check
-!`if grep -q 'statusline_asked=never' ~/.claude/skills/tasks/.global-config 2>/dev/null; then echo "STATUSLINE_SKIP"; elif grep -q 'statusline' ~/.claude/settings.json 2>/dev/null && grep -q 'statusline-command.sh' ~/.claude/settings.json 2>/dev/null; then echo "STATUSLINE_CONFIGURED"; else echo "STATUSLINE_NOT_CONFIGURED"; fi`
+!`GC="${CLAUDE_SKILL_DIR:+${CLAUDE_SKILL_DIR}/.global-config}"; GC="${GC:-$(find ~/.claude -name .global-config -path "*/tasks/.global-config" 2>/dev/null | head -1)}"; if [ -n "$GC" ] && grep -q 'statusline_asked=never' "$GC" 2>/dev/null; then echo "STATUSLINE_SKIP"; elif grep -q 'statusline' ~/.claude/settings.json 2>/dev/null && grep -q 'statusline-command.sh' ~/.claude/settings.json 2>/dev/null; then echo "STATUSLINE_CONFIGURED"; else echo "STATUSLINE_NOT_CONFIGURED"; fi`
 
 ## INIT Flow
 
 When the Git Commit Policy above says `NOT_INITIALIZED`, run the full init flow:
 
-1. **Git commit preference**: Ask shared vs private, then run `~/.claude/skills/tasks/task_loader init --git-commit true|false`
+1. **Git commit preference**: Ask shared vs private, then run `${CLAUDE_SKILL_DIR}/task_loader init --git-commit true|false`
 2. **Statusline setup** (only if the Statusline Setup Check above says `STATUSLINE_NOT_CONFIGURED`):
    - Use `AskUserQuestion` with question: "Do you want to add your task summary to your status line?" and suggestions: `["Yes please", "Not now", "No thanks and stop asking"]`
-   - **"Yes please"**: Use the `statusline-setup` agent to configure the user's status line to use the command `bash /Users/blairanderson/.claude/statusline-command.sh` (type: command). This is the same statusline script that shows git info, path, website, and open tasks.
+   - **"Yes please"**: Use the `statusline-setup` agent to configure the user's status line to use the command `bash ~/.claude/statusline-command.sh` (type: command). This is the same statusline script that shows git info, path, website, and open tasks.
    - **"Not now"**: Continue without changes.
-   - **"No thanks and stop asking"**: Write `statusline_asked=never` to `~/.claude/skills/tasks/.global-config` (append if file exists, create if not). This suppresses the question in all future inits.
+   - **"No thanks and stop asking"**: Write `statusline_asked=never` to `${CLAUDE_SKILL_DIR}/.global-config` (append if file exists, create if not). This suppresses the question in all future inits.
 
 If the Statusline Setup Check says `STATUSLINE_CONFIGURED` or `STATUSLINE_SKIP`, skip step 2 entirely.
 
@@ -33,7 +33,7 @@ If the Statusline Setup Check says `STATUSLINE_CONFIGURED` or `STATUSLINE_SKIP`,
 
 Manage project tasks stored as individual markdown files in the `.tasks/` directory of the current repo. Each file has YAML frontmatter (name, description, status) and a markdown body with full plan details.
 
-The script is at `~/.claude/skills/tasks/task_loader` — it works with any repo, no framework dependency. Tasks are always scoped to the current working directory's `.tasks/` folder.
+The script is at `${CLAUDE_SKILL_DIR}/task_loader` — it works with any repo, no framework dependency. Tasks are always scoped to the current working directory's `.tasks/` folder.
 
 ## Auto-Commit Behavior
 
@@ -48,7 +48,7 @@ This skill needs global permissions so it works seamlessly across all projects w
 > To make task management seamless across all your projects, I need global permissions. Please add these to `~/.claude/settings.json` under `permissions.allow`:
 >
 > ```json
-> "Bash(~/.claude/skills/tasks/task_loader*)",
+> "Bash(*/tasks/task_loader*)",
 > "Bash(mkdir -p .tasks)",
 > "Bash(rm .tasks/*)",
 > "Bash(git add .tasks/*)",
@@ -87,7 +87,7 @@ Parse the user's `$ARGUMENTS` to determine which action to take:
 Show a summary table of all tasks. Run:
 
 ```bash
-~/.claude/skills/tasks/task_loader list
+${CLAUDE_SKILL_DIR}/task_loader list
 ```
 
 Format the output as a markdown table for the user:
@@ -102,7 +102,7 @@ If no tasks exist, say: "No tasks yet. Want me to create some to track your work
 Show full details for a single task. Run:
 
 ```bash
-~/.claude/skills/tasks/task_loader show TASK_ID
+${CLAUDE_SKILL_DIR}/task_loader show TASK_ID
 ```
 
 Display the frontmatter fields and render the body as markdown.
@@ -117,14 +117,14 @@ Create a new task. The **ID is a unique 2-character alphanumeric code** (e.g., `
 For simple single-line bodies:
 
 ```bash
-~/.claude/skills/tasks/task_loader create 4R --name "Task Name" --description "One-liner" --body "Plan details"
+${CLAUDE_SKILL_DIR}/task_loader create 4R --name "Task Name" --description "One-liner" --body "Plan details"
 ```
 
 For multi-line body content, write the file directly:
 
 1. Build the markdown file content with frontmatter + body
 2. Write it to `.tasks/<ID>.md` using the Write tool (e.g., `.tasks/4R.md`)
-3. Verify with `~/.claude/skills/tasks/task_loader show ID`
+3. Verify with `${CLAUDE_SKILL_DIR}/task_loader show ID`
 
 ### `update <id> [field=value ...]`
 
@@ -132,13 +132,13 @@ Update an existing task. Common operations:
 
 ```bash
 # Update status
-~/.claude/skills/tasks/task_loader update TASK_ID --status in_progress
+${CLAUDE_SKILL_DIR}/task_loader update TASK_ID --status in_progress
 
 # Update name
-~/.claude/skills/tasks/task_loader update TASK_ID --name "New Name"
+${CLAUDE_SKILL_DIR}/task_loader update TASK_ID --name "New Name"
 
 # Mark completed
-~/.claude/skills/tasks/task_loader update TASK_ID --status completed
+${CLAUDE_SKILL_DIR}/task_loader update TASK_ID --status completed
 ```
 
 To update the body, read the file with the Read tool, then edit it with the Edit tool.
