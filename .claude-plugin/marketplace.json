@@ -48,6 +48,16 @@
       },
       "category": "git",
       "tags": ["git", "hotfix", "deploy", "workflow"]
+    },
+    {
+      "name": "tasks",
+      "source": "./plugins/tasks",
+      "description": "Universal TODO and task tracker — manages tasks as markdown files in .tasks/ directory",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "productivity",
+      "tags": ["tasks", "todo", "project-management", "tracking", "workflow"]
     }
   ]
 }
