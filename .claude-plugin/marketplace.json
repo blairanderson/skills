@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Curated collection of production-ready Claude Code skills",
-    "version": "1.0.11"
+    "version": "1.0.12"
   },
   "plugins": [
     {
@@ -68,6 +68,16 @@
       },
       "category": "rails",
       "tags": ["rails", "frontend", "erb", "bootstrap", "tailwind", "css", "views"]
+    },
+    {
+      "name": "fix-last-run",
+      "source": "./plugins/fix-last-run",
+      "description": "Check the last GitHub Actions workflow run and fix failures",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "git",
+      "tags": ["github-actions", "ci", "workflow", "debugging", "fix"]
     }
   ]
 }

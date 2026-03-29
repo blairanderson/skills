@@ -49,6 +49,7 @@ Once installed, skills activate automatically based on context. You can also inv
 | `hotfix` | Git | Stay on master, commit, pull with rebase, push, and watch GitHub workflows |
 | `tasks` | Productivity | Universal TODO and task tracker — manages tasks as markdown files in .tasks/ |
 | `frontend-rails` | Rails | Expert frontend design for Rails ERB templates — Bootstrap 5.1, 5.3, and Tailwind CSS v4 |
+| `fix-last-run` | Git | Check the last GitHub Actions workflow run and fix failures |
 
 Looking for Garry Tan's gstack skills? They're published separately at [blairanderson/gstack](https://github.com/blairanderson/gstack).
 
