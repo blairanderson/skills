@@ -3,15 +3,20 @@ name: bump
 description: Bump the marketplace version in the blairanderson/skills repo, commit, and push to master. Use whenever the user says "bump", "bump version", "release", or asks to increment the version in the skills repo.
 ---
 
-# Bump — increment version, commit, push
+# Bump — smart version increment, commit, push
 
-The skills repo has a marketplace manifest at `.claude-plugin/marketplace.json` with a `metadata.version` field using semver (e.g., `1.0.3`).
+The skills repo has a marketplace manifest at `.claude-plugin/marketplace.json` with a `metadata.version` field using semver (e.g., `1.1.0`).
 
 ## Steps
 
 1. Read `.claude-plugin/marketplace.json` and find the current `metadata.version` value
-2. Increment the **patch** version (e.g., `1.0.3` → `1.0.4`)
-3. Update the file with the new version
-4. Commit the change: `git commit -am "Bump marketplace version to <new-version>"`
-5. Push: `git push`
-6. Confirm with a one-line summary showing the old and new version
+2. Find the last bump commit: `git log --oneline --grep="Bump marketplace version" -1`
+3. Review all commits since that bump: `git log --oneline <last-bump-hash>..HEAD`
+4. Decide the version increment based on what changed:
+   - **Patch** (x.y.Z): bug fixes, typo fixes, tweaks to existing skill content, doc updates
+   - **Minor** (x.Y.0): new plugins added, plugins removed, significant skill rewrites
+   - **Major** (X.0.0): structural changes to marketplace.json format, breaking changes to how plugins are installed or discovered
+5. Update the file with the new version
+6. Commit: `git commit -am "Bump marketplace version to <new-version>"`
+7. Push: `git push`
+8. Confirm with a summary: old version, new version, why that increment was chosen (one line)
