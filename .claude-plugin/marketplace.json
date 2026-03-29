@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Curated collection of production-ready Claude Code skills",
-    "version": "1.0.10"
+    "version": "1.0.11"
   },
   "plugins": [
     {
@@ -58,6 +58,16 @@
       },
       "category": "productivity",
       "tags": ["tasks", "todo", "project-management", "tracking", "workflow"]
+    },
+    {
+      "name": "frontend-rails",
+      "source": "./plugins/frontend-rails",
+      "description": "Expert frontend design for Rails ERB templates — Bootstrap 5.1, 5.3, and Tailwind CSS v4",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "rails",
+      "tags": ["rails", "frontend", "erb", "bootstrap", "tailwind", "css", "views"]
     }
   ]
 }
