@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Curated collection of production-ready Claude Code skills",
-    "version": "1.0.13"
+    "version": "1.0.14"
   },
   "plugins": [
     {
