@@ -68,6 +68,16 @@
       },
       "category": "git",
       "tags": ["github-actions", "ci", "workflow", "debugging", "fix"]
+    },
+    {
+      "name": "blue-ocean",
+      "source": "./plugins/blue-ocean",
+      "description": "Blue Ocean Strategy framework — stop competing, start creating uncontested market space",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "planning",
+      "tags": ["strategy", "blue-ocean", "market-creation", "competitive-analysis", "business"]
     }
   ]
 }
