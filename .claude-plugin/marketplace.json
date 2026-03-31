@@ -78,6 +78,16 @@
       },
       "category": "planning",
       "tags": ["strategy", "blue-ocean", "market-creation", "competitive-analysis", "business"]
+    },
+    {
+      "name": "document-feature",
+      "source": "./plugins/document-feature",
+      "description": "Post-ship marketing documentation and page generation — ensures marketing site reflects shipped features",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "productivity",
+      "tags": ["marketing", "documentation", "post-ship", "pages", "changelog"]
     }
   ]
 }
