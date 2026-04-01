@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Curated collection of production-ready Claude Code skills",
-    "version": "1.2.0"
+    "version": "1.3.0"
   },
   "plugins": [
     {
@@ -88,6 +88,16 @@
       },
       "category": "productivity",
       "tags": ["marketing", "documentation", "post-ship", "pages", "changelog"]
+    },
+    {
+      "name": "organizer",
+      "source": "./plugins/organizer",
+      "description": "Organize files across Desktop, Downloads, and Documents with business-aware routing and move logging",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "productivity",
+      "tags": ["files", "organization", "cleanup", "desktop", "downloads"]
     }
   ]
 }

@@ -52,6 +52,7 @@ Once installed, skills activate automatically based on context. You can also inv
 | `fix-last-run` | Git | Check the last GitHub Actions workflow run and fix failures |
 | `blue-ocean` | Planning | Blue Ocean Strategy framework — stop competing, start creating uncontested market space |
 | `document-feature` | Productivity | Post-ship marketing documentation and page generation workflow |
+| `organizer` | Productivity | Organize files across Desktop, Downloads, and Documents with business-aware routing |
 
 Looking for Garry Tan's gstack skills? They're published separately at [blairanderson/gstack](https://github.com/blairanderson/gstack).
 

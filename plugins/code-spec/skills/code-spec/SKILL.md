@@ -1,6 +1,6 @@
 ---
 name: code-spec
-version: 1.0.0
+version: 1.1.0
 allowed-tools:
   - Read
   - Grep
@@ -8,7 +8,10 @@ allowed-tools:
   - Bash
   - AskUserQuestion
 description: |
-  reverse-engineer a feature or project specification from existing application code and related tests. use when the user wants to extract a bounded feature from a large app, document the actual contract of an existing module, generate a FEATURE-SPEC.md or SPEC.md from implementation evidence, or produce a portable spec another agent can rebuild in a different language or stack. especially relevant for prompts like "/code-spec Product Videos", "write a FEATURE-SPEC.md from this code", "extract this feature into its own app", or "document the real behavior of this part of the system".
+  Reverse-engineer a feature or project specification from existing application code and related tests.
+  Converts your System/Feature/Application into SOME-FEATURE-SPEC.md
+  Use when the user wants to extract a bounded feature from a large app, document the actual contract of an existing module, generate a spec from implementation evidence, or produce a portable spec another agent can rebuild in a different language or stack. 
+  Especially relevant for prompts like "/code-spec Product Videos", "write a FEATURE-SPEC.md from this code", "extract this feature into its own app", or "document the real behavior of this part of the system".
 ---
 
 # Code Spec Mode
@@ -36,6 +39,10 @@ Assume access to the codebase through tools like Read, Grep, and Glob.
 The first AskUserQuestion must always be:
 
 "Is this `SPEC.md` for your entire project, or a `FEATURE-SPEC.md` for one bounded feature?"
+
+The file name should REPRESENT the feature/system/application that is being documented. 
+
+Save into the `/specs/` directory
 
 Offer concrete options:
 
