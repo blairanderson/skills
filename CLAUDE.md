@@ -89,12 +89,10 @@ The `source` path must match the actual directory. The `name` field is used in i
 |--------|----------|-----------------|-------|
 | `code-spec` | planning | Yes | Spec extraction from code |
 | `rails-authentication` | rails | Yes | Phased auth setup, 9 reference docs |
-| `git:cleanup_branch` | git | Yes | Directory is `cleanup/`, registry name has colon |
 | `hotfix` | git | Yes | Commit/push/watch workflow |
 | `tasks` | productivity | Yes | Task tracker with task_loader/test_task_loader scripts |
 
 ## Gotchas
 
-- The `cleanup` plugin registers as `git:cleanup_branch` in marketplace.json but lives in `plugins/cleanup/`. The colon previously broke slash command registration (fixed in commit 59fd4be).
 - Plugin names in marketplace.json `name` field must match what users type after the `/` in install commands.
 - Always bump the marketplace version after adding or modifying plugins. The `/bump` skill handles this automatically.
