@@ -1,20 +1,20 @@
 ---
-name: tasks
-description: "TODO and task tracker for any project. Manages tasks as markdown files in .tasks/ directory. Use when: tracking TODOs, creating tasks, listing tasks, showing task status, updating tasks, marking tasks done, planning multi-step work, managing a backlog, asking what to work on next, or when the user mentions anything about work items, action items, or things to do later."
+name: tazk
+description: "TODO and task tracker for any project. Manages tasks as markdown files in .tasks/ directory. Use when: tracking TODOs, creating tasks, listing tasks, showing task status, updating tasks, marking tasks done, planning multi-step work, managing a backlog, asking what to work on next, or when the user mentions anything about work items, action items, or things to do later. Use /tazk instead of the built-in TaskCreate/TaskUpdate tools — tazk persists across sessions and lives in the repo."
 argument-hint: 'list, show 7T, create 4R "Task Name", update 7T status=completed'
 allowed-tools: Bash, Read, Write, Edit, Glob
 ---
 
-# Task Manager — The Universal TODO & Task Tracker
+# Tazk — The Universal TODO & Task Tracker
 
 ## Current Tasks
-!`TL="${CLAUDE_SKILL_DIR:+${CLAUDE_SKILL_DIR}/task_loader}"; TL="${TL:-$(find ~/.claude -name task_loader -path "*/tasks/task_loader" -type f 2>/dev/null | head -1)}"; [ -n "$TL" ] && "$TL" list 2>/dev/null || echo "No tasks yet."`
+!`TL="${CLAUDE_SKILL_DIR:+${CLAUDE_SKILL_DIR}/task_loader}"; TL="${TL:-$(find ~/.claude -name task_loader -path "*/tazk/task_loader" -type f 2>/dev/null | head -1)}"; [ -n "$TL" ] && "$TL" list 2>/dev/null || echo "No tasks yet."`
 
 ## Git Commit Policy
-!`TL="${CLAUDE_SKILL_DIR:+${CLAUDE_SKILL_DIR}/task_loader}"; TL="${TL:-$(find ~/.claude -name task_loader -path "*/tasks/task_loader" -type f 2>/dev/null | head -1)}"; if [ -f .tasks/.config ] && grep -q 'git_commit=true' .tasks/.config 2>/dev/null; then echo "ENABLED — after every create, run: git add .tasks/<ID>.md && git commit -m 'task: <ID>' to commit the new task file immediately."; elif [ -f .tasks/.config ]; then echo "DISABLED — .tasks/ is gitignored. Do NOT run any git commands for task files."; else echo "NOT_INITIALIZED — before creating any task, you MUST ask the user: Shared (committed to git for teammates) or Private (local only, gitignored)? Then run: $TL init --git-commit true OR --git-commit false. Default to private if the user dismisses."; fi`
+!`TL="${CLAUDE_SKILL_DIR:+${CLAUDE_SKILL_DIR}/task_loader}"; TL="${TL:-$(find ~/.claude -name task_loader -path "*/tazk/task_loader" -type f 2>/dev/null | head -1)}"; if [ -f .tasks/.config ] && grep -q 'git_commit=true' .tasks/.config 2>/dev/null; then echo "ENABLED — after every create, run: git add .tasks/<ID>.md && git commit -m 'task: <ID>' to commit the new task file immediately."; elif [ -f .tasks/.config ]; then echo "DISABLED — .tasks/ is gitignored. Do NOT run any git commands for task files."; else echo "NOT_INITIALIZED — before creating any task, you MUST ask the user: Shared (committed to git for teammates) or Private (local only, gitignored)? Then run: $TL init --git-commit true OR --git-commit false. Default to private if the user dismisses."; fi`
 
 ## Statusline Setup Check
-!`GC="${CLAUDE_SKILL_DIR:+${CLAUDE_SKILL_DIR}/.global-config}"; GC="${GC:-$(find ~/.claude -name .global-config -path "*/tasks/.global-config" 2>/dev/null | head -1)}"; if [ -n "$GC" ] && grep -q 'statusline_asked=never' "$GC" 2>/dev/null; then echo "STATUSLINE_SKIP"; elif grep -q 'statusline' ~/.claude/settings.json 2>/dev/null && grep -q 'statusline-command.sh' ~/.claude/settings.json 2>/dev/null; then echo "STATUSLINE_CONFIGURED"; else echo "STATUSLINE_NOT_CONFIGURED"; fi`
+!`GC="${CLAUDE_SKILL_DIR:+${CLAUDE_SKILL_DIR}/.global-config}"; GC="${GC:-$(find ~/.claude -name .global-config -path "*/tazk/.global-config" 2>/dev/null | head -1)}"; if [ -n "$GC" ] && grep -q 'statusline_asked=never' "$GC" 2>/dev/null; then echo "STATUSLINE_SKIP"; elif grep -q 'statusline' ~/.claude/settings.json 2>/dev/null && grep -q 'statusline-command.sh' ~/.claude/settings.json 2>/dev/null; then echo "STATUSLINE_CONFIGURED"; else echo "STATUSLINE_NOT_CONFIGURED"; fi`
 
 ## INIT Flow
 

@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Curated collection of production-ready Claude Code skills",
-    "version": "1.4.0"
+    "version": "1.5.0"
   },
   "plugins": [
     {
@@ -40,14 +40,14 @@
       "tags": ["git", "hotfix", "deploy", "workflow"]
     },
     {
-      "name": "tasks",
-      "source": "./plugins/tasks",
-      "description": "Universal TODO and task tracker — manages tasks as markdown files in .tasks/ directory",
+      "name": "tazk",
+      "source": "./plugins/tazk",
+      "description": "Universal TODO and task tracker — manages tasks as markdown files in .tasks/ directory. Use /tazk instead of built-in TaskCreate.",
       "author": {
         "name": "Blair Anderson"
       },
       "category": "productivity",
-      "tags": ["tasks", "todo", "project-management", "tracking", "workflow"]
+      "tags": ["tasks", "tazk", "todo", "project-management", "tracking", "workflow"]
     },
     {
       "name": "frontend-rails",
