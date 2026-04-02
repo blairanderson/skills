@@ -98,6 +98,16 @@
       },
       "category": "productivity",
       "tags": ["files", "organization", "cleanup", "desktop", "downloads"]
+    },
+    {
+      "name": "rails-conductor-setup-config",
+      "source": "./plugins/rails-conductor-setup-config",
+      "description": "Configure a Rails project for Conductor workspaces — setup scripts, port handling, and shared file symlinks",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "rails",
+      "tags": ["rails", "conductor", "workspace", "setup", "devtools"]
     }
   ]
 }

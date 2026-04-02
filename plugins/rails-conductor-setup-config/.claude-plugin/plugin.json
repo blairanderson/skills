@@ -1,0 +1,5 @@
+{
+  "name": "rails-conductor-setup-config",
+  "description": "Configure a Rails project for Conductor workspaces — conductor.json, setup scripts, port handling, and shared file symlinks",
+  "version": "1.0.0"
+}
