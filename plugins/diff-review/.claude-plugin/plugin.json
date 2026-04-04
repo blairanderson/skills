@@ -1,0 +1,5 @@
+{
+  "name": "diff-review",
+  "description": "Adversarial git diff reviewer — finds bugs, performance issues, and correctness problems in changed code",
+  "version": "1.0.0"
+}

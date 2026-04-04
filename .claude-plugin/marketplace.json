@@ -108,6 +108,16 @@
       },
       "category": "rails",
       "tags": ["rails", "conductor", "workspace", "setup", "devtools"]
+    },
+    {
+      "name": "diff-review",
+      "source": "./plugins/diff-review",
+      "description": "Adversarial git diff reviewer — finds bugs, performance issues, and correctness problems in changed code",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "git",
+      "tags": ["git", "code-review", "bugs", "performance", "security", "diff"]
     }
   ]
 }
