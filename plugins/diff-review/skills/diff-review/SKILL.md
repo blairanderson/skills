@@ -1,7 +1,7 @@
 ---
 name: diff-review
 description: "Use when: reviewing a git diff, code review, checking for bugs in changed code, adversarial review, PR review, 'review the diff', 'find bugs in changes', 'check my changes', 'what did I break', 'review what changed'. Also trigger when another agent just made changes and the user wants a second opinion, or when the user says 'diff review', 'strict review', or 'performance review' in the context of code changes."
-allowed-tools: Bash, Read, Grep, Glob
+allowed-tools: Bash, Read, Grep, Glob, AskUserQuestion, Edit
 argument-hint: "[optional: commit range like 'HEAD~3' or 'abc123..def456']"
 ---
 
@@ -91,6 +91,21 @@ Check for these categories, in order of severity:
 - Hardcoded values that should be configurable
 - Missing cleanup (opened resources not closed, temp files not removed)
 
+## AskUserQuestion Format
+
+For every finding, follow this structure:
+1. **Re-ground:** Which file, what the code does (1 sentence, plain English)
+2. **The problem:** What breaks and when — concrete failure scenario
+3. **Recommend:** `RECOMMENDATION: [Fix/Ignore/Defer] because [reason]`
+4. **Options:**
+   A) Apply the fix now (shows the fix code)
+   B) Acknowledge but skip — acceptable risk
+   C) I'll handle it differently (user explains)
+
+Assume the user hasn't looked at this window in 20 minutes and doesn't have the code open.
+
+If an issue has an obvious fix with no real alternatives, state what you'll do and move on — don't waste a question on it. Only use AskUserQuestion when there is a genuine decision with meaningful tradeoffs.
+
 ## Step 4: Verify Findings
 
 For each issue, verify it's real before reporting:
@@ -102,41 +117,24 @@ For each issue, verify it's real before reporting:
 
 If you're less than 70% confident something is a real issue, investigate further or drop it. False positives waste time and erode trust.
 
-## Step 5: Report
+## Step 5: Walk Through Findings
 
-```
-## Diff Review
+Present findings ONE AT A TIME, ordered by severity (critical first).
 
-**Files reviewed:** N
-**Issues found:** N critical, N high, N medium
+For each finding, use AskUserQuestion:
+- Show the code, the problem, and the recommended fix
+- Options: A) Apply fix now  B) Skip  C) Modify approach
+- **STOP after each.** Do NOT proceed until user responds.
+- If user picks A), apply the fix with the Edit tool immediately.
+- If user picks C), discuss and apply their preferred approach.
 
----
+**STOP.** AskUserQuestion once per issue. Do NOT batch. Recommend + WHY. Do NOT proceed until user responds.
 
-### path/to/file.ext
+After all findings are addressed, show a summary:
+- N findings: X fixed, Y skipped, Z modified
+- Verdict: Safe to ship / Still has open issues
 
-#### [CRITICAL] Short description
-Lines N-M:
-```language
-the problematic code
-```
-**Why this is a problem:** Concrete explanation of what breaks and when
-**Fix:**
-```language
-corrected code
-```
-
----
-
-## Performance Recommendations
-
-Specific, actionable items only. "This is O(n^2) because X" not "consider optimizing."
-
-## Verdict
-
-Safe to ship / Fix N issues first / Needs rework
-```
-
-### Report rules:
+### Walk-through rules:
 - Every finding must show the actual code and specific line numbers
 - Every finding must explain WHY with a concrete failure scenario
 - Every critical/high finding must include a fix
