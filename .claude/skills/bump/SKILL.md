@@ -9,14 +9,15 @@ The skills repo has a marketplace manifest at `.claude-plugin/marketplace.json` 
 
 ## Steps
 
-1. Read `.claude-plugin/marketplace.json` and find the current `metadata.version` value
-2. Find the last bump commit: `git log --oneline --grep="Bump marketplace version" -1`
-3. Review all commits since that bump: `git log --oneline <last-bump-hash>..HEAD`
-4. Decide the version increment based on what changed:
+1. git branch must be CLEAN. git diff --quiet && git diff --cached --quiet && [ -z "$(git ls-files --others --exclude-standard)" ] && echo "branch is clean.. continue" || echo "dirty branch. stop and alert user"
+2. Read `.claude-plugin/marketplace.json` and find the current `metadata.version` value
+3. Find the last bump commit: `git log --oneline --grep="Bump marketplace version" -1`
+4. Review all commits since that bump: `git log --oneline <last-bump-hash>..HEAD`
+5. Decide the version increment based on what changed:
    - **Patch** (x.y.Z): bug fixes, typo fixes, tweaks to existing skill content, doc updates
    - **Minor** (x.Y.0): new plugins added, plugins removed, significant skill rewrites
    - **Major** (X.0.0): structural changes to marketplace.json format, breaking changes to how plugins are installed or discovered
-5. Update the file with the new version
-6. Commit: `git commit -am "Bump marketplace version to <new-version>"`
-7. Push: `git push`
-8. Confirm with a summary: old version, new version, why that increment was chosen (one line)
+6. Update the file with the new version
+7. Commit: `git commit -am "Bump marketplace version to <new-version>"`
+8. Push: `git push`
+9. Confirm with a summary: old version, new version, why that increment was chosen (one line)
