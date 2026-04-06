@@ -9,7 +9,7 @@ The skills repo has a marketplace manifest at `.claude-plugin/marketplace.json` 
 
 ## Steps
 
-1. git branch must be CLEAN. git diff --quiet && git diff --cached --quiet && [ -z "$(git ls-files --others --exclude-standard)" ] && echo "branch is clean.. continue" || echo "dirty branch. stop and alert user"
+1. git branch must be CLEAN. Run `git status --porcelain` — if output is empty the branch is clean, otherwise stop and alert the user with what's dirty.
 2. Read `.claude-plugin/marketplace.json` and find the current `metadata.version` value
 3. Find the last bump commit: `git log --oneline --grep="Bump marketplace version" -1`
 4. Review all commits since that bump: `git log --oneline <last-bump-hash>..HEAD`
