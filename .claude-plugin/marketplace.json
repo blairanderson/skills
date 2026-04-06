@@ -40,14 +40,14 @@
       "tags": ["git", "hotfix", "deploy", "workflow"]
     },
     {
-      "name": "tazk",
-      "source": "./plugins/tazk",
-      "description": "Universal TODO and task tracker — manages tasks as markdown files in .tasks/ directory. Use /tazk instead of built-in TaskCreate.",
+      "name": "todo",
+      "source": "./plugins/todo",
+      "description": "Universal TODO and task tracker — manages tasks as markdown files in .tasks/ directory. Use /todo instead of built-in TaskCreate.",
       "author": {
         "name": "Blair Anderson"
       },
       "category": "productivity",
-      "tags": ["tasks", "tazk", "todo", "project-management", "tracking", "workflow"]
+      "tags": ["tasks", "todo", "project-management", "tracking", "workflow"]
     },
     {
       "name": "frontend-rails",

@@ -45,7 +45,7 @@ Once installed, skills activate automatically based on context. You can also inv
 | `code-spec` | Planning | Reverse-engineer a feature or project into a portable, implementation-ready specification |
 | `rails-authentication` | Rails | End-to-end Rails 8 authentication setup with session management, OAuth, and 2FA |
 | `hotfix` | Git | Stay on master, commit, pull with rebase, push, and watch GitHub workflows |
-| `tazk` | Productivity | Universal TODO and task tracker — manages tasks as markdown files in .tasks/ |
+| `todo` | Productivity | Universal TODO and task tracker — manages tasks as markdown files in .tasks/ |
 | `frontend-rails` | Rails | Expert frontend design for Rails ERB templates — Bootstrap 5.1, 5.3, and Tailwind CSS v4 |
 | `fix-last-run` | Git | Check the last GitHub Actions workflow run and fix failures |
 | `blue-ocean` | Planning | Blue Ocean Strategy framework — stop competing, start creating uncontested market space |

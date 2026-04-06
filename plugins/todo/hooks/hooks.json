@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "onboard-tazk.sh"
+            "command": "onboard-todo.sh"
           }
         ]
       },
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "onboard-tazk.sh"
+            "command": "onboard-todo.sh"
           }
         ]
       }
