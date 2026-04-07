@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Curated collection of production-ready Claude Code skills",
-    "version": "1.9.0"
+    "version": "1.10.0"
   },
   "plugins": [
     {
@@ -118,6 +118,16 @@
       },
       "category": "git",
       "tags": ["git", "code-review", "bugs", "performance", "security", "diff"]
+    },
+    {
+      "name": "app-distribution-guide",
+      "source": "./plugins/app-distribution-guide",
+      "description": "Design and build a multi-surface distribution layer — MCP server with OAuth, Claude and ChatGPT connectors, REST API/SDK, dashboard, and open source strategy",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "planning",
+      "tags": ["mcp", "api", "sdk", "distribution", "oauth", "claude-connector", "chatgpt", "open-source"]
     },
     {
       "name": "app-onboarding-questionnaire",

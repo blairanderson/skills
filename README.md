@@ -54,6 +54,7 @@ Once installed, skills activate automatically based on context. You can also inv
 | `rails-conductor-setup-config` | Rails | Configure a Rails project for Conductor workspaces — setup scripts, port handling, symlinks |
 | `app-onboarding-questionnaire` | Planning | Design and build a high-converting questionnaire-style app onboarding flow modelled on top subscription apps |
 | `diff-review` | Git | Adversarial git diff reviewer — finds bugs, performance issues, and correctness problems |
+| `app-distribution-guide` | Planning | Design and build a multi-surface distribution layer — MCP server, OAuth, Claude/ChatGPT connectors, REST API/SDK, and open source strategy |
 
 ## How Skills Work
 

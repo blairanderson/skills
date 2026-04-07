@@ -28,7 +28,7 @@ from pathlib import Path
 
 # Fields stripped from frontmatter when mirroring to Codex
 # (Codex allows: name, description, license, allowed-tools, metadata)
-CODEX_INCOMPATIBLE = {"version", "argument-hint"}
+CODEX_INCOMPATIBLE = {"version", "argument-hint", "user-invocable"}
 
 CLAUDE_REPO = Path(__file__).parent.parent.parent.parent.parent  # skills/
 CODEX_REPO = CLAUDE_REPO.parent / "skills-openai"
