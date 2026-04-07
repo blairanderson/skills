@@ -1,7 +1,7 @@
 ---
 name: todo
 description: "TODO and task tracker for any project. Manages tasks as markdown files in .tasks/ directory. Use when: tracking TODOs, creating tasks, listing tasks, showing task status, updating tasks, marking tasks done, planning multi-step work, managing a backlog, asking what to work on next, or when the user mentions anything about work items, action items, or things to do later. Use /todo instead of the built-in TaskCreate/TaskUpdate tools — todo persists across sessions and lives in the repo."
-argument-hint: 'list, show 7T, create 4R "Task Name", update 7T status=completed'
+argument-hint: 'quick, detailed, list, show 7T, create 4R "Task Name", update 7T status=completed'
 allowed-tools: Bash, Read, Write, Edit, Glob
 ---
 
@@ -13,8 +13,38 @@ allowed-tools: Bash, Read, Write, Edit, Glob
 ## Git Commit Policy
 !`if [ -f .tasks/.config ] && grep -q 'git_commit=true' .tasks/.config 2>/dev/null; then echo "ENABLED — after every create, run: git add .tasks/<ID>.md && git commit -m 'task: <ID>' to commit the new task file immediately."; elif [ -f .tasks/.config ]; then echo "DISABLED — .tasks/ is gitignored. Do NOT run any git commands for task files."; else echo "NOT_INITIALIZED — before creating any task, you MUST ask the user: Shared (committed to git for teammates) or Private (local only, gitignored)? Then run: task_loader init --git-commit true OR --git-commit false. Default to private if the user dismisses."; fi`
 
+## Mode Preference
+!`if [ -f .tasks/.config ] && grep -q 'default_mode=' .tasks/.config 2>/dev/null; then grep 'default_mode=' .tasks/.config | head -1; else echo "default_mode=NOT_SET"; fi`
+
 ## Statusline Setup Check
 !`GC="${CLAUDE_SKILL_DIR:+${CLAUDE_SKILL_DIR}/.global-config}"; if [ -n "$GC" ] && grep -q 'statusline_asked=never' "$GC" 2>/dev/null; then echo "STATUSLINE_SKIP"; elif grep -q 'statusline' ~/.claude/settings.json 2>/dev/null && grep -q 'statusline-command.sh' ~/.claude/settings.json 2>/dev/null; then echo "STATUSLINE_CONFIGURED"; else echo "STATUSLINE_NOT_CONFIGURED"; fi`
+
+## Brainstorming Mode (runs IMMEDIATELY on activation)
+
+**Before doing anything else** when the skill loads (user typed `/todo` with no specific subcommand like `list`, `show`, `create`, `update`, or `delete`):
+
+1. Read the **Mode Preference** above.
+2. **If `default_mode=NOT_SET`**: Use `AskUserQuestion` with:
+   - question: `"Which mode would you like to use?"`
+   - suggestions: `["quick — jot notes and I'll create tasks fast", "detailed — full task planning with descriptions and bodies"]`
+   - Save the answer to `.tasks/.config` by running: `sed -i '' '/^default_mode=/d' .tasks/.config 2>/dev/null; echo "default_mode=quick" >> .tasks/.config` (or `detailed`). If `.tasks/` doesn't exist yet, proceed with INIT Flow first, then save.
+3. **If `default_mode=quick`**: Enter **Quick Mode** immediately (see below).
+4. **If `default_mode=detailed`**: Enter **Detailed Mode** immediately (see below).
+
+The user can always override by typing `/todo quick` or `/todo detailed` as the argument, which also updates their saved default.
+
+### Quick Mode
+
+Fast brainstorming capture. Say: *"Quick mode — jot your tasks, one per line. I'll create them all."* then wait for the user's input. When they respond:
+- Parse each line as a separate task
+- Generate a random 2-char ID for each
+- Create all task files immediately using `task_loader create` (one call per task, no back-and-forth)
+- Show a summary table when done
+- Do NOT ask clarifying questions per task — capture first, refine later
+
+### Detailed Mode
+
+The standard planning flow: ask for one task at a time with name, description, and full body/plan details before creating. Take time to discuss scope and steps.
 
 ## INIT Flow
 
@@ -86,9 +116,9 @@ You should **proactively suggest** creating tasks when:
 
 ## Commands
 
-Parse the user's `$ARGUMENTS` to determine which action to take:
+Parse the user's `$ARGUMENTS` to determine which action to take. If no argument is given, run the **Brainstorming Mode** flow above (mode selection → quick or detailed). If the argument is `quick` or `detailed`, enter that mode and save it as the new default.
 
-### `list` (default when no argument given)
+### `list`
 
 Show a summary table of all tasks. Run:
 
@@ -204,7 +234,7 @@ When working on a task:
 - **Never read full task files during list** — frontmatter only
 - **IDs are 2-char alphanumeric** — e.g., `4R`, `7B`, `A3`
 - **Bodies should be thorough** — include file paths, line numbers, step-by-step plans
-- If no argument is provided, default to `list`
+- If no argument is provided, run the Brainstorming Mode flow (ask mode if not set, then enter that mode)
 - Each repo has its own `.tasks/` directory — tasks never leak across repos
 - **Be proactive** — suggest task creation when you see multi-step work ahead
 - **Track your own work** — when implementing something complex, create tasks and update them as you go
