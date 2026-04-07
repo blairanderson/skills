@@ -56,7 +56,6 @@ Call `AskUserQuestion` with:
 - **question**: `"What's the next task?"` (on first run) or `"✓ [list tasks just written] — next?"` (on subsequent runs, showing what was just captured)
 - **options**:
   1. `label: "exit"`, `description: "Stop capturing and see the summary"`
-  2. `label: "quick capture a new task"`, `description: "Type your task in the text field"`
 
 The user will type their task in the free-text "Other" field that appears automatically below the options.
 
@@ -77,8 +76,14 @@ Stop. Do not loop again.
 
 For every non-empty line:
 
-1. Generate a unique random 2-char alphanumeric ID (glob `.tasks/*.md` to avoid collisions)
-2. Write `.tasks/ID.md` directly:
+1. Generate a task name summarized from the contents of the input.
+2. Decide if the input is detailed enough or if the plan still needs research/planning put this answer in the description
+3. Generate a unique random 2-char alphanumeric ID (glob `.tasks/*.md` to avoid collisions)
+4. Write `.tasks/ID.md` directly:
+
+From the user input, summarize the task details into an intelligent long-description of the task. 
+Remember the user might paste in an entire todo from another system and we wouldn't want to have the whole text listed as the name or a single sentance description. break it up so that its easy to read.  
+ 
 
 ```markdown
 ---
@@ -87,7 +92,7 @@ description: "The line of text verbatim"
 status: "pending"
 ---
 
-Captured.
+{nice long description plan}
 ```
 
 Write all files in parallel. Do not call `task_loader` — write the files directly with the Write tool (faster).
