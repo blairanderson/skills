@@ -1,5 +1,5 @@
 {
   "name": "todo",
   "description": "Universal TODO and task tracker — manages tasks as markdown files in .tasks/ directory",
-  "version": "1.4.1"
+  "version": "1.4.2"
 }

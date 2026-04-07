@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+CONFIG=".tasks/.config"
+if grep -q 'git_commit=true' "$CONFIG" 2>/dev/null; then
+  echo "ENABLED"
+elif test -f "$CONFIG"; then
+  echo "DISABLED"
+else
+  echo "NOT_INITIALIZED"
+fi

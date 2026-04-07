@@ -2,7 +2,7 @@
 name: todo:quick
 description: "Use when: user wants to quickly capture tasks, brainstorm TODOs, jot down ideas, dump a list of things to do, or do a brain dump of work items. Enters fast capture mode — NO code written, every line typed becomes its own task file immediately."
 argument-hint: 'e.g. /todo:quick'
-allowed-tools: Bash(task_loader*), Bash(mkdir -p .tasks), Glob(.tasks/*), Read(.tasks/*), Write(.tasks/*), AskUserQuestion
+allowed-tools: Bash(task_loader*), Bash(check_git_policy), Bash(mkdir -p .tasks), Glob(.tasks/*), Read(.tasks/*), Write(.tasks/*), AskUserQuestion
 ---
 
 # Todo: Quick — Fast Task Capture
@@ -21,7 +21,7 @@ If you notice yourself about to write a `.rb`, `.js`, `.ts`, `.py`, `.sh`, `.htm
 !`task_loader list 2>/dev/null || echo "No tasks yet."`
 
 ## Git Commit Policy
-!`if [ -f .tasks/.config ] && grep -q 'git_commit=true' .tasks/.config 2>/dev/null; then echo "ENABLED"; elif [ -f .tasks/.config ]; then echo "DISABLED"; else echo "NOT_INITIALIZED"; fi`
+!`check_git_policy`
 
 ---
 
