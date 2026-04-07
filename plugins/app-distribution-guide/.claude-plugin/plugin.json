@@ -1,0 +1,5 @@
+{
+  "name": "app-distribution-guide",
+  "description": "Adds a multi-interface access layer to an existing app: MCP server with OAuth, Claude/ChatGPT connectors, API/SDK exposure, and a shared dashboard layer.",
+  "version": "1.0.0"
+}
