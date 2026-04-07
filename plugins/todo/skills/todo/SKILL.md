@@ -69,7 +69,7 @@ If the Statusline Setup Check says `STATUSLINE_CONFIGURED` or `STATUSLINE_SKIP`,
 
 Manage project tasks stored as individual markdown files in the `.tasks/` directory of the current repo. Each file has YAML frontmatter (name, description, status) and a markdown body with full plan details.
 
-The `task_loader` script lives in the plugin's `bin/` directory and is automatically on PATH when the plugin is enabled. It works with any repo, no framework dependency. Tasks are always scoped to the current working directory's `.tasks/` folder.
+The `task_loader` script lives in the plugin's `bin/` directory and is on PATH while the plugin is enabled. It works with any repo, no framework dependency. Tasks are always scoped to the current working directory's `.tasks/` folder.
 
 ## Auto-Commit Behavior
 
