@@ -1,7 +1,7 @@
 ---
 name: bump
-description: Bump the marketplace version in the blairanderson/skills repo, commit, and push to master. Use whenever the user says "bump", "bump version", "release", or asks to increment the version in the skills repo. Also handles plugin-specific bumps like "bump todo:quick".
-argument-hint: 'e.g. /bump or /bump todo:quick'
+description: Bump the marketplace version in the blairanderson/skills repo, commit, and push to master. Use whenever the user says "bump", "bump version", "release", or asks to increment the version in the skills repo. Also handles plugin-specific bumps like "bump todo:capture".
+argument-hint: 'e.g. /bump or /bump todo:capture'
 ---
 
 # Bump — smart version increment, commit, push
@@ -12,7 +12,7 @@ argument-hint: 'e.g. /bump or /bump todo:quick'
 
 ## Mode A — Plugin bump: `/bump <plugin-name>` or `/bump <plugin>:<skill>`
 
-If an argument is given (e.g. `todo` or `todo:quick`), bump the **plugin's own version** in `plugins/<plugin>/.claude-plugin/plugin.json`.
+If an argument is given (e.g. `todo` or `todo:capture`), bump the **plugin's own version** in `plugins/<plugin>/.claude-plugin/plugin.json`.
 
 The `<plugin>` is always the part before the colon (or the whole argument if no colon).
 

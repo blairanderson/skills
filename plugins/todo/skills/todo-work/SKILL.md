@@ -19,7 +19,7 @@ allowed-tools: Bash, Read, Write, Edit, Glob
 1. Run `task_loader list` to get all tasks.
 2. Filter to: `in_progress` tasks first, then `pending` tasks. Skip `completed` and `blocked` unless nothing else exists.
 3. Take the top 10.
-4. If there are **no tasks at all**: say *"No tasks found. Use `/todo:quick` to capture some first."* and stop.
+4. If there are **no tasks at all**: say *"No tasks found. Use `/todo:capture` to capture some first."* and stop.
 5. If there are tasks, use `AskUserQuestion` with:
    - question: `"What do you want to work on?"`
    - suggestions: array of up to 10 strings, each formatted as `"ID — Task Name (status)"` e.g. `"4R — Add login page (pending)"`
@@ -36,7 +36,7 @@ allowed-tools: Bash, Read, Write, Edit, Glob
 ### If the User Picks Something Not on the List
 
 If they type a free-form task name or say "none of these", ask if they want to:
-- Create a new task with `/todo:quick`
+- Create a new task with `/todo:capture`
 - Plan something new with `/todo:plan`
 
 ### Rules
