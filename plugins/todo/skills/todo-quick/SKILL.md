@@ -2,10 +2,20 @@
 name: todo:quick
 description: "Use when: user wants to quickly capture tasks, brainstorm TODOs, jot down ideas, dump a list of things to do, or do a brain dump of work items. Enters fast capture mode — NO code written, every line typed becomes its own task file immediately."
 argument-hint: 'e.g. /todo:quick'
-allowed-tools: Bash, Read, Write, Glob
+allowed-tools: Bash(task_loader*), Bash(mkdir -p .tasks), Glob(.tasks/*), Read(.tasks/*), Write(.tasks/*)
 ---
 
 # Todo: Quick — Fast Task Capture
+
+## !! HARD CONSTRAINT — READ FIRST !!
+
+**You are NOT allowed to write application code in this skill. Ever. Under any circumstances.**
+
+The ONLY files you may write are `.tasks/ID.md` task capture files.
+
+If you notice yourself about to write a `.rb`, `.js`, `.ts`, `.py`, `.sh`, `.html`, `.css`, `.json` file — or ANY file that is not inside `.tasks/` — **STOP IMMEDIATELY**. That is not what this skill does.
+
+---
 
 ## Current Tasks
 !`task_loader list 2>/dev/null || echo "No tasks yet."`
