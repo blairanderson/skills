@@ -54,13 +54,17 @@ The loop has exactly two steps. Repeat forever until the user exits.
 
 Call `AskUserQuestion` with:
 - **question**: `"What's the next task?"` (on first run) or `"✓ [list tasks just written] — next?"` (on subsequent runs, showing what was just captured)
-- **suggestions**: `["type your next task idea", "exit quick capture mode"]`
+- **options**:
+  1. `label: "exit"`, `description: "Stop capturing and see the summary"`
+  2. `label: "quick capture a new task"`, `description: "Type your task in the text field"`
+
+The user will type their task in the free-text "Other" field that appears automatically below the options.
 
 Wait for response.
 
 ### Step 2 — Handle response
 
-**If the user chose or typed "exit quick capture mode"** (or any close variant):
+**If the user chose or typed "exit"** (or any close variant like "exit quick capture mode"):
 
 Show the final summary:
 ```
@@ -100,4 +104,4 @@ Then immediately go back to **Step 1** with the question showing what was just c
 - Explain what you're doing
 - Say "Great!", "Sure!", or any filler
 - Add context or planning to task bodies — just write `Captured.`
-- Break out of the loop for any reason except "exit quick capture mode"
+- Break out of the loop for any reason except "exit"
