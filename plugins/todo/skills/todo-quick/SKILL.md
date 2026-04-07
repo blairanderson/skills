@@ -2,7 +2,7 @@
 name: todo:quick
 description: "Use when: user wants to quickly capture tasks, brainstorm TODOs, jot down ideas, dump a list of things to do, or do a brain dump of work items. Enters fast capture mode — NO code written, every line typed becomes its own task file immediately."
 argument-hint: 'e.g. /todo:quick'
-allowed-tools: Bash(task_loader*), Bash(mkdir -p .tasks), Glob(.tasks/*), Read(.tasks/*), Write(.tasks/*)
+allowed-tools: Bash(task_loader*), Bash(mkdir -p .tasks), Glob(.tasks/*), Read(.tasks/*), Write(.tasks/*), AskUserQuestion
 ---
 
 # Todo: Quick — Fast Task Capture
@@ -42,36 +42,38 @@ If Git Commit Policy says `NOT_INITIALIZED`:
 - Ask: shared (committed to git) or private (gitignored)?
 - Run: `task_loader init --git-commit true` or `task_loader init --git-commit false`
 
-Then output **exactly** the capture prompt:
-
-```
-Quick mode — go:
-```
-
-Nothing else. Wait.
+Then immediately enter the capture loop (Step 2 below).
 
 ---
 
 ## The Capture Loop
 
-Every time the user sends a message, follow this sequence exactly:
+The loop has exactly two steps. Repeat forever until the user exits.
 
-### Step 1 — Check for exit
+### Step 1 — Ask with AskUserQuestion
 
-If the user's message is only one of these words: `done`, `exit`, `stop`, `quit`, `/done` — exit the loop. Output:
+Call `AskUserQuestion` with:
+- **question**: `"What's the next task?"` (on first run) or `"✓ [list tasks just written] — next?"` (on subsequent runs, showing what was just captured)
+- **suggestions**: `["type your next task idea", "exit quick capture mode"]`
 
+Wait for response.
+
+### Step 2 — Handle response
+
+**If the user chose or typed "exit quick capture mode"** (or any close variant):
+
+Show the final summary:
 ```
-Done. [N tasks captured total]
+Done. [N] tasks captured.
 /todo:plan <ID> to expand · /todo:work to start
 ```
+Stop. Do not loop again.
 
-Then stop. Do not continue the loop.
+**Otherwise** — treat the entire response as task input:
 
-### Step 2 — Write files
+For every non-empty line:
 
-For every non-empty line in the user's message:
-
-1. Generate a unique random 2-char alphanumeric ID (glob `.tasks/*.md` to check collisions)
+1. Generate a unique random 2-char alphanumeric ID (glob `.tasks/*.md` to avoid collisions)
 2. Write `.tasks/ID.md` directly:
 
 ```markdown
@@ -84,20 +86,9 @@ status: "pending"
 Captured.
 ```
 
-Write all files in parallel. Do not call `task_loader` — write the files directly with the Write tool (faster, no shell overhead).
+Write all files in parallel. Do not call `task_loader` — write the files directly with the Write tool (faster).
 
-### Step 3 — Output the capture prompt (THE ONLY ALLOWED RESPONSE FORMAT)
-
-After writing, output **exactly** this and nothing else:
-
-```
-✓ ID  Task name
-✓ ID  Task name
-...
-
-```
-
-One `✓ ID  name` line per task just created. Blank line after. Then stop. Do not add commentary. Do not ask questions. Do not summarize. Do not suggest next steps. Just wait for the next message.
+Then immediately go back to **Step 1** with the question showing what was just captured.
 
 ---
 
@@ -109,12 +100,4 @@ One `✓ ID  name` line per task just created. Blank line after. Then stop. Do n
 - Explain what you're doing
 - Say "Great!", "Sure!", or any filler
 - Add context or planning to task bodies — just write `Captured.`
-- Break out of the loop for any reason except the exit words above
-
----
-
-## Exit
-
-The loop ends only when the user types one of: `done`, `exit`, `stop`, `quit`, `/done`
-
-On exit, show the full task list one time, then suggest `/todo:plan` and `/todo:work`.
+- Break out of the loop for any reason except "exit quick capture mode"
