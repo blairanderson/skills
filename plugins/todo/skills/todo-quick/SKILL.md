@@ -15,62 +15,96 @@ allowed-tools: Bash, Read, Write, Glob
 
 ---
 
-## Behavior
+## YOU ARE IN A CAPTURE LOOP
 
-You are in **Quick Capture Mode**. The rules are strict:
+This skill runs a **strict capture loop**. There are only two things you are allowed to do:
 
-1. **NO code is written.** Do not write code, run builds, or make changes to the project.
-2. **Every line the user types becomes a task file.** One line = one task. No exceptions.
-3. **No clarifying questions per task.** Capture first, refine later.
-4. **Be fast.** Acknowledge, create, move on.
+1. **Write task files** for every non-empty line the user types
+2. **Output the capture prompt** (defined below) after writing
 
-### On Load
+That is all. No explanations. No analysis. No code. No questions. No suggestions.
 
-If Git Commit Policy says `NOT_INITIALIZED`, run the init flow:
+---
+
+## On Load
+
+If Git Commit Policy says `NOT_INITIALIZED`:
 - Ask: shared (committed to git) or private (gitignored)?
 - Run: `task_loader init --git-commit true` or `task_loader init --git-commit false`
 
-Then immediately say:
+Then output **exactly** the capture prompt:
 
-> **Quick mode** — jot your tasks, one per line. I'll create them all.
-
-Wait for the user's input. Do NOT say anything else. Do NOT ask questions.
-
-### When the User Responds
-
-Parse each non-empty line as a separate task. For each line:
-
-1. Generate a unique random 2-char alphanumeric ID (check existing `.tasks/` to avoid collisions)
-2. Create the task file immediately:
-
-```bash
-task_loader create ID --name "Task Name" --description "Task Name" --body "Captured from quick mode."
+```
+Quick mode — go:
 ```
 
-Or write directly to `.tasks/ID.md`:
+Nothing else. Wait.
+
+---
+
+## The Capture Loop
+
+Every time the user sends a message, follow this sequence exactly:
+
+### Step 1 — Check for exit
+
+If the user's message is only one of these words: `done`, `exit`, `stop`, `quit`, `/done` — exit the loop. Output:
+
+```
+Done. [N tasks captured total]
+/todo:plan <ID> to expand · /todo:work to start
+```
+
+Then stop. Do not continue the loop.
+
+### Step 2 — Write files
+
+For every non-empty line in the user's message:
+
+1. Generate a unique random 2-char alphanumeric ID (glob `.tasks/*.md` to check collisions)
+2. Write `.tasks/ID.md` directly:
 
 ```markdown
 ---
-name: "Task Name"
-description: "Task Name"
+name: "The line of text verbatim"
+description: "The line of text verbatim"
 status: "pending"
 ---
 
-Captured from quick mode.
+Captured.
 ```
 
-3. After ALL tasks are created, show a summary table:
+Write all files in parallel. Do not call `task_loader` — write the files directly with the Write tool (faster, no shell overhead).
 
-| ID | Name |
-|----|------|
-| 4R | ... |
+### Step 3 — Output the capture prompt (THE ONLY ALLOWED RESPONSE FORMAT)
 
-Then say: *"All captured. Use `/todo:plan` to expand any task, or `/todo:work` to pick something to work on."*
+After writing, output **exactly** this and nothing else:
 
-### Rules
+```
+✓ ID  Task name
+✓ ID  Task name
+...
 
-- **Never write application code** — this mode is capture only
-- **Never ask about priority, deadlines, or details** — just capture
-- **If the user types a follow-up**, treat each new line as more tasks to capture (stay in capture mode)
-- **Empty lines are ignored**
-- IDs must be unique 2-char alphanumeric codes
+```
+
+One `✓ ID  name` line per task just created. Blank line after. Then stop. Do not add commentary. Do not ask questions. Do not summarize. Do not suggest next steps. Just wait for the next message.
+
+---
+
+## What You Must Never Do Inside the Loop
+
+- Write application code
+- Ask clarifying questions ("What do you mean by...?")
+- Offer priority ratings, estimates, or suggestions
+- Explain what you're doing
+- Say "Great!", "Sure!", or any filler
+- Add context or planning to task bodies — just write `Captured.`
+- Break out of the loop for any reason except the exit words above
+
+---
+
+## Exit
+
+The loop ends only when the user types one of: `done`, `exit`, `stop`, `quit`, `/done`
+
+On exit, show the full task list one time, then suggest `/todo:plan` and `/todo:work`.
