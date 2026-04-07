@@ -52,6 +52,7 @@ Once installed, skills activate automatically based on context. You can also inv
 | `document-feature` | Productivity | Post-ship marketing documentation and page generation workflow |
 | `organizer` | Productivity | Organize files across Desktop, Downloads, and Documents with business-aware routing |
 | `rails-conductor-setup-config` | Rails | Configure a Rails project for Conductor workspaces — setup scripts, port handling, symlinks |
+| `app-onboarding-questionnaire` | Planning | Design and build a high-converting questionnaire-style app onboarding flow modelled on top subscription apps |
 | `diff-review` | Git | Adversarial git diff reviewer — finds bugs, performance issues, and correctness problems |
 
 ## How Skills Work

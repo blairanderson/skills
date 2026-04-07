@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Curated collection of production-ready Claude Code skills",
-    "version": "1.7.1"
+    "version": "1.8.0"
   },
   "plugins": [
     {
@@ -118,6 +118,19 @@
       },
       "category": "git",
       "tags": ["git", "code-review", "bugs", "performance", "security", "diff"]
+    },
+    {
+      "name": "app-onboarding-questionnaire",
+      "source": {
+        "source": "github",
+        "repo": "adamlyttleapps/claude-skill-app-onboarding-questionnaire"
+      },
+      "description": "Design and build a high-converting questionnaire-style app onboarding flow modelled on proven patterns from top subscription apps like Headspace, Noom, and Duolingo",
+      "author": {
+        "name": "Adam Lyttle"
+      },
+      "category": "planning",
+      "tags": ["onboarding", "mobile", "conversion", "ux", "questionnaire", "paywall", "app-store"]
     }
   ]
 }
