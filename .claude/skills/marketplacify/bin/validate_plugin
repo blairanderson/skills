@@ -1,0 +1,254 @@
+#!/usr/bin/env bash
+# validate_plugin — verify a plugin is marketplace-ready
+#
+# Usage:
+#   bin/validate_plugin <plugin-name>
+#   bin/validate_plugin --all
+#
+# Exit 0 = all checks passed. Exit 1 = one or more failures.
+
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
+MARKETPLACE_JSON="$REPO_ROOT/.claude-plugin/marketplace.json"
+PLUGINS_DIR="$REPO_ROOT/plugins"
+
+PASS=0
+FAIL=1
+errors=0
+checks=0
+
+ok()   { echo "  [PASS] $1"; checks=$((checks + 1)); }
+fail() { echo "  [FAIL] $1"; checks=$((checks + 1)); errors=$((errors + 1)); }
+header() { echo; echo "=== $1 ==="; }
+
+validate_plugin() {
+  local name="$1"
+  local plugin_dir="$PLUGINS_DIR/$name"
+
+  header "Plugin: $name"
+
+  # 1. Plugin directory exists
+  if [[ -d "$plugin_dir" ]]; then
+    ok "plugins/$name/ directory exists"
+  else
+    fail "plugins/$name/ directory not found"
+    return
+  fi
+
+  # 2. plugin.json exists
+  local plugin_json="$plugin_dir/.claude-plugin/plugin.json"
+  if [[ -f "$plugin_json" ]]; then
+    ok ".claude-plugin/plugin.json exists"
+  else
+    fail ".claude-plugin/plugin.json missing"
+    plugin_json=""
+  fi
+
+  # 3. plugin.json has required fields and name matches directory
+  if [[ -n "$plugin_json" ]]; then
+    if ! python3 -m json.tool "$plugin_json" > /dev/null 2>&1; then
+      fail "plugin.json is not valid JSON"
+    else
+      ok "plugin.json is valid JSON"
+
+      local pj_name pj_desc pj_version
+      pj_name=$(python3 -c "import json,sys; d=json.load(open('$plugin_json')); print(d.get('name',''))")
+      pj_desc=$(python3 -c "import json,sys; d=json.load(open('$plugin_json')); print(d.get('description',''))")
+      pj_version=$(python3 -c "import json,sys; d=json.load(open('$plugin_json')); print(d.get('version',''))")
+
+      [[ -n "$pj_name" ]]    && ok "plugin.json has 'name' field"     || fail "plugin.json missing 'name'"
+      [[ -n "$pj_desc" ]]    && ok "plugin.json has 'description'"    || fail "plugin.json missing 'description'"
+      [[ -n "$pj_version" ]] && ok "plugin.json has 'version'"        || fail "plugin.json missing 'version'"
+
+      if [[ "$pj_name" == "$name" ]]; then
+        ok "plugin.json name matches directory name ('$name')"
+      else
+        fail "plugin.json name ('$pj_name') does not match directory name ('$name')"
+      fi
+    fi
+  fi
+
+  # 4. SKILL.md exists at the required nested path
+  local skill_md="$plugin_dir/skills/$name/SKILL.md"
+  if [[ -f "$skill_md" ]]; then
+    ok "skills/$name/SKILL.md exists"
+  else
+    fail "skills/$name/SKILL.md missing (expected: plugins/$name/skills/$name/SKILL.md)"
+    skill_md=""
+  fi
+
+  # 5. SKILL.md frontmatter validation
+  if [[ -n "$skill_md" ]]; then
+    local first_line
+    first_line=$(head -1 "$skill_md")
+    if [[ "$first_line" == "---" ]]; then
+      ok "SKILL.md has YAML frontmatter opening"
+    else
+      fail "SKILL.md does not start with '---' (no frontmatter)"
+    fi
+
+    local sm_name sm_desc
+    sm_name=$(python3 - "$skill_md" <<'EOF'
+import sys, re
+content = open(sys.argv[1]).read()
+m = re.search(r'^---\s*\n(.*?)---', content, re.DOTALL)
+if not m: sys.exit(0)
+for line in m.group(1).splitlines():
+    if line.startswith('name:'):
+        print(line.split(':', 1)[1].strip())
+        break
+EOF
+)
+    sm_desc=$(python3 - "$skill_md" <<'EOF'
+import sys, re
+content = open(sys.argv[1]).read()
+m = re.search(r'^---\s*\n(.*?)---', content, re.DOTALL)
+if not m: sys.exit(0)
+for line in m.group(1).splitlines():
+    if line.startswith('description:'):
+        print(line.split(':', 1)[1].strip())
+        break
+EOF
+)
+
+    [[ -n "$sm_name" ]] && ok "SKILL.md frontmatter has 'name'" || fail "SKILL.md frontmatter missing 'name'"
+    [[ -n "$sm_desc" ]] && ok "SKILL.md frontmatter has 'description'" || fail "SKILL.md frontmatter missing 'description'"
+
+    # name must match directory
+    if [[ -n "$sm_name" && "$sm_name" == "$name" ]]; then
+      ok "SKILL.md name matches directory name ('$name')"
+    elif [[ -n "$sm_name" ]]; then
+      fail "SKILL.md name ('$sm_name') does not match directory name ('$name')"
+    fi
+
+    # name format: kebab-case, max 64 chars
+    if [[ -n "$sm_name" ]]; then
+      if echo "$sm_name" | grep -qE '^[a-z0-9]+(-[a-z0-9]+)*$'; then
+        ok "SKILL.md name is valid kebab-case"
+      else
+        fail "SKILL.md name '$sm_name' is not kebab-case (lowercase letters, digits, hyphens only; no leading/trailing/double hyphens)"
+      fi
+      if [[ ${#sm_name} -le 64 ]]; then
+        ok "SKILL.md name length OK (${#sm_name} chars)"
+      else
+        fail "SKILL.md name too long (${#sm_name} > 64 chars)"
+      fi
+    fi
+
+    # description must not contain angle brackets; max 1024 chars
+    if [[ -n "$sm_desc" ]]; then
+      if echo "$sm_desc" | grep -qE '[<>]'; then
+        fail "SKILL.md description contains angle brackets (<>)"
+      else
+        ok "SKILL.md description has no angle brackets"
+      fi
+      if [[ ${#sm_desc} -le 1024 ]]; then
+        ok "SKILL.md description length OK (${#sm_desc} chars)"
+      else
+        fail "SKILL.md description too long (${#sm_desc} > 1024 chars)"
+      fi
+    fi
+  fi
+
+  # 6. marketplace.json entry exists
+  local mj_name mj_source mj_desc mj_category mj_author mj_tags
+  mj_name=$(python3 - "$MARKETPLACE_JSON" "$name" <<'EOF'
+import json, sys
+data = json.load(open(sys.argv[1]))
+match = next((p for p in data.get('plugins', []) if p.get('name') == sys.argv[2]), None)
+print(match.get('name', '') if match else '')
+EOF
+)
+
+  if [[ "$mj_name" == "$name" ]]; then
+    ok "marketplace.json has entry for '$name'"
+  else
+    fail "marketplace.json has NO entry for '$name'"
+    return
+  fi
+
+  # 7. marketplace.json source path matches directory
+  mj_source=$(python3 - "$MARKETPLACE_JSON" "$name" <<'EOF'
+import json, sys
+data = json.load(open(sys.argv[1]))
+match = next((p for p in data.get('plugins', []) if p.get('name') == sys.argv[2]), None)
+print(match.get('source', '') if match else '')
+EOF
+)
+  local expected_source="./plugins/$name"
+  if [[ "$mj_source" == "$expected_source" ]]; then
+    ok "marketplace.json source matches ('$mj_source')"
+  else
+    fail "marketplace.json source ('$mj_source') should be '$expected_source'"
+  fi
+
+  # 8. marketplace.json required fields
+  mj_desc=$(python3 - "$MARKETPLACE_JSON" "$name" <<'EOF'
+import json, sys
+data = json.load(open(sys.argv[1]))
+match = next((p for p in data.get('plugins', []) if p.get('name') == sys.argv[2]), None)
+print(match.get('description', '') if match else '')
+EOF
+)
+  mj_category=$(python3 - "$MARKETPLACE_JSON" "$name" <<'EOF'
+import json, sys
+data = json.load(open(sys.argv[1]))
+match = next((p for p in data.get('plugins', []) if p.get('name') == sys.argv[2]), None)
+print(match.get('category', '') if match else '')
+EOF
+)
+  mj_author=$(python3 - "$MARKETPLACE_JSON" "$name" <<'EOF'
+import json, sys
+data = json.load(open(sys.argv[1]))
+match = next((p for p in data.get('plugins', []) if p.get('name') == sys.argv[2]), None)
+print(match.get('author', {}).get('name', '') if match else '')
+EOF
+)
+  mj_tags=$(python3 - "$MARKETPLACE_JSON" "$name" <<'EOF'
+import json, sys
+data = json.load(open(sys.argv[1]))
+match = next((p for p in data.get('plugins', []) if p.get('name') == sys.argv[2]), None)
+tags = match.get('tags', []) if match else []
+print('yes' if tags else '')
+EOF
+)
+
+  [[ -n "$mj_desc" ]]     && ok "marketplace.json entry has 'description'"   || fail "marketplace.json entry missing 'description'"
+  [[ -n "$mj_category" ]] && ok "marketplace.json entry has 'category'"      || fail "marketplace.json entry missing 'category'"
+  [[ -n "$mj_author" ]]   && ok "marketplace.json entry has 'author.name'"   || fail "marketplace.json entry missing 'author.name'"
+  [[ -n "$mj_tags" ]]     && ok "marketplace.json entry has 'tags' (non-empty)" || fail "marketplace.json entry missing or empty 'tags'"
+}
+
+# --- Main ---
+
+if [[ "${1:-}" == "--all" ]]; then
+  plugin_names=()
+  for dir in "$PLUGINS_DIR"/*/; do
+    plugin_names+=("$(basename "$dir")")
+  done
+  if [[ ${#plugin_names[@]} -eq 0 ]]; then
+    echo "No plugins found in $PLUGINS_DIR"
+    exit 1
+  fi
+  for pname in "${plugin_names[@]}"; do
+    validate_plugin "$pname"
+  done
+elif [[ -n "${1:-}" ]]; then
+  validate_plugin "$1"
+else
+  echo "Usage: bin/validate_plugin <plugin-name>"
+  echo "       bin/validate_plugin --all"
+  exit 1
+fi
+
+echo
+echo "================================"
+echo "Results: $((checks - errors))/$checks checks passed"
+if [[ $errors -gt 0 ]]; then
+  echo "FAILED: $errors check(s) failed"
+  exit 1
+else
+  echo "ALL CHECKS PASSED — plugin is marketplace-ready"
+  exit 0
+fi

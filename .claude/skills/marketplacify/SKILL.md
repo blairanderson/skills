@@ -90,15 +90,35 @@ Add the new plugin to the "Available Skills" table in `README.md`:
 | `<plugin-name>` | Category | Description |
 ```
 
-## Step 5: Bump the Marketplace Version
+## Step 5: Validate the Plugin
+
+Run the validator to confirm the plugin is marketplace-ready before bumping the version:
+
+```bash
+.claude/skills/marketplacify/bin/validate_plugin <plugin-name>
+```
+
+The validator checks:
+- Plugin directory and `plugin.json` exist with correct `name`, `description`, `version`
+- `plugin.json` name matches the directory name
+- `skills/<name>/SKILL.md` exists at the required nested path
+- SKILL.md frontmatter has `name` and `description`; name is kebab-case ≤ 64 chars; description has no angle brackets and is ≤ 1024 chars
+- SKILL.md name matches directory name and `plugin.json` name
+- `marketplace.json` has an entry with matching `name`, correct `source` path, `description`, `category`, `author.name`, and non-empty `tags`
+
+Fix any `[FAIL]` lines before proceeding. Run with `--all` to check every plugin at once.
+
+## Step 6: Bump the Marketplace Version
 
 Increment the patch version in `.claude-plugin/marketplace.json` → `metadata.version`.
 
 Or just run `/bump` which automates this.
 
-## Step 6: Commit and Push
+## Step 7: Commit and Push
 
 Stage all new files, commit, and push to master.
+
+---
 
 ---
 
@@ -109,6 +129,7 @@ Stage all new files, commit, and push to master.
 - [ ] `plugins/<name>/skills/<name>/SKILL.md` exists with valid frontmatter
 - [ ] Entry added to `.claude-plugin/marketplace.json` plugins array
 - [ ] README.md "Available Skills" table updated
+- [ ] `.claude/skills/marketplacify/bin/validate_plugin <name>` passes all checks
 - [ ] Marketplace version bumped
 - [ ] All helper scripts/files are inside `plugins/<name>/skills/<name>/`
 ```
