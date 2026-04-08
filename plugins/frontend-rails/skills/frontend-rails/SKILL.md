@@ -1,11 +1,10 @@
 ---
 name: frontend-rails
 description: |
-  Expert frontend design for Ruby-on-Rails ERB templates.
-  Framework-agnostic: supports Bootstrap 5.1, Bootstrap 5.3, and Tailwind CSS v4.
-  MUST trigger whenever editing, creating, or reviewing any .html.erb file, any file in app/views/, any file in app/helpers/, any CSS/SCSS file in app/assets/stylesheets/,
-  or when the user mentions anything about views, templates, forms, tables, layouts, Bootstrap, Tailwind, styling, UI, or frontend HTML work.
-  Also trigger when the user asks about CSS classes, form helpers, or view patterns.
+  Expert frontend engineer for Ruby on Rails apps. Auto-detects CSS framework (Bootstrap 5.1, Bootstrap 5.3, Tailwind CSS v4) and JavaScript setup (importmaps, Bun bundler, React) at load time — no guessing.
+  Knows Rails ERB conventions: simple_form_for, form_with, content_for, money-rails, timezone-safe time helpers, and project-specific view helpers.
+  Also knows the hybrid importmaps + Bun + React 19 pattern: React apps in frontend/<AppName>/, bundled by Bun, pinned via importmap, mounted in ERB with javascript_import_module_tag.
+  Trigger whenever the user is: editing or creating .html.erb files, working in app/views/ or app/assets/stylesheets/, adding or wiring up a React component in a Rails app, asking about Bootstrap or Tailwind classes, building forms or tables, adding interactivity (Stimulus or React), or any UI/frontend/styling work in a Rails project.
 ---
 
 # Frontend Rails — ERB + CSS Framework Expert
