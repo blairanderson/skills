@@ -10,25 +10,52 @@ description: |
 
 # Frontend Rails — ERB + CSS Framework Expert
 
-You are working in a Ruby on Rails app. This skill ensures every ERB template you write or edit uses the correct CSS framework for the project.
+You are working in a Ruby on Rails app. This skill ensures every ERB template you write or edit uses the correct CSS framework and JavaScript setup for the project.
+
+## Project Context (auto-detected at load time)
+
+* IMPORTMAP_RB = !`ls config/importmap.rb 2>/dev/null && echo "present" || echo "absent"`
+* IMPORTMAP_GEM = !`grep -s "importmap-rails" Gemfile || echo ""`
+* BUNDLER_FILES = !`ls package.json bun.lockb yarn.lock package-lock.json 2>/dev/null || true`
+* REACT_INSTALLED = !`grep -s '"react"' package.json || echo ""`
+* TAILWIND_GEMFILE = !`grep -s "tailwindcss" Gemfile || echo ""`
+* TAILWIND_CSS = !`grep -rls "@import.*tailwindcss" app/assets/stylesheets/ 2>/dev/null || echo ""`
+* BOOTSTRAP_VERSION = !`grep -h "bootstrap" yarn.lock package-lock.json bun.lockb Gemfile.lock 2>/dev/null | grep -o 'bootstrap@[0-9.]*' | head -1 || echo ""`
+* BOOTSTRAP_GEMFILE = !`grep -s "bootstrap" Gemfile || echo ""`
+
+Use the values above — do not re-run these checks.
 
 ## Step 1: Detect the CSS Framework
 
-Before writing any markup, determine which framework the project uses:
+From the auto-detected values above:
 
-```bash
-# Check for Tailwind
-grep -r "tailwindcss" Gemfile package.json app/assets/stylesheets/ 2>/dev/null
-ls tailwind.config.* 2>/dev/null
-grep -r "@import.*tailwindcss" app/assets/stylesheets/ 2>/dev/null
+- **Tailwind**: `TAILWIND_GEMFILE` or `TAILWIND_CSS` is non-empty → use Tailwind CSS v4
+- **Bootstrap**: check `BOOTSTRAP_VERSION` for `5.3` or `5.1`; if empty, check `BOOTSTRAP_GEMFILE`
+- **Conflict**: if both are present, ask the user which to use for the current work
 
-# Check for Bootstrap — and which version
-grep -r "bootstrap" Gemfile package.json 2>/dev/null
-grep -r "bootstrap@" app/views/layouts/ 2>/dev/null
-grep -r "bootstrap" yarn.lock package-lock.json Gemfile.lock 2>/dev/null | grep -o 'bootstrap@[0-9.]*'
-```
+**Use the detected framework exclusively.** Never mix frameworks.
 
-**Use the detected framework exclusively.** Never mix frameworks. If both are present, ask the user which to use for the current work.
+## Step 1b: Detect the JavaScript Setup
+
+From the auto-detected values above:
+
+- **Importmaps**: `IMPORTMAP_RB` is `present` or `IMPORTMAP_GEM` is non-empty
+- **Bundler-based**: `BUNDLER_FILES` lists any files
+- **React**: `REACT_INSTALLED` is non-empty (only relevant if bundler-based)
+
+**If importmaps is detected:**
+- The project does NOT use a Node.js bundler — there is no `npm install`, no build step, no JSX compilation
+- Do NOT suggest React components, JSX, or npm packages
+- JavaScript lives in `app/javascript/` as plain ES modules, mapped in `config/importmap.rb`
+- For interactivity, use **Stimulus controllers** (`app/javascript/controllers/`)
+- If the user wants something React-like, suggest Stimulus + ERB or ask whether they want to migrate to a bundler first — don't assume
+
+**If a bundler + React is detected:**
+- JSX/TSX components are valid; follow the project's existing component conventions
+- Check `app/javascript/` for existing component structure before creating new ones
+- If importmaps is also present (hybrid setup), read `references/rails-react-bun.md` — this describes the Bun-bundle-then-pin pattern used to serve React apps through importmap
+
+**If neither is clear**, check the application layout for `javascript_importmap_tags` vs `javascript_include_tag "application"` vs a Vite/build tag, then ask the user if still ambiguous.
 
 Read the appropriate reference file:
 - **Bootstrap 5.1**: `references/bootstrap-5.1-cheatsheet.md`
@@ -130,7 +157,8 @@ bun run herb:format:check  # Check only
 
 ## Checklist: Before Submitting ERB Changes
 
-1. Using the correct CSS framework (don't mix Bootstrap and Tailwind)
+1. Verified JS setup (importmaps vs bundler) — no React/JSX in importmaps projects
+2. Using the correct CSS framework (don't mix Bootstrap and Tailwind)
 2. Using the correct Bootstrap version classes (5.1 vs 5.3 differences matter)
 3. Using project-specific view helpers where they exist
 4. No `Time.now` / `Date.today` — use `Time.current` / `Date.current`
