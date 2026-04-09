@@ -7,9 +7,11 @@ allowed-tools: Bash(task_loader*), Bash(check_git_policy), Glob(.tasks/*), Read(
 
 # Todo: Triage — Batch Task Processing
 
-## !! HARD CONSTRAINT !!
+## !! HARD CONSTRAINTS — READ BEFORE DOING ANYTHING !!
 
 **No application code. Only `.tasks/*.md` files are modified.**
+
+**`task_loader` is a CLI on your $PATH.** Call it directly: `task_loader list`, `task_loader show ID`, `task_loader update ID --priority 2`. Do NOT prefix with `bash`, do NOT use a file path, do NOT use Edit/Write to modify task frontmatter. The only tool you use for reading/updating tasks is `Bash(task_loader ...)`. Use Edit ONLY for appending notes to task body text.
 
 ---
 

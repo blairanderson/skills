@@ -7,6 +7,8 @@ allowed-tools: Bash(check_git_policy), Bash, Read, Write, Edit, Glob
 
 # Todo: Work — Pick What to Work On
 
+**`task_loader` is a CLI on your $PATH.** Call it directly: `task_loader list`, `task_loader show ID`, `task_loader update ID --status in_progress`. Do NOT prefix with `bash`, do NOT use a file path like `.tasks/task_loader`.
+
 ## Current Tasks
 !`task_loader list 2>/dev/null || echo "No tasks yet."`
 

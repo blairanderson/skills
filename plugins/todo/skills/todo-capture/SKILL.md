@@ -7,6 +7,8 @@ allowed-tools: Bash(task_loader*), Bash(check_git_policy), Bash(mkdir -p .tasks)
 
 # Todo: Capture — Fast Task Capture
 
+**`task_loader` is a CLI on your $PATH.** Call it directly: `task_loader list`, `task_loader show ID`, `task_loader create ID --name "..."`. Do NOT prefix with `bash`, do NOT use a file path like `.tasks/task_loader`.
+
 ## !! HARD CONSTRAINT — READ FIRST !!
 
 **You are NOT allowed to write application code in this skill. Ever. Under any circumstances.**
