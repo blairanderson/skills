@@ -30,17 +30,19 @@ cmd_table() {
     exit 0
   fi
 
-  # Collect rows: id|status|name|description
+  # Collect rows: id|status|priority|created|name|description
   local rows=()
   for f in "$TASK_DIR"/*.md; do
     [[ -f "$f" ]] || continue
     local id
     id="$(basename "$f" .md)"
-    local name status description
+    local name status priority created description
     name="$(_get_field "$f" "name")"
     status="$(_get_field "$f" "status")"
+    priority="$(_get_field "$f" "priority")"
+    created="$(_get_field "$f" "created")"
     description="$(_get_field "$f" "description")"
-    rows+=("${id}|${status}|${name}|${description}")
+    rows+=("${id}|${status}|${priority:-later}|${created:--}|${name}|${description}")
   done
 
   if [[ ${#rows[@]} -eq 0 ]]; then
@@ -49,29 +51,31 @@ cmd_table() {
   fi
 
   # Compute max widths (start with header lengths)
-  local w_id=2 w_st=6 w_nm=4 w_ds=11
+  local w_id=2 w_st=6 w_pr=8 w_cr=7 w_nm=4 w_ds=11
   for row in "${rows[@]}"; do
-    IFS='|' read -r id st nm ds <<< "$row"
+    IFS='|' read -r id st pr cr nm ds <<< "$row"
     (( ${#id} > w_id )) && w_id=${#id}
     (( ${#st} > w_st )) && w_st=${#st}
+    (( ${#pr} > w_pr )) && w_pr=${#pr}
+    (( ${#cr} > w_cr )) && w_cr=${#cr}
     (( ${#nm} > w_nm )) && w_nm=${#nm}
     (( ${#ds} > w_ds )) && w_ds=${#ds}
   done
 
   # Build format string and separator
-  local fmt="| %-${w_id}s | %-${w_st}s | %-${w_nm}s | %-${w_ds}s |"
+  local fmt="| %-${w_id}s | %-${w_st}s | %-${w_pr}s | %-${w_cr}s | %-${w_nm}s | %-${w_ds}s |"
   local sep
-  sep=$(printf '+-%*s-+-%*s-+-%*s-+-%*s-+' "$w_id" '' "$w_st" '' "$w_nm" '' "$w_ds" '')
+  sep=$(printf '+-%*s-+-%*s-+-%*s-+-%*s-+-%*s-+-%*s-+' "$w_id" '' "$w_st" '' "$w_pr" '' "$w_cr" '' "$w_nm" '' "$w_ds" '')
   sep="${sep// /-}"
 
   echo "$sep"
   # shellcheck disable=SC2059
-  printf "$fmt\n" "ID" "Status" "Name" "Description"
+  printf "$fmt\n" "ID" "Status" "Priority" "Created" "Name" "Description"
   echo "$sep"
   for row in "${rows[@]}"; do
-    IFS='|' read -r id st nm ds <<< "$row"
+    IFS='|' read -r id st pr cr nm ds <<< "$row"
     # shellcheck disable=SC2059
-    printf "$fmt\n" "$id" "$st" "$nm" "$ds"
+    printf "$fmt\n" "$id" "$st" "$pr" "$cr" "$nm" "$ds"
   done
   echo "$sep"
 }
@@ -90,8 +94,10 @@ cmd_list() {
     local name status description
     name="$(_get_field "$f" "name")"
     status="$(_get_field "$f" "status")"
+    priority="$(_get_field "$f" "priority")"
+    created="$(_get_field "$f" "created")"
     description="$(_get_field "$f" "description")"
-    echo "${id} | ${status} | ${name} | ${description}"
+    echo "${id} | ${status} | ${priority:-later} | ${created:--} | ${name} | ${description}"
     found=1
   done
 
@@ -165,6 +171,8 @@ cmd_update() {
         _update_field "$file" "description" "$2"; shift 2 ;;
       --status)
         _update_field "$file" "status" "$2"; shift 2 ;;
+      --priority)
+        _update_field "$file" "priority" "$2"; shift 2 ;;
       *) echo "Unknown option: $1" >&2; exit 1 ;;
     esac
   done

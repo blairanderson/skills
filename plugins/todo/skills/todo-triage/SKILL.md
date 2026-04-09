@@ -2,7 +2,7 @@
 name: todo:triage
 description: "Use when: user wants to review tasks, process the inbox, update priorities, organize TODOs, clean up stale items, or see a task dashboard. The PM batch-processing step between capture and work."
 argument-hint: 'e.g. /todo:triage'
-allowed-tools: Bash(task_loader*), Bash(check_git_policy), Glob(.tasks/*), Read(.tasks/*), Write(.tasks/*), Edit(.tasks/*), AskUserQuestion
+allowed-tools: Bash(task_loader*), Bash(check_git_policy), Glob(.tasks/*), Read(.tasks/*), Edit(.tasks/*), AskUserQuestion
 ---
 
 # Todo: Triage — Batch Task Processing
@@ -29,7 +29,9 @@ Triage is a **batch operation**. You make quick decisions about many tasks in on
 
 ## Phase 1 — Dashboard
 
-On load, read all `.tasks/*.md` files and present a summary board:
+The task list is already loaded above via `task_loader list`. Use that output (and `task_loader show <ID>` for details) to build the dashboard. **Do NOT iterate files with raw bash loops — always use `task_loader`.**
+
+Present a summary board:
 
 ```
 ## Task Board
@@ -77,9 +79,9 @@ For each task, use `AskUserQuestion`:
 
 **Handle response:**
 
-- **0, 1, 2, 3**: Update the `priority` field in frontmatter using Edit
+- **0, 1, 2, 3**: Update priority: `task_loader update ID --priority 0` (or 1, 2, 3)
 - **skip**: Leave unchanged, move to next task
-- **archive**: Set `status: "archived"` in frontmatter using Edit
+- **archive**: Archive the task: `task_loader update ID --status archived`
 
 If the user adds free-text context alongside their choice, append it to the task body as a dated note:
 
@@ -116,7 +118,7 @@ For each stale task, use `AskUserQuestion`:
   2. `"bump — raise priority"` (then ask what priority)
   3. `"archive — not doing this"`
 
-Update frontmatter accordingly.
+Update using `task_loader update ID --priority <N>` or `task_loader update ID --status archived`.
 
 ---
 
@@ -147,5 +149,5 @@ Next: /todo:work to start · /todo:plan <ID> to expand
 - **One task at a time** — present each task individually with AskUserQuestion
 - **Respect "skip"** — if the user skips, move on. No pushback
 - **Respect "stop"** — if the user stops mid-triage, show Phase 4 summary with whatever progress was made
-- **Preserve task body** — when updating frontmatter, use Edit to change only the priority/status fields. Don't rewrite the body
+- **Use task_loader** — update priority/status via `task_loader update ID --priority X` or `--status X`. Use Edit only for appending notes to the body. Never use raw bash loops to read task files.
 - **Add `created` if missing** — if a task file lacks a `created` field in frontmatter, add today's date when you touch it for any other reason
