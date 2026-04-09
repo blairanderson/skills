@@ -131,10 +131,7 @@
     },
     {
       "name": "app-onboarding-questionnaire",
-      "source": {
-        "source": "github",
-        "repo": "adamlyttleapps/claude-skill-app-onboarding-questionnaire"
-      },
+      "source": "./plugins/app-onboarding-questionnaire",
       "description": "Design and build a high-converting questionnaire-style app onboarding flow modelled on proven patterns from top subscription apps like Headspace, Noom, and Duolingo",
       "author": {
         "name": "Adam Lyttle"
