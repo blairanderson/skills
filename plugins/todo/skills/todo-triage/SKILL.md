@@ -2,7 +2,7 @@
 name: todo:triage
 description: "Use when: user wants to review tasks, process the inbox, update priorities, organize TODOs, clean up stale items, or see a task dashboard. The PM batch-processing step between capture and work."
 argument-hint: 'e.g. /todo:triage'
-allowed-tools: Bash(task_loader*), Glob(.tasks/*), Read(.tasks/*), Write(.tasks/*), Edit(.tasks/*), AskUserQuestion
+allowed-tools: Bash(task_loader*), Bash(check_git_policy), Glob(.tasks/*), Read(.tasks/*), Write(.tasks/*), Edit(.tasks/*), AskUserQuestion
 ---
 
 # Todo: Triage — Batch Task Processing

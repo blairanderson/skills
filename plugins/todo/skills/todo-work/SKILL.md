@@ -2,7 +2,7 @@
 name: todo:work
 description: "Use when: user wants to start working, asks what to work on next, wants to pick a task to tackle, or is ready to begin implementation. Shows top 10 tasks and asks which one to work on using an interactive prompt."
 argument-hint: 'e.g. /todo:work'
-allowed-tools: Bash, Read, Write, Edit, Glob
+allowed-tools: Bash(check_git_policy), Bash, Read, Write, Edit, Glob
 ---
 
 # Todo: Work — Pick What to Work On

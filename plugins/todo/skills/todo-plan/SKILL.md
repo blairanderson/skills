@@ -2,7 +2,7 @@
 name: todo:plan
 description: "Use when: user wants to expand a task, flesh out a plan, break down a TODO into steps, add detail to an existing task, or plan the implementation of a specific work item. Takes a task ID or picks one interactively and builds it into a thorough plan."
 argument-hint: 'e.g. /todo:plan 4R'
-allowed-tools: Bash, Read, Write, Edit, Glob
+allowed-tools: Bash(check_git_policy), Bash, Read, Write, Edit, Glob
 ---
 
 # Todo: Plan — Task Expansion & Deep Planning
