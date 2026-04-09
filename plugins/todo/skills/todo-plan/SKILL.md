@@ -30,6 +30,7 @@ Parse `$ARGUMENTS`:
 1. Read the full task file: `task_loader show ID`
 2. Discuss the task with the user — ask clarifying questions one at a time:
    - What is the goal / definition of done?
+   - What priority? (`0` = drop everything, `1` = high, `2` = normal, `3` = low, `later` = someday)
    - What are the steps or phases?
    - What files, systems, or people are involved?
    - Are there blockers or dependencies?
@@ -41,7 +42,7 @@ Parse `$ARGUMENTS`:
    - `## Dependencies` — things that must happen first
    - `## Notes` — risks, open questions, decisions made
 4. Write the expanded body back to `.tasks/ID.md` using the Edit tool (preserve frontmatter)
-5. Confirm: *"Plan saved to .tasks/ID.md. Use `/todo:work` when you're ready to start."*
+5. Confirm: *"Plan saved to .tasks/ID.md. `/todo:triage` to reprioritize · `/todo:work` when ready to start."*
 
 ### Iterative Planning
 
@@ -51,6 +52,6 @@ If the user wants to keep expanding, continue the conversation and keep updating
 
 - **Do not write application code** — only update the `.tasks/ID.md` file
 - **Ask one question at a time** — don't dump a list of 10 questions at once
-- **Preserve frontmatter** — only update the body section of the task file
+- **Preserve frontmatter** — only update the body section (and `priority` field if discussed)
 - **Be concrete** — file paths, function names, API endpoints beat vague descriptions
 - If a task should be split into multiple tasks, suggest it but let the user decide

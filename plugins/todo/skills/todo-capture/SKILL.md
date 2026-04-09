@@ -2,7 +2,7 @@
 name: todo:capture
 description: "Use when: user wants to quickly capture tasks, brainstorm TODOs, jot down ideas, dump a list of things to do, or do a brain dump of work items. Enters fast capture mode — NO code written, every line typed becomes its own task file immediately."
 argument-hint: 'e.g. /todo:capture'
-allowed-tools: Bash(task_loader*), Bash(check_git_policy), Bash(mkdir -p .tasks), Glob(.tasks/*), Read(.tasks/*), Write(.tasks/*), AskUserQuestion
+allowed-tools: Bash(task_loader*), Bash(check_git_policy), Bash(mkdir -p .tasks), Glob(.tasks/*), Read(.tasks/*), Write(.tasks/*)
 ---
 
 # Todo: Capture — Fast Task Capture
@@ -50,29 +50,18 @@ Then immediately enter the capture loop (Step 2 below).
 
 The loop has exactly two steps. Repeat forever until the user exits.
 
-### Step 1 — Ask with AskUserQuestion
+### Step 1 — Ask the user
 
-Call `AskUserQuestion` with:
-- **question**: `"What's the next task?"` (on first run) or `"✓ [list tasks just written] — next?"` (on subsequent runs, showing what was just captured)
-- **options**:
-  1. `label: "exit"`, `description: "Stop capturing and see the summary"`
+Simply output a text prompt. **Do NOT use AskUserQuestion.** Just ask directly:
 
-The user will type their task in the free-text "Other" field that appears automatically below the options.
+- First run: `"What's the first task?"`
+- Subsequent runs: `"✓ [list tasks just written] — next?"`
 
-Wait for response.
+The user types their task as a normal message. The user can exit capture mode at any time by pressing Escape — you do not need to offer an exit option.
 
 ### Step 2 — Handle response
 
-**If the user chose or typed "exit"** (or any close variant like "exit quick capture mode"):
-
-Show the final summary:
-```
-Done. [N] tasks captured.
-/todo:plan <ID> to expand · /todo:work to start
-```
-Stop. Do not loop again.
-
-**Otherwise** — treat the entire response as task input:
+Treat the entire response as task input:
 
 For every non-empty line:
 
@@ -90,10 +79,14 @@ Remember the user might paste in an entire todo from another system and we would
 name: "The line of text verbatim"
 description: "The line of text verbatim"
 status: "pending"
+priority: "later"
+created: "YYYY-MM-DD"
 ---
 
 {nice long description plan}
 ```
+
+Use today's actual date for the `created` field (e.g. `"2026-04-09"`).
 
 Write all files in parallel. Do not call `task_loader` — write the files directly with the Write tool (faster).
 
@@ -105,7 +98,7 @@ Then immediately go back to **Step 1** with the question showing what was just c
 
 - Write application code
 - Ask clarifying questions ("What do you mean by...?")
-- Offer priority ratings, estimates, or suggestions
+- Offer estimates or suggestions (priority defaults to "later" — user sets it manually)
 - Explain what you're doing
 - Say "Great!", "Sure!", or any filler
 - Add context or planning to task bodies — just write `Captured.`
