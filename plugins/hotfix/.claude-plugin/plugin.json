@@ -1,5 +1,5 @@
 {
   "name": "hotfix",
   "description": "Stay on master, commit changed files, pull with rebase, push, and watch GitHub workflow runs",
-  "version": "1.0.1"
+  "version": "1.1.0"
 }
