@@ -18,26 +18,21 @@ This skill walks through setting up authentication in a Rails app using Rails 8'
 
 Confirm the app is Rails 8+ by checking the Gemfile. If it's older, let the user know the built-in generator requires Rails 8 and discuss alternatives (Devise, hand-rolled `has_secure_password`).
 
-## Phase 1: Discover Requirements
+## Phase 1: Discover Requirements and Ask the User Clarifying Questions
 
-Before running any generators or writing code, have a short conversation with the user. You need to understand what they're building so you can set up auth correctly the first time.
+Before running any generators or writing code, present what you've learned and ask targeted questions. Only ask what the code doesn't already answer:
 
-Ask about these in a natural way (not as a checklist dump — read the room and skip what's obvious from context):
+- Core Auth / **Sign-up flow**: Do users self-register, or are they invited?
+- Core Auth / **Email verification**: Required before access? (Recommended for most apps — prevents fake accounts and ensures password reset works)
+- Core Auth / **Password requirements**: Any specific rules beyond Rails defaults? (Rails enforces max 72 bytes but no minimum — you'll likely want a minimum length)
+- Core Auth / **Remember me**: Should sessions persist across browser closes?
+- Extended Features / **Accounts / Organizations / Teams**: Does the app have a concept of a group that users belong to? (e.g., a company, a workspace, a team). This is extremely common in B2B SaaS.
+- Extended Features / **Roles & Permissions**: Do different users have different access levels? (e.g., admin, member, viewer). Even simple apps often need at least an admin role. See `references/roles-and-permissions.md` for implementation patterns.
+- Extended Features / **Invitations**: Can existing users invite new ones? This often goes hand-in-hand with organizations. See `references/invitations.md` for the full flow.
+- Extended Features / **OAuth / Social Login**: Need "Sign in with Google/GitHub/etc."? See `references/oauth.md`.
+- Extended Features / **Multi-tenancy**: Should data be scoped to organizations? (If they said yes to organizations, this is usually yes too). See `references/multi-tenancy.md` for scoping patterns.
 
-### Core Auth
-
-- **Sign-up flow**: Do users self-register, or are they invited? Or both?
-- **Email verification**: Required before access? (Recommended for most apps — prevents fake accounts and ensures password reset works)
-- **Password requirements**: Any specific rules beyond Rails defaults? (Rails enforces max 72 bytes but no minimum — you'll likely want a minimum length)
-- **Remember me**: Should sessions persist across browser closes?
-
-### Extended Features (ask about these — they're common and better to set up early)
-
-- **Accounts / Organizations / Teams**: Does the app have a concept of a group that users belong to? (e.g., a company, a workspace, a team). This is extremely common in B2B SaaS.
-- **Roles & Permissions**: Do different users have different access levels? (e.g., admin, member, viewer). Even simple apps often need at least an admin role. See `references/roles-and-permissions.md` for implementation patterns.
-- **Invitations**: Can existing users invite new ones? This often goes hand-in-hand with organizations. See `references/invitations.md` for the full flow.
-- **OAuth / Social Login**: Need "Sign in with Google/GitHub/etc."? See `references/oauth.md`.
-- **Multi-tenancy**: Should data be scoped to organizations? (If they said yes to organizations, this is usually yes too). See `references/multi-tenancy.md` for scoping patterns.
+**Save to memory:** app profile (what it does, who it's for, platform, core features, paywall status, sign-in preference).
 
 ### Advanced Features (mention these — they may not need them now, but it's good to plant the seed)
 
