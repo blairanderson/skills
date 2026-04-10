@@ -11,21 +11,21 @@ Solo-dev workflow: commit directly to main/master, no branching.
 
 ## Arguments
 
-`/hotfix $ARGUMENTS` — the arguments become the commit tag prefix.
+`/hotfix $ARGUMENTS` — the arguments are slugified and used as the commit tag.
 
-**Slugify the arguments:** lowercase, replace spaces/special chars with hyphens, strip leading/trailing hyphens.
+**Slugify the arguments:** lowercase, replace spaces/special chars with hyphens, strip leading/trailing hyphens. The slug REPLACES the word "hotfix" — it is NOT a prefix added to "hotfix".
 
 Examples:
-- `/hotfix SOMETHING AWESOME HERE` → tag: `something-awesome-here`
-- `/hotfix Fix Login Bug` → tag: `fix-login-bug`
-- `/hotfix` (no args) → tag: `hotfix`
+- `/hotfix SOMETHING AWESOME HERE` → slug: `something-awesome-here` → commit: `something-awesome-here / your summary`
+- `/hotfix Fix Login Bug` → slug: `fix-login-bug` → commit: `fix-login-bug / your summary`
+- `/hotfix` (no args) → slug: `hotfix` → commit: `hotfix / your summary`
 
 ## Steps
 
 1. Make sure you are on the default branch
-2. Slugify `$ARGUMENTS` into the tag (default to `hotfix` if no arguments given)
+2. Slugify `$ARGUMENTS` into the tag (default to `hotfix` ONLY if no arguments given)
 3. Commit ONLY FILES YOU TOUCHED IN YOUR SESSION
-4. SUMMARIZE your changes into a relevant message, prefixed with the slug tag: `git commit -am "TAG / YOUR SUMMARY HERE"`
+4. SUMMARIZE your changes into a relevant message, prefixed with the slug: `git commit -am "SLUG / YOUR SUMMARY HERE"` — the SLUG is the slugified arguments, NOT the literal word "hotfix" (unless no arguments were provided)
 5. Pull with rebase: `git pull --rebase`
 6. PUSH `git push`
 7. Confirm with a short status summary
