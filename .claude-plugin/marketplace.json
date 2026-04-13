@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Curated collection of production-ready Claude Code skills",
-    "version": "1.15.3"
+    "version": "1.15.4"
   },
   "plugins": [
     {
@@ -151,6 +151,16 @@
       "license": "MIT",
       "category": "seo",
       "tags": ["astro", "seo", "structured-data", "sitemaps", "open-graph", "indexnow", "hreflang"]
+    },
+    {
+      "name": "rails-seo",
+      "source": "./plugins/rails-seo",
+      "description": "Audits and improves SEO for Rails apps — meta-tags, JSON-LD graph via schema_dot_org, sitemap_generator, IndexNow, grover OG images, llms.txt, and rake seo:audit build validation. Works with Sitepress and dynamic ActiveRecord apps.",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "seo",
+      "tags": ["rails", "seo", "meta-tags", "schema-dot-org", "sitemaps", "open-graph", "indexnow", "sitepress", "llms-txt"]
     }
   ]
 }
