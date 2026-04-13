@@ -1,0 +1,5 @@
+{
+  "name": "astro-seo",
+  "description": "Audits and improves SEO for Astro sites — technical foundation, structured data, sitemaps, IndexNow, Open Graph, hreflang, and more. Vendored from jdevalk/skills (MIT).",
+  "version": "1.0.0"
+}

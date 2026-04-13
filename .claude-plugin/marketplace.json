@@ -138,6 +138,19 @@
       },
       "category": "planning",
       "tags": ["onboarding", "mobile", "conversion", "ux", "questionnaire", "paywall", "app-store"]
+    },
+    {
+      "name": "astro-seo",
+      "source": "./plugins/astro-seo",
+      "description": "Audits and improves SEO for Astro sites — technical foundation, structured data, sitemaps, IndexNow, Open Graph, hreflang, and more",
+      "author": {
+        "name": "Joost de Valk",
+        "email": "joost@joost.blog"
+      },
+      "homepage": "https://github.com/jdevalk/skills/tree/main/astro-seo",
+      "license": "MIT",
+      "category": "seo",
+      "tags": ["astro", "seo", "structured-data", "sitemaps", "open-graph", "indexnow", "hreflang"]
     }
   ]
 }
