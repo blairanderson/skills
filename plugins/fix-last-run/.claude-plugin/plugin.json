@@ -1,5 +1,5 @@
 {
   "name": "fix-last-run",
   "description": "Check the last GitHub Actions workflow run and fix failures",
-  "version": "1.0.0"
+  "version": "1.0.1"
 }

@@ -29,7 +29,7 @@ gh run list --limit 5 --json databaseId,status,conclusion,name,headBranch,create
 
 Report the status to the user immediately:
 - **Success** → tell the user, done.
-- **In progress** → tell the user it's still running, offer to wait with `gh run watch <id>`.
+- **In progress** → immediately run `gh run watch <id> --exit-status` and report the result when it completes.
 - **Failure** → continue to Step 3.
 
 ## Step 3: Diagnose the Failure
