@@ -57,6 +57,7 @@ Once installed, skills activate automatically based on context. You can also inv
 | `app-distribution-guide` | Planning | Design and build a multi-surface distribution layer — MCP server, OAuth, Claude/ChatGPT connectors, REST API/SDK, and open source strategy |
 | `astro-seo` | SEO | Audit and improve SEO for Astro sites — structured data, sitemaps, IndexNow, Open Graph, hreflang (vendored from [jdevalk/skills](https://github.com/jdevalk/skills), MIT) |
 | `rails-seo` | SEO | Audit and improve SEO for Rails apps — meta-tags, JSON-LD graph, sitemap_generator, IndexNow, grover OG images, llms.txt, rake seo:audit. Works with Sitepress and dynamic ActiveRecord apps |
+| `backlinks` | SEO | Find all domains linking to any domain using CommonCrawl hyperlinkgraph data and DuckDB |
 
 ## How Skills Work
 

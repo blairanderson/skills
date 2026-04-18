@@ -153,6 +153,16 @@
       "tags": ["astro", "seo", "structured-data", "sitemaps", "open-graph", "indexnow", "hreflang"]
     },
     {
+      "name": "backlinks",
+      "source": "./plugins/backlinks",
+      "description": "Find all domains linking to any domain using CommonCrawl hyperlinkgraph data and DuckDB",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "seo",
+      "tags": ["seo", "backlinks", "commoncrawl", "duckdb", "link-analysis", "domain-research"]
+    },
+    {
       "name": "rails-seo",
       "source": "./plugins/rails-seo",
       "description": "Audits and improves SEO for Rails apps — meta-tags, JSON-LD graph via schema_dot_org, sitemap_generator, IndexNow, grover OG images, llms.txt, and rake seo:audit build validation. Works with Sitepress and dynamic ActiveRecord apps.",

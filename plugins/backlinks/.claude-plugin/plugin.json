@@ -1,0 +1,5 @@
+{
+  "name": "backlinks",
+  "description": "Find all domains linking to any domain using CommonCrawl hyperlinkgraph data and DuckDB",
+  "version": "1.0.0"
+}
