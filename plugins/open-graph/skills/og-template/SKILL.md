@@ -85,6 +85,19 @@ Wait for the user's go-ahead or corrections before generating.
 
 The tree mirrors the design's layout hierarchy. Always start with:
 
+### Mobile-first text sizing (non-negotiable defaults)
+
+OG images are most often seen as thumbnails on mobile screens. Default to these minimum sizes — do NOT start smaller and wait for the user to ask you to enlarge:
+
+| Role | Minimum fontSize |
+|------|-----------------|
+| Eyebrow / label / badge | 32px |
+| Title / headline | 72–96px |
+| Subtitle / description | 48px |
+| Footer / site / meta text | 32px |
+
+If you derive sizes from a design that uses smaller values, scale them up to these minimums automatically before outputting the JSON. Only go below these if the user explicitly asks for a smaller size.
+
 ```json
 { "type": "div", "tw": "flex h-full w-full ...", "children": [...] }
 ```
