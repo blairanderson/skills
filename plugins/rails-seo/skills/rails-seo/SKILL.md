@@ -57,6 +57,7 @@ Confirm the basics before auditing:
 - **Deployment target** — read `fly.toml`, `render.yaml`, `Procfile` (Heroku), `config/deploy.yml` (Kamal), `Dockerfile`, `netlify.toml`, `public/_headers`, or `config/nginx.conf` to determine the host. This drives redirect and header syntax in Phase 2.
 - **Already installed?** Grep `Gemfile` and `Gemfile.lock` for `meta-tags`, `schema_dot_org`, `sitemap_generator`, `grover`, `ahoy_matey`, `rack-rewrite`, `friendly_id`. Record installed versions. Run `bundle outdated meta-tags schema_dot_org sitemap_generator grover` to check freshness. If a gem is behind, recommend an upgrade in Phase 2 before auditing feature gaps — outdated versions are a plausible cause of any audit finding.
 - **Multilingual?** Check `config/application.rb` for `config.i18n.available_locales` with >1 locale, or `config/locales/` containing non-`en` files, or routes scoped under `scope "(:locale)"`. If yes, hreflang matters; if no, skip it.
+- **Accepts markdown?** Grep controllers for `format.md` or `render markdown:`. Record `true` or `false` — used in Phase 1 section 6 and Phase 2.
 
 Ask only what you can't detect. Don't ask the user what the site is about — read the homepage (`app/views/pages/home.html.erb`, Sitepress `app/content/pages/index.html.erb`, or the root route's view) and the `<title>` / H1.
 
@@ -129,6 +130,7 @@ Skip **Nice** checks for small personal blogs unless the user asks for the full 
 - **Should** — schema map at `/schemamap.xml` listing every endpoint, with `Schemamap:` directive in `public/robots.txt`.
 - **Should** — [`llms.txt`](https://llmstxt.org) at the site root listing indexable pages (title + description + URL) for LLM consumers. Generated dynamically from a controller that enumerates Sitepress resources and AR records.
 - **Nice** — `<link rel="nlweb">` pointing to a conversational endpoint. NLWeb is early; the tag is one line and worth having, but it's not a scoring blocker in 2026.
+- **Should** — content controllers respond to `Accept: text/markdown` requests (Rails 8+ built-in). LLM agents and feed readers can consume raw markdown directly without HTML parsing. If the site does **not** accept markdown (detected in Phase 0), read `references/accepting-markdown.md` and implement it in Phase 2.
 
 ### 7. Performance (/10)
 
@@ -676,6 +678,18 @@ get "/schemamap.xml", to: "seo/schema#map", defaults: { format: :xml }
 ```
 
 Add `Schemamap: https://example.com/schemamap.xml` to `public/robots.txt` (see sitemap example above).
+
+### Markdown content negotiation
+
+**Only implement this section if Phase 0 found `format.md` absent from the app's controllers.**
+Read `references/accepting-markdown.md` for the full recipe, then apply:
+
+1. Add `to_markdown` to each content model (`Post`, `Article`, `Page`). Use a stored `body_markdown` column if one exists; otherwise use `ReverseMarkdown` for Action Text bodies.
+2. Add `format.md { render markdown: @resource }` to each `show` action that serves indexable content.
+3. Add the `prioritize_markdown_format` before-action to `ApplicationController` to fix the `Accept: */*` tie-breaking issue (Rails 8 built-in, but the workaround is still needed for wildcard clients).
+4. Verify with `curl -sI -H "Accept: text/markdown" <post_url>` — expect `Content-Type: text/markdown` and `Vary: Accept`.
+
+Skip this section entirely if Phase 0 detected `format.md` already present.
 
 ### Redirects
 
