@@ -171,6 +171,16 @@
       },
       "category": "seo",
       "tags": ["rails", "seo", "meta-tags", "schema-dot-org", "sitemaps", "open-graph", "indexnow", "sitepress", "llms-txt"]
+    },
+    {
+      "name": "open-graph",
+      "source": "./plugins/open-graph",
+      "description": "Convert HTML/SVG designs or URLs into OG Shot TemplateDef JSON blobs ready to paste into the admin UI",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "productivity",
+      "tags": ["og-shot", "open-graph", "templates", "social-cards", "satori", "image-generation"]
     }
   ]
 }

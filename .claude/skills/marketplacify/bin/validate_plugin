@@ -69,23 +69,34 @@ validate_plugin() {
     fi
   fi
 
-  # 4. SKILL.md exists at the required nested path
-  local skill_md="$plugin_dir/skills/$name/SKILL.md"
-  if [[ -f "$skill_md" ]]; then
-    ok "skills/$name/SKILL.md exists"
-  else
-    fail "skills/$name/SKILL.md missing (expected: plugins/$name/skills/$name/SKILL.md)"
-    skill_md=""
+  # 4. At least one SKILL.md exists under skills/*/
+  local skills_dir="$plugin_dir/skills"
+  local skill_files=()
+  if [[ -d "$skills_dir" ]]; then
+    while IFS= read -r -d '' f; do
+      skill_files+=("$f")
+    done < <(find "$skills_dir" -maxdepth 2 -name "SKILL.md" -print0 2>/dev/null | sort -z)
   fi
 
-  # 5. SKILL.md frontmatter validation
-  if [[ -n "$skill_md" ]]; then
+  if [[ ${#skill_files[@]} -gt 0 ]]; then
+    ok "Found ${#skill_files[@]} SKILL.md file(s) under skills/"
+  else
+    fail "No SKILL.md found under plugins/$name/skills/*/SKILL.md"
+  fi
+
+  # 5. Validate each SKILL.md (skill name = skill dir name, not plugin name)
+  for skill_md in "${skill_files[@]}"; do
+    local skill_dir_name
+    skill_dir_name=$(basename "$(dirname "$skill_md")")
+    local rel_path="skills/$skill_dir_name/SKILL.md"
+    echo "  --- Skill: $skill_dir_name ---"
+
     local first_line
     first_line=$(head -1 "$skill_md")
     if [[ "$first_line" == "---" ]]; then
-      ok "SKILL.md has YAML frontmatter opening"
+      ok "$rel_path has YAML frontmatter opening"
     else
-      fail "SKILL.md does not start with '---' (no frontmatter)"
+      fail "$rel_path does not start with '---' (no frontmatter)"
     fi
 
     local sm_name sm_desc
@@ -112,44 +123,44 @@ for line in m.group(1).splitlines():
 EOF
 )
 
-    [[ -n "$sm_name" ]] && ok "SKILL.md frontmatter has 'name'" || fail "SKILL.md frontmatter missing 'name'"
-    [[ -n "$sm_desc" ]] && ok "SKILL.md frontmatter has 'description'" || fail "SKILL.md frontmatter missing 'description'"
+    [[ -n "$sm_name" ]] && ok "$rel_path frontmatter has 'name'" || fail "$rel_path frontmatter missing 'name'"
+    [[ -n "$sm_desc" ]] && ok "$rel_path frontmatter has 'description'" || fail "$rel_path frontmatter missing 'description'"
 
-    # name must match directory
-    if [[ -n "$sm_name" && "$sm_name" == "$name" ]]; then
-      ok "SKILL.md name matches directory name ('$name')"
+    # name must match the skill's own directory name (not the plugin name)
+    if [[ -n "$sm_name" && "$sm_name" == "$skill_dir_name" ]]; then
+      ok "$rel_path name matches skill directory ('$skill_dir_name')"
     elif [[ -n "$sm_name" ]]; then
-      fail "SKILL.md name ('$sm_name') does not match directory name ('$name')"
+      fail "$rel_path name ('$sm_name') does not match skill directory ('$skill_dir_name')"
     fi
 
     # name format: kebab-case, max 64 chars
     if [[ -n "$sm_name" ]]; then
       if echo "$sm_name" | grep -qE '^[a-z0-9]+(-[a-z0-9]+)*$'; then
-        ok "SKILL.md name is valid kebab-case"
+        ok "$rel_path name is valid kebab-case"
       else
-        fail "SKILL.md name '$sm_name' is not kebab-case (lowercase letters, digits, hyphens only; no leading/trailing/double hyphens)"
+        fail "$rel_path name '$sm_name' is not kebab-case (lowercase letters, digits, hyphens only; no leading/trailing/double hyphens)"
       fi
       if [[ ${#sm_name} -le 64 ]]; then
-        ok "SKILL.md name length OK (${#sm_name} chars)"
+        ok "$rel_path name length OK (${#sm_name} chars)"
       else
-        fail "SKILL.md name too long (${#sm_name} > 64 chars)"
+        fail "$rel_path name too long (${#sm_name} > 64 chars)"
       fi
     fi
 
     # description must not contain angle brackets; max 1024 chars
     if [[ -n "$sm_desc" ]]; then
       if echo "$sm_desc" | grep -qE '[<>]'; then
-        fail "SKILL.md description contains angle brackets (<>)"
+        fail "$rel_path description contains angle brackets (<>)"
       else
-        ok "SKILL.md description has no angle brackets"
+        ok "$rel_path description has no angle brackets"
       fi
       if [[ ${#sm_desc} -le 1024 ]]; then
-        ok "SKILL.md description length OK (${#sm_desc} chars)"
+        ok "$rel_path description length OK (${#sm_desc} chars)"
       else
-        fail "SKILL.md description too long (${#sm_desc} > 1024 chars)"
+        fail "$rel_path description too long (${#sm_desc} > 1024 chars)"
       fi
     fi
-  fi
+  done
 
   # 6. marketplace.json entry exists
   local mj_name mj_source mj_desc mj_category mj_author mj_tags
