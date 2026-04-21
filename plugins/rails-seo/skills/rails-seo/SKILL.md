@@ -5,9 +5,10 @@ description: >
   to audit, set up, or improve SEO on a Rails app, or mentions head metadata,
   structured data, JSON-LD, sitemaps, IndexNow, Open Graph images, schema
   endpoints, `llms.txt`, NLWeb, hreflang, `meta-tags`, `schema_dot_org`,
-  `sitemap_generator`, or search engine indexing in a Rails context. Produces
-  drop-in code for both Sitepress (`app/content/pages/`) and dynamic
-  ActiveRecord apps, and chains into `readability-check` for generated prose.
+  `sitemap_generator`, agent-ready, isitagentready, Content-Signal, well-known
+  endpoints, MCP server card, AI bot rules, or search engine indexing in a Rails
+  context. Produces drop-in code for both Sitepress (`app/content/pages/`) and
+  dynamic ActiveRecord apps, and chains into `readability-check` for generated prose.
 ---
 
 # Rails SEO
@@ -58,6 +59,7 @@ Confirm the basics before auditing:
 - **Already installed?** Grep `Gemfile` and `Gemfile.lock` for `meta-tags`, `schema_dot_org`, `sitemap_generator`, `grover`, `ahoy_matey`, `rack-rewrite`, `friendly_id`. Record installed versions. Run `bundle outdated meta-tags schema_dot_org sitemap_generator grover` to check freshness. If a gem is behind, recommend an upgrade in Phase 2 before auditing feature gaps — outdated versions are a plausible cause of any audit finding.
 - **Multilingual?** Check `config/application.rb` for `config.i18n.available_locales` with >1 locale, or `config/locales/` containing non-`en` files, or routes scoped under `scope "(:locale)"`. If yes, hreflang matters; if no, skip it.
 - **Accepts markdown?** Grep controllers for `format.md` or `render markdown:`. Record `true` or `false` — used in Phase 1 section 6 and Phase 2.
+- **Agent-ready baseline?** Read `public/robots.txt` (if it exists). Check for: (a) any AI crawler `User-Agent` blocks (`GPTBot`, `ClaudeBot`, `Google-Extended`, `CCBot`, `Anthropic-AI`), (b) a `Content-Signal:` directive, (c) a `Schemamap:` directive. Check routes for `/.well-known/` namespace. Record findings — used in Phase 1 section 10 and Phase 2.
 
 Ask only what you can't detect. Don't ask the user what the site is about — read the homepage (`app/views/pages/home.html.erb`, Sitepress `app/content/pages/index.html.erb`, or the root route's view) and the `<title>` / H1.
 
@@ -131,6 +133,21 @@ Skip **Nice** checks for small personal blogs unless the user asks for the full 
 - **Should** — [`llms.txt`](https://llmstxt.org) at the site root listing indexable pages (title + description + URL) for LLM consumers. Generated dynamically from a controller that enumerates Sitepress resources and AR records.
 - **Nice** — `<link rel="nlweb">` pointing to a conversational endpoint. NLWeb is early; the tag is one line and worth having, but it's not a scoring blocker in 2026.
 - **Should** — content controllers respond to `Accept: text/markdown` requests (Rails 8+ built-in). LLM agents and feed readers can consume raw markdown directly without HTML parsing. If the site does **not** accept markdown (detected in Phase 0), read `references/accepting-markdown.md` and implement it in Phase 2.
+
+### 10. Agent readiness — isitagentready.com (/10)
+
+Checks drawn from the [isitagentready.com](https://isitagentready.com) rubric (Cloudflare's five-dimension scoring standard). Only ~4% of sites pass these — implementing them puts the app ahead of 96% of the web for AI agent access.
+
+- **Must** — `public/robots.txt` has explicit `User-Agent:` blocks for major AI crawlers: `GPTBot`, `ClaudeBot`, `Google-Extended`, `CCBot`, `Anthropic-AI`, `PerplexityBot`. An absent block means the crawler falls back to the wildcard rule — which may be correct, but is ambiguous. Explicit is better.
+- **Should** — `public/robots.txt` has a `Content-Signal:` directive declaring usage policy (`ai-train=no, ai-input=yes, search=yes` or similar). This is the machine-readable equivalent of a data-use policy.
+- **Should** — `/.well-known/mcp/server-card.json` exists and returns valid JSON describing the site's MCP capabilities, available resources, and auth requirements.
+- **Nice** — `/.well-known/agent-skills/index.json` exists and lists callable skills/actions (search, browse, etc.).
+- **Nice** — `/.well-known/api-catalog` exists (RFC 9727 Linkset format) listing all public JSON APIs — only if the app exposes an API surface.
+- **Should** — homepage and key pages include `Link` response headers pointing agents to `llms.txt`, the sitemap, and the MCP server card without requiring HTML parsing.
+- **Must (if markdown enabled)** — markdown responses include `Vary: Accept` and a `Content-Type: text/markdown; charset=utf-8` header. Missing `Vary` causes CDN cache poisoning (a cached HTML page served to agents requesting markdown).
+- **Nice** — markdown responses include `x-markdown-tokens` header with an approximate token count, enabling agents to pre-estimate context window usage.
+
+If any **Must** or **Should** checks fail, read `references/agent-ready.md` in Phase 2 and implement the fixes.
 
 ### 7. Performance (/10)
 
@@ -691,6 +708,20 @@ Read `references/accepting-markdown.md` for the full recipe, then apply:
 
 Skip this section entirely if Phase 0 detected `format.md` already present.
 
+### Agent readiness (isitagentready.com)
+
+**Only implement this section if Phase 1 category 10 found any Must or Should failures.** Read `references/agent-ready.md` for the full recipe, then apply in this order:
+
+1. **robots.txt AI bot rules + Content-Signal** — add explicit `User-Agent:` blocks for each AI crawler and the `Content-Signal:` directive. Adjust `ai-train`, `ai-input`, and `search` values to match the site owner's content policy. These are copy-paste additions to `public/robots.txt` — no Ruby code required.
+
+2. **HTTP Link headers** — add the `Seo::LinkHeaders` concern to `ApplicationController`. This appends `Link` headers pointing to `llms.txt`, the sitemap, and the MCP server card on every response. One include line; five minutes of work.
+
+3. **Well-known endpoints** — generate `WellKnownController` with three actions (`mcp_server_card`, `agent_skills`, `api_catalog`) and wire the routes under `scope "/.well-known"`. Skip `api_catalog` if the app has no public JSON API surface beyond the schema endpoints already generated in section 6.
+
+4. **`Vary: Accept` + `x-markdown-tokens`** — if markdown content negotiation is enabled (format.md present), add `response.headers["Vary"] = "Accept"` and the token-count header to each markdown format block. This is a two-line addition per controller action.
+
+All four steps are independent. Do them in order but stop if the user confirms they want only a subset.
+
 ### Redirects
 
 **Small redirect table — `config/routes.rb`:**
@@ -895,6 +926,14 @@ If the project has a large content corpus in the database, note that the same `r
 - Submit the homepage to [Rich Results Test](https://search.google.com/test/rich-results) and [ClassySchema](https://classyschema.org/Visualisation).
 - `curl -I https://example.com/does-not-exist` — confirm `HTTP/2 404`, not 200.
 - If IndexNow is wired, `curl https://example.com/<key>.txt` should return the key.
+- **Agent-ready checks** (if category 10 work was done):
+  - `curl -sI https://example.com/ | grep -i link` — confirm `Link` header references llms.txt, sitemap, and mcp-server.
+  - `curl -s https://example.com/robots.txt | grep -A2 "GPTBot"` — confirm AI bot rules are present.
+  - `curl -s https://example.com/robots.txt | grep "Content-Signal"` — confirm Content-Signal directive.
+  - `curl -s https://example.com/.well-known/mcp/server-card.json | python3 -m json.tool` — valid JSON, 200 OK.
+  - `curl -s https://example.com/.well-known/agent-skills/index.json | python3 -m json.tool` — valid JSON, 200 OK.
+  - `curl -sI -H "Accept: text/markdown" https://example.com/posts/your-slug | grep -i "vary\|content-type"` — confirm `Vary: Accept` and `Content-Type: text/markdown`.
+  - Paste the URL into [isitagentready.com](https://isitagentready.com) and confirm the score improved across Discoverability, Content Accessibility, and Protocol Discovery dimensions.
 - Remind the user about tasks that can't be automated:
   - Register the site in [Google Search Console](https://search.google.com/search-console) and [Bing Webmaster Tools](https://www.bing.com/webmasters).
   - Submit the sitemap index in both.
@@ -920,7 +959,8 @@ If the project has a large content corpus in the database, note that the same `r
 | 7. Performance                               |  x/10 |
 | 8. Redirects and error handling              |  x/10 |
 | 9. Build-time validation and content quality |  x/10 |
-| **Total**                                    | xx/90 |
+| 10. Agent readiness (isitagentready.com)     |  x/10 |
+| **Total**                                    | xx/100 |
 
 ### Findings
 [Grouped by category. Quote actual code/config. Be specific.]
@@ -941,3 +981,4 @@ If the project has a large content corpus in the database, note that the same `r
 - **Topics, not keyphrases.** When reviewing content, focus on topical coverage and readability, not keyword density.
 - **Cached HTML is the baseline.** Rails wasn't built static-first like Astro, but fragment caching + Russian-doll + a CDN in front gets to the same destination: HTML served from cache, not regenerated on every request.
 - **Agent discovery matters now.** Schema endpoints, `/schemamap.xml`, `/llms.txt`, NLWeb tags — the crawler is no longer the only consumer, and Rails apps need to serve LLM consumers just as deliberately as static sites do.
+- **isitagentready.com is the new PageSpeed.** AI bot rules in `robots.txt`, `Content-Signal` directives, `/.well-known/mcp/server-card.json`, and `Link` headers are the 2026 equivalent of meta descriptions: low-effort, high-signal, and still ignored by 96% of sites. Do them.
