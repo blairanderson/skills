@@ -180,3 +180,77 @@ Fill `sampleParams` with realistic-looking values for every param — these show
 - [ ] Root tree node has `"tw": "flex h-full w-full ..."`
 - [ ] No `gap` in `style` objects (use margin instead)
 - [ ] `img` nodes have `src`, not `text`
+
+---
+
+## render-inline API
+
+`POST https://open-graph.com/render-inline`
+
+Renders a complete TemplateDef from the request body — no saved template required. Returns a PNG directly (~200 ms). Responses are never cached (`Cache-Control: no-store`).
+
+### Authentication
+
+Pass your API key (prefixed `ogsk_`) as a query param or header:
+
+```
+?key=ogsk_...
+# or
+Authorization: Bearer ogsk_...
+```
+
+### Request body
+
+```json
+{
+  "template": { /* full TemplateDef object */ },
+  "params": { "title": "Hello World" },
+  "w": 1200,
+  "h": 630,
+  "dpr": 2
+}
+```
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `template` | Yes | Full TemplateDef object (same structure as the JSON tab in the admin) |
+| `params` | No | String map of variable values; merged with `template.defaults` |
+| `w` | No | Output width in px (1–4096); falls back to `template.defaultSize.w` |
+| `h` | No | Output height in px (1–4096); falls back to `template.defaultSize.h` |
+| `dpr` | No | Device pixel ratio / zoom factor 1–3 (default: 2) |
+
+### Response
+
+Always `image/png`. Use it directly in `<img src>` or `fetch()` and pipe the bytes to a file.
+
+### Example — curl
+
+```bash
+curl -X POST https://open-graph.com/render-inline \
+  -H "Authorization: Bearer ogsk_YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "template": { /* TemplateDef JSON */ },
+    "params": { "title": "Ship it", "eyebrow": "My Brand" }
+  }' \
+  --output card.png
+```
+
+### Example — fetch (JavaScript)
+
+```js
+const res = await fetch("https://open-graph.com/render-inline", {
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer ogsk_YOUR_KEY",
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ template, params }),
+});
+const blob = await res.blob();
+const url = URL.createObjectURL(blob);
+```
+
+### When to mention this
+
+After you output the TemplateDef JSON, remind the user that they can render it immediately — without saving it — via `render-inline`. This is the fastest way to iterate on a design before committing it to the admin.

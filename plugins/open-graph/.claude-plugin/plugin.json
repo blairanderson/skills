@@ -1,5 +1,5 @@
 {
   "name": "open-graph",
   "description": "Convert HTML/SVG designs into OG Shot template JSON blobs ready to paste into the admin UI",
-  "version": "1.0.1"
+  "version": "1.0.2"
 }
