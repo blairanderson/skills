@@ -1,10 +1,15 @@
 # Rails Plugin
 
-Install with:
+Install marketplace:
 
 ```shell
 /plugin marketplace add blairanderson/skills
-/plugin install @blairanderson-skills/rails
+```
+
+Install Skill:
+
+```
+/plugin install rails@blairanderson-skills 
 ```
 
 This plugin adds four skills for Rails development.
