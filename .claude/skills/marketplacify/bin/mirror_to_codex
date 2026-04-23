@@ -25,6 +25,7 @@ import re
 import shutil
 import sys
 from pathlib import Path
+from typing import Optional
 
 # Fields stripped from frontmatter when mirroring to Codex
 # (Codex allows: name, description, license, allowed-tools, metadata)
@@ -73,10 +74,31 @@ def strip_frontmatter_fields(content: str, strip_keys: set) -> tuple[str, list[s
     return f"{open_fence}{new_fm}{close_fence}{body}", stripped
 
 
-def mirror_plugin(name: str) -> bool:
-    src_skill = CLAUDE_REPO / "plugins" / name / "skills" / name / "SKILL.md"
-    if not src_skill.exists():
-        print(f"  [FAIL] Source not found: {src_skill}")
+def find_skill_path(plugin: str, skill: Optional[str]) -> Optional[Path]:
+    """Find the SKILL.md for a plugin. If skill is given, use that subfolder.
+    Otherwise try matching the plugin name, then fall back to the first skill found."""
+    base = CLAUDE_REPO / "plugins" / plugin / "skills"
+    if skill:
+        candidate = base / skill / "SKILL.md"
+        return candidate if candidate.exists() else None
+    # try same-name skill first
+    same = base / plugin / "SKILL.md"
+    if same.exists():
+        return same
+    # fall back to first skill found
+    if base.exists():
+        for sub in sorted(base.iterdir()):
+            candidate = sub / "SKILL.md"
+            if candidate.exists():
+                return candidate
+    return None
+
+
+def mirror_plugin(name: str, skill: Optional[str] = None) -> bool:
+    src_skill = find_skill_path(name, skill)
+    if src_skill is None:
+        hint = f"plugins/{name}/skills/{skill or name}/SKILL.md"
+        print(f"  [FAIL] Source not found: {hint}")
         return False
 
     dst_dir = CODEX_REPO / "plugins" / name
@@ -115,14 +137,20 @@ def main():
 
     if len(sys.argv) == 2 and sys.argv[1] == "--all":
         plugins_dir = CLAUDE_REPO / "plugins"
-        names = sorted(p.name for p in plugins_dir.iterdir() if p.is_dir())
-        if not names:
+        targets = [(p.name, None) for p in sorted(plugins_dir.iterdir()) if p.is_dir()]
+        if not targets:
             print("No plugins found.")
             sys.exit(1)
     elif len(sys.argv) == 2:
-        names = [sys.argv[1]]
+        arg = sys.argv[1]
+        if ":" in arg:
+            plugin, skill = arg.split(":", 1)
+            targets = [(plugin, skill)]
+        else:
+            targets = [(arg, None)]
     else:
         print("Usage: bin/mirror_to_codex <plugin-name>")
+        print("       bin/mirror_to_codex <plugin>:<skill>")
         print("       bin/mirror_to_codex --all")
         sys.exit(1)
 
@@ -130,13 +158,13 @@ def main():
     print()
 
     success = 0
-    for name in names:
-        if mirror_plugin(name):
+    for name, skill in targets:
+        if mirror_plugin(name, skill):
             success += 1
 
     print()
-    print(f"Mirrored {success}/{len(names)} plugins.")
-    if success < len(names):
+    print(f"Mirrored {success}/{len(targets)} plugins.")
+    if success < len(targets):
         sys.exit(1)
 
 
