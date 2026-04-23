@@ -145,7 +145,7 @@
     {
       "name": "rails",
       "source": "./plugins/rails",
-      "description": "Rails developer toolkit — authentication (OAuth, 2FA, sessions), frontend (Bootstrap/Tailwind ERB), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, and pgsync database sync",
+      "description": "Rails developer toolkit — authentication (OAuth, 2FA, sessions), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, and pgsync database sync",
       "author": {
         "name": "Blair Anderson"
       },
