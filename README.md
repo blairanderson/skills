@@ -43,7 +43,10 @@ Once installed, skills activate automatically based on context. You can also inv
 | Skill | Category | Description |
 |-------|----------|-------------|
 | `code-spec` | Planning | Reverse-engineer a feature or project into a portable, implementation-ready specification |
-| `rails` | Rails | Rails developer toolkit — authentication (OAuth, 2FA, sessions), frontend (Bootstrap/Tailwind ERB), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, and pgsync database sync |
+| `rails` → `rails-seo` | Rails | Audit and improve SEO for Ruby on Rails apps — head metadata, JSON-LD, sitemaps |
+| `rails` → `rails-authentication` | Rails | End-to-end Rails authentication — OAuth, 2FA, sessions |
+| `rails` → `rails-conductor-setup-config` | Rails | Set up Conductor workspaces and config for Rails projects |
+| `rails` → `pgsync` | Rails | Sync production Postgres data to local dev via pgsync + SSH tunnel |
 | `hotfix` | Git | Stay on master, commit, pull with rebase, push, and watch GitHub workflows |
 | `todo` | Productivity | Universal TODO and task tracker — manages tasks as markdown files in .tasks/ |
 | `fix-last-run` | Git | Check the last GitHub Actions workflow run and fix failures |
