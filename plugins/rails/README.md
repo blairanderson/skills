@@ -3,6 +3,7 @@
 Install with:
 
 ```shell
+/plugin marketplace add blairanderson/skills
 /plugin install @blairanderson-skills/rails
 ```
 
