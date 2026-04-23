@@ -54,6 +54,7 @@ Once installed, skills activate automatically based on context. You can also inv
 | `diff-review` | Git | Adversarial git diff reviewer — finds bugs, performance issues, and correctness problems |
 | `app-distribution-guide` | Planning | Design and build a multi-surface distribution layer — MCP server, OAuth, Claude/ChatGPT connectors, REST API/SDK, and open source strategy |
 | `astro` | Astro | Audit and improve SEO for Astro sites — structured data, sitemaps, IndexNow, Open Graph, hreflang (vendored from [jdevalk/skills](https://github.com/jdevalk/skills), MIT) |
+| `jekyll` | Jekyll | Audit and improve SEO for Jekyll sites — jekyll-seo-tag, linked @graph JSON-LD, sitemaps, IndexNow via GitHub Actions, OG images, llms.txt, and agent discovery |
 | `backlinks` | SEO | Find all domains linking to any domain using CommonCrawl hyperlinkgraph data and DuckDB |
 | `open-graph` | Productivity | Convert HTML/SVG designs or URLs into OG Shot TemplateDef JSON blobs — paste into the admin UI's JSON tab |
 

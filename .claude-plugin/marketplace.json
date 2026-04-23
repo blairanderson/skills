@@ -151,6 +151,16 @@
       },
       "category": "rails",
       "tags": ["rails", "authentication", "oauth", "2fa", "frontend", "erb", "bootstrap", "tailwind", "seo", "meta-tags", "schema-dot-org", "sitemaps", "conductor", "pgsync", "postgres", "hatchbox"]
+    },
+    {
+      "name": "jekyll",
+      "source": "./plugins/jekyll",
+      "description": "Jekyll developer tools — SEO with structured data, sitemaps, IndexNow, Open Graph images, llms.txt, and agent discovery for Jekyll static sites",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "jekyll",
+      "tags": ["jekyll", "seo", "structured-data", "sitemaps", "open-graph", "indexnow", "jekyll-seo-tag", "github-pages", "static-site", "llms-txt", "agent-discovery"]
     }
   ]
 }
