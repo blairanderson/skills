@@ -181,6 +181,16 @@
       },
       "category": "productivity",
       "tags": ["og-shot", "open-graph", "templates", "social-cards", "satori", "image-generation"]
+    },
+    {
+      "name": "rails",
+      "source": "./plugins/rails",
+      "description": "Rails developer tools — pgsync SSH tunnel setup for syncing production Postgres data to local dev via Hatchbox",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "rails",
+      "tags": ["rails", "pgsync", "postgres", "hatchbox", "ssh-tunnel", "database", "sync"]
     }
   ]
 }

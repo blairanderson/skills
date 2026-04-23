@@ -56,6 +56,7 @@ Once installed, skills activate automatically based on context. You can also inv
 | `diff-review` | Git | Adversarial git diff reviewer — finds bugs, performance issues, and correctness problems |
 | `app-distribution-guide` | Planning | Design and build a multi-surface distribution layer — MCP server, OAuth, Claude/ChatGPT connectors, REST API/SDK, and open source strategy |
 | `astro-seo` | SEO | Audit and improve SEO for Astro sites — structured data, sitemaps, IndexNow, Open Graph, hreflang (vendored from [jdevalk/skills](https://github.com/jdevalk/skills), MIT) |
+| `rails` | Rails | Rails developer tools — pgsync SSH tunnel setup for syncing production Postgres to local dev via Hatchbox |
 | `rails-seo` | SEO | Audit and improve SEO for Rails apps — meta-tags, JSON-LD graph, sitemap_generator, IndexNow, grover OG images, llms.txt, rake seo:audit. Works with Sitepress and dynamic ActiveRecord apps |
 | `backlinks` | SEO | Find all domains linking to any domain using CommonCrawl hyperlinkgraph data and DuckDB |
 | `open-graph` | Productivity | Convert HTML/SVG designs or URLs into OG Shot TemplateDef JSON blobs — paste into the admin UI's JSON tab |

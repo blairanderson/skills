@@ -1,0 +1,5 @@
+{
+  "name": "rails",
+  "description": "Rails developer tools — pgsync SSH tunnel setup for syncing production Postgres data to local dev",
+  "version": "1.0.0"
+}
