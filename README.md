@@ -18,16 +18,10 @@ A curated marketplace of skills for [Claude Code](https://docs.anthropic.com/en/
 
 ### 3. Install a skill
 
-Install everything:
+Install a skill by name:
 
 ```shell
-/plugin install @blairanderson-skills
-```
-
-Or install a single skill by name:
-
-```shell
-/plugin install @blairanderson-skills/code-spec
+/plugin install code-spec@blairanderson-skills
 ```
 
 ### 4. Use it

@@ -9,7 +9,7 @@ This is the **blairanderson/skills** Claude Code marketplace — a collection of
 Users install skills via:
 ```shell
 /plugin marketplace add blairanderson/skills
-/plugin install @blairanderson-skills/<plugin-name>
+/plugin install <plugin-name>@blairanderson-skills
 ```
 
 ## Repository Layout
@@ -81,7 +81,7 @@ Skills can include dynamic shell expansions with `!` backtick blocks that run at
 }
 ```
 
-The `source` path must match the actual directory. The `name` field is used in install commands (`/plugin install @blairanderson-skills/<name>`).
+The `source` path must match the actual directory. The `name` field is used in install commands (`/plugin install <name>@blairanderson-skills`).
 
 ## Current Plugins
 
