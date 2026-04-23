@@ -5,7 +5,7 @@ description: >
   set up, or improve SEO on a Jekyll site, or mentions head metadata,
   structured data, JSON-LD, sitemaps, IndexNow, Open Graph images, schema
   endpoints, llms.txt, NLWeb, hreflang, jekyll-seo-tag, jekyll-sitemap,
-  jekyll-feed, html-proofer, front matter validation, Cloudflare Workers,
+  jekyll-feed, html-proofer, front matter validation, Cloudflare, Netlify, Vercel,
   or search engine indexing in a Jekyll project.
   Chains into `readability-check` for generated prose.
 ---
@@ -16,7 +16,7 @@ Audits and improves the SEO setup of a Jekyll site against the full stack descri
 
 The opinionated spine of this skill is [`jekyll-seo-tag`](https://github.com/jekyll/jekyll-seo-tag) (the official SEO plugin). Most head metadata routes through it. Where it falls short — linked `@graph` JSON-LD, per-collection sitemaps, OG image generation — the skill fills in with custom Liquid includes, `_plugins/` generators, and Rake tasks.
 
-The assumed build and deployment model is **GitHub Actions → Cloudflare Pages** (or Cloudflare Workers for dynamic edge routes). This means the full Gemfile is available, custom `_plugins/*.rb` generators work, and `_redirects` / `_headers` files are the standard mechanism for redirects and cache headers.
+The assumed build model is **GitHub Actions**, which gives access to the full Gemfile and custom `_plugins/*.rb` generators. The deployment target varies — Cloudflare Pages/Workers, Netlify, and Vercel are the common hosts — and drives the syntax for redirects and cache headers. Phase 0 detects the host; Phase 2 branches on it.
 
 ## Workflow
 
@@ -40,7 +40,12 @@ Confirm the basics before auditing:
   - `_posts/` — standard dated blog posts.
   - `_pages/` or markdown files at root — static pages.
   - Custom collections in `_config.yml` under `collections:` (e.g., `_projects/`, `_docs/`). Enumerate them with `grep -A 20 "^collections:" _config.yml`.
-- **Deployment target** — read `.github/workflows/*.yml`, `wrangler.toml`, `_headers`, and `_redirects` to confirm the host. The expected setup is Cloudflare Pages or Cloudflare Workers deployed via GitHub Actions. If `wrangler.toml` exists, it's Workers; if `cloudflare/pages-action` appears in a workflow, it's Pages. Note if `netlify.toml` or `vercel.json` exist instead — redirect and header syntax differs slightly.
+- **Deployment target** — determine the host by reading these files in order. Record it; Phase 2 branches on it for redirect and header syntax:
+  - **Cloudflare Pages** — `cloudflare/pages-action` in a workflow YAML, or `wrangler.toml` with `pages_build_output_dir`. Uses `_redirects` (plain text, Netlify-compatible format) and `_headers` (plain text).
+  - **Cloudflare Workers** — `wrangler.toml` with `[site]` block or `main =` pointing to a Worker script. Redirects and headers are set in the Worker script, not in flat files.
+  - **Netlify** — `netlify.toml` present. Uses `_redirects` and `_headers` (same format as Cloudflare Pages) or equivalent `[[redirects]]` / `[[headers]]` blocks in `netlify.toml`.
+  - **Vercel** — `vercel.json` present. Uses a `redirects` array and a `headers` array in `vercel.json` — no flat files.
+  - **Unknown** — ask the user.
 - **Is `jekyll-seo-tag` already installed?** Grep `Gemfile` and `_config.yml` `plugins:` list. If yes, check `_config.yml` for `title:`, `description:`, `twitter.username:`, `social:` block, and `author:`. Also check `_layouts/` for `{% seo %}`. If the tag is called but `url:` is missing, flag that first.
 - **Check `jekyll-seo-tag` version** with `bundle exec gem list jekyll-seo-tag`. The gem is at 2.8.0 and in maintenance mode; flag any version below 2.8.0.
 - **Is the site multilingual?** Check `_config.yml` for `languages:` / `lang:`, or multiple locale directories (`_i18n/`, `_posts/en/`, `_posts/fr/`). If yes, hreflang matters; if no, skip it.
@@ -121,7 +126,7 @@ Skip **Nice** checks for small personal blogs unless the user asks for the full 
 - **Should** — HTML minified via `jekyll-compress-html` (a pure Liquid layout wrapper, zero dependencies).
 - **Should** — content images use `loading="lazy" decoding="async"` attributes. If using `jekyll_picture_tag` (requires libvips), responsive `<picture>` elements with WebP + JPEG srcsets are generated automatically.
 - **Should** — primary web font preloaded in woff2: `<link rel="preload" href="{{ '/assets/fonts/Inter.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin="anonymous">` in the `<head>`.
-- **Should** — `_headers` file serving `Cache-Control: public, max-age=31536000, immutable` on static assets and `No-Vary-Search` stripping UTM parameters from the Cloudflare cache key.
+- **Should** — host-appropriate headers serving `Cache-Control: public, max-age=31536000, immutable` on static assets and `No-Vary-Search` stripping UTM parameters from the CDN cache key. Syntax varies by host (see Phase 2).
 
 ### 8. Redirects and error handling (/10)
 
@@ -670,7 +675,9 @@ end
 
 ### Redirects and fuzzy 404
 
-**`_redirects`** (Cloudflare Pages — server-side 301):
+Pick the syntax matching the deployment target detected in Phase 0.
+
+**Cloudflare Pages / Netlify — `_redirects`** (server-side 301, plain text):
 
 ```text
 /old-path    /new-path    301
@@ -685,7 +692,37 @@ include:
   - _headers
 ```
 
-Seeding the table from scratch: if migrating from WordPress or another CMS, export the old URL list (WP-CLI `wp post list`, database dump, or the old sitemap via Wayback Machine), diff old URLs against the current sitemap, and commit the table once. Maintain it whenever you change a slug.
+**Cloudflare Workers** — set redirects in the Worker script. If using an Assets binding for static files, add a fetch handler that checks the request URL against a hard-coded map before falling through to the asset:
+
+```js
+// src/index.js
+const REDIRECTS = {
+  "/old-path": "/new-path",
+  "/blog/:slug": null,   // handled by pattern match below
+};
+
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    const dest = REDIRECTS[url.pathname];
+    if (dest) return Response.redirect(new URL(dest, url.origin), 301);
+    return env.ASSETS.fetch(request);
+  }
+};
+```
+
+**Vercel — `vercel.json`**:
+
+```json
+{
+  "redirects": [
+    { "source": "/old-path", "destination": "/new-path", "permanent": true },
+    { "source": "/blog/:slug", "destination": "/posts/:slug", "permanent": true }
+  ]
+}
+```
+
+**Seeding the redirect table from scratch:** if migrating from WordPress or another CMS, export the old URL list (WP-CLI `wp post list`, database dump, or the old sitemap via Wayback Machine), diff old URLs against the current sitemap, and commit the table once. Maintain it whenever you change a slug.
 
 **`404.html` with client-side fuzzy suggestion:**
 
@@ -725,11 +762,13 @@ permalink: /404.html
 </html>
 ```
 
-The user sees the suggestion but must click it — there is no automatic server-side redirect. To upgrade to an automatic server-side fuzzy redirect, implement a Cloudflare Worker that intercepts 404 responses, fetches the sitemap, and computes the match at the edge before returning the redirect.
+The user sees the suggestion but must click it — there is no automatic server-side redirect. To upgrade to a true server-side fuzzy redirect, implement edge-layer logic (a Cloudflare Worker, Netlify Edge Function, or Vercel Middleware) that intercepts unmatched requests, computes a Levenshtein match against the sitemap, and returns a 301 before the static 404 is served.
 
 ### Performance headers
 
-**`_headers`** (Cloudflare Pages):
+Pick the syntax matching the deployment target detected in Phase 0.
+
+**Cloudflare Pages / Netlify — `_headers`** (plain text, included via `_config.yml` above):
 
 ```text
 /assets/*
@@ -741,7 +780,66 @@ The user sees the suggestion but must click it — there is no automatic server-
   X-Content-Type-Options: nosniff
 ```
 
-Place `_headers` in the repo root (included via `_config.yml` above).
+**Cloudflare Workers** — set headers in the fetch handler:
+
+```js
+// src/index.js
+export default {
+  async fetch(request, env) {
+    const response = await env.ASSETS.fetch(request);
+    const url = new URL(request.url);
+    const headers = new Headers(response.headers);
+
+    if (url.pathname.startsWith("/assets/")) {
+      headers.set("Cache-Control", "public, max-age=31536000, immutable");
+    }
+    headers.set("No-Vary-Search", 'key-order, params=("utm_source" "utm_medium" "utm_campaign" "utm_content" "utm_term")');
+    headers.set("X-Frame-Options", "DENY");
+    headers.set("X-Content-Type-Options", "nosniff");
+
+    return new Response(response.body, { status: response.status, headers });
+  }
+};
+```
+
+**Netlify — `netlify.toml`** (alternative to `_headers` if the project already uses `netlify.toml`):
+
+```toml
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    No-Vary-Search = 'key-order, params=("utm_source" "utm_medium" "utm_campaign" "utm_content" "utm_term")'
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+```
+
+**Vercel — `vercel.json`**:
+
+```json
+{
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "No-Vary-Search", "value": "key-order, params=(\"utm_source\" \"utm_medium\" \"utm_campaign\" \"utm_content\" \"utm_term\")" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    }
+  ]
+}
+```
 
 **`jekyll-compress-html`** — copy the single `compress.html` file from [penibelst/jekyll-compress-html](https://github.com/penibelst/jekyll-compress-html) into `_layouts/compress.html`, then set your `_layouts/default.html` front matter to `layout: compress`. This wraps the entire rendered output in the Liquid HTML compressor.
 
