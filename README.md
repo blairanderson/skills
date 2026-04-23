@@ -43,21 +43,17 @@ Once installed, skills activate automatically based on context. You can also inv
 | Skill | Category | Description |
 |-------|----------|-------------|
 | `code-spec` | Planning | Reverse-engineer a feature or project into a portable, implementation-ready specification |
-| `rails-authentication` | Rails | End-to-end Rails 8 authentication setup with session management, OAuth, and 2FA |
+| `rails` | Rails | Rails developer toolkit — authentication (OAuth, 2FA, sessions), frontend (Bootstrap/Tailwind ERB), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, and pgsync database sync |
 | `hotfix` | Git | Stay on master, commit, pull with rebase, push, and watch GitHub workflows |
 | `todo` | Productivity | Universal TODO and task tracker — manages tasks as markdown files in .tasks/ |
-| `frontend-rails` | Rails | Expert frontend design for Rails ERB templates — Bootstrap 5.1, 5.3, and Tailwind CSS v4 |
 | `fix-last-run` | Git | Check the last GitHub Actions workflow run and fix failures |
 | `blue-ocean` | Planning | Blue Ocean Strategy framework — stop competing, start creating uncontested market space |
 | `document-feature` | Productivity | Post-ship marketing documentation and page generation workflow |
 | `organizer` | Productivity | Organize files across Desktop, Downloads, and Documents with business-aware routing |
-| `rails-conductor-setup-config` | Rails | Configure a Rails project for Conductor workspaces — setup scripts, port handling, symlinks |
 | `app-onboarding-questionnaire` | Planning | Design and build a high-converting questionnaire-style app onboarding flow modelled on top subscription apps |
 | `diff-review` | Git | Adversarial git diff reviewer — finds bugs, performance issues, and correctness problems |
 | `app-distribution-guide` | Planning | Design and build a multi-surface distribution layer — MCP server, OAuth, Claude/ChatGPT connectors, REST API/SDK, and open source strategy |
 | `astro-seo` | SEO | Audit and improve SEO for Astro sites — structured data, sitemaps, IndexNow, Open Graph, hreflang (vendored from [jdevalk/skills](https://github.com/jdevalk/skills), MIT) |
-| `rails` | Rails | Rails developer tools — pgsync SSH tunnel setup for syncing production Postgres to local dev via Hatchbox |
-| `rails-seo` | SEO | Audit and improve SEO for Rails apps — meta-tags, JSON-LD graph, sitemap_generator, IndexNow, grover OG images, llms.txt, rake seo:audit. Works with Sitepress and dynamic ActiveRecord apps |
 | `backlinks` | SEO | Find all domains linking to any domain using CommonCrawl hyperlinkgraph data and DuckDB |
 | `open-graph` | Productivity | Convert HTML/SVG designs or URLs into OG Shot TemplateDef JSON blobs — paste into the admin UI's JSON tab |
 

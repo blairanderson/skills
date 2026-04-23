@@ -1,5 +1,0 @@
-{
-  "name": "rails-authentication",
-  "description": "End-to-end Rails 8 authentication setup with session management, OAuth, 2FA, and more",
-  "version": "1.0.1"
-}

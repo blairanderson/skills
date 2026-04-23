@@ -1,5 +1,0 @@
-{
-  "name": "rails-seo",
-  "description": "Audits and improves SEO for Ruby on Rails apps — meta-tags, JSON-LD graph via schema_dot_org, sitemap_generator, IndexNow, grover OG images, llms.txt, and rake seo:audit build validation. Works with Sitepress and dynamic ActiveRecord apps. Ports Joost de Valk's SEO framework to Rails.",
-  "version": "1.0.0"
-}

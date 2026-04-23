@@ -20,16 +20,6 @@
       "tags": ["spec", "code-generation", "planning"]
     },
     {
-      "name": "rails-authentication",
-      "source": "./plugins/rails-authentication",
-      "description": "End-to-end Rails 8 authentication setup with session management, OAuth, 2FA, and more",
-      "author": {
-        "name": "Blair Anderson"
-      },
-      "category": "rails",
-      "tags": ["rails", "authentication", "oauth", "2fa"]
-    },
-    {
       "name": "hotfix",
       "source": "./plugins/hotfix",
       "description": "Stay on master, commit changed files, pull with rebase, push, and watch GitHub workflow runs",
@@ -48,16 +38,6 @@
       },
       "category": "productivity",
       "tags": ["tasks", "todo", "project-management", "tracking", "workflow"]
-    },
-    {
-      "name": "frontend-rails",
-      "source": "./plugins/frontend-rails",
-      "description": "Expert frontend design for Rails ERB templates — Bootstrap 5.1, 5.3, and Tailwind CSS v4",
-      "author": {
-        "name": "Blair Anderson"
-      },
-      "category": "rails",
-      "tags": ["rails", "frontend", "erb", "bootstrap", "tailwind", "css", "views"]
     },
     {
       "name": "fix-last-run",
@@ -98,16 +78,6 @@
       },
       "category": "productivity",
       "tags": ["files", "organization", "cleanup", "desktop", "downloads"]
-    },
-    {
-      "name": "rails-conductor-setup-config",
-      "source": "./plugins/rails-conductor-setup-config",
-      "description": "Configure a Rails project for Conductor workspaces — setup scripts, port handling, and shared file symlinks",
-      "author": {
-        "name": "Blair Anderson"
-      },
-      "category": "rails",
-      "tags": ["rails", "conductor", "workspace", "setup", "devtools"]
     },
     {
       "name": "diff-review",
@@ -163,16 +133,6 @@
       "tags": ["seo", "backlinks", "commoncrawl", "duckdb", "link-analysis", "domain-research"]
     },
     {
-      "name": "rails-seo",
-      "source": "./plugins/rails-seo",
-      "description": "Audits and improves SEO for Rails apps — meta-tags, JSON-LD graph via schema_dot_org, sitemap_generator, IndexNow, grover OG images, llms.txt, and rake seo:audit build validation. Works with Sitepress and dynamic ActiveRecord apps.",
-      "author": {
-        "name": "Blair Anderson"
-      },
-      "category": "seo",
-      "tags": ["rails", "seo", "meta-tags", "schema-dot-org", "sitemaps", "open-graph", "indexnow", "sitepress", "llms-txt"]
-    },
-    {
       "name": "open-graph",
       "source": "./plugins/open-graph",
       "description": "Convert HTML/SVG designs or URLs into OG Shot TemplateDef JSON blobs ready to paste into the admin UI",
@@ -185,12 +145,12 @@
     {
       "name": "rails",
       "source": "./plugins/rails",
-      "description": "Rails developer tools — pgsync SSH tunnel setup for syncing production Postgres data to local dev via Hatchbox",
+      "description": "Rails developer toolkit — authentication (OAuth, 2FA, sessions), frontend (Bootstrap/Tailwind ERB), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, and pgsync database sync",
       "author": {
         "name": "Blair Anderson"
       },
       "category": "rails",
-      "tags": ["rails", "pgsync", "postgres", "hatchbox", "ssh-tunnel", "database", "sync"]
+      "tags": ["rails", "authentication", "oauth", "2fa", "frontend", "erb", "bootstrap", "tailwind", "seo", "meta-tags", "schema-dot-org", "sitemaps", "conductor", "pgsync", "postgres", "hatchbox"]
     }
   ]
 }
