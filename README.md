@@ -60,6 +60,7 @@ Once installed, skills activate automatically based on context. You can also inv
 | `jekyll` | Jekyll | Audit and improve SEO for Jekyll sites — jekyll-seo-tag, linked @graph JSON-LD, sitemaps, IndexNow via GitHub Actions, OG images, llms.txt, and agent discovery |
 | `backlinks` | SEO | Find all domains linking to any domain using CommonCrawl hyperlinkgraph data and DuckDB |
 | `open-graph` | Productivity | Convert HTML/SVG designs or URLs into OG Shot TemplateDef JSON blobs — paste into the admin UI's JSON tab |
+| `skillify` | Productivity | The meta skill — audit any feature against the 10-item skill completeness checklist and fill in missing pieces |
 
 ## How Skills Work
 

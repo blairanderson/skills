@@ -153,6 +153,16 @@
       "tags": ["rails", "authentication", "oauth", "2fa", "frontend", "erb", "bootstrap", "tailwind", "seo", "meta-tags", "schema-dot-org", "sitemaps", "conductor", "pgsync", "postgres", "hatchbox"]
     },
     {
+      "name": "skillify",
+      "source": "./plugins/skillify",
+      "description": "The meta skill — audit any feature against the 10-item skill completeness checklist and fill in missing pieces (SKILL.md, tests, evals, resolver triggers)",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "productivity",
+      "tags": ["skills", "meta", "checklist", "testing", "evals", "resolver", "completeness"]
+    },
+    {
       "name": "jekyll",
       "source": "./plugins/jekyll",
       "description": "Jekyll developer tools — SEO with structured data, sitemaps, IndexNow, Open Graph images, llms.txt, and agent discovery for Jekyll static sites",
