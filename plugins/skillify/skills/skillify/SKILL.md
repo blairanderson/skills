@@ -121,3 +121,12 @@ A skillify run produces, in order:
 2. The files created to close each gap (SKILL.md, test files, resolver
    entries).
 3. A one-line summary of the resulting skill completeness score (N/10).
+
+## Destination
+
+A skill can exist in many places: 
+- [ ] the current repository {pwd}/.claude/skills/*
+- [ ] the system ~/.claude/skills/*
+- [ ] the USER skills marketplace directory (print the actual directory name)
+
+AskUserQuestion "Where should $skill-name go?"
