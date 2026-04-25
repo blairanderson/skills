@@ -3,23 +3,24 @@ name: statusline-health
 description: "Use when: user wants to add a health check to their Claude Code status line, wants to monitor website uptime in the statusline, wants to set up HEALTH= in .claude-statusline, or wants the statusline to show (up) or a red alert when a site goes down"
 allowed-tools: Bash, Read, Write, Edit
 argument-hint: "https://mysite.com/up"
-version: "1.0.0"
+version: "1.1.0"
 ---
 
 # Skill: statusline-health
 
-Add a cached uptime indicator to your Claude Code status line. The statusline polls your health URL every 5 minutes and shows:
+Add a cached uptime indicator and CI status badge to your Claude Code status line. The statusline polls your health URL every 5 minutes and shows:
 
 - Green `(up)` after the website URL when healthy
 - Full red alert `WEBSITE IS DOWN. I REPEAT <url> IS DOWN` replacing the entire status line when the check fails
-- Dim `(add HEALTH= to .claude-statusline)` reminder when a project has `website=` but no `HEALTH=`
+- Dim `(!health)` reminder when a project has `WEBSITE=` but no `HEALTH=`
+- `✓CI` / `✗CI` / `⋯CI` badge next to the git branch showing the last GitHub Actions run result
 
 ## What this skill sets up
 
 | File | Purpose |
 |---|---|
-| `.claude-statusline` in project root | Stores `HEALTH=<url>` (and `website=`) |
-| `~/.claude/statusline-command.sh` | Main statusline script — patched with health check logic |
+| `.claude-statusline` in project root | Stores `HEALTH=<url>` (and `website=`) — gitignored, personal config |
+| `~/.claude/statusline-command.sh` | Main statusline script — patched with health check and CI logic |
 
 ---
 
@@ -29,7 +30,7 @@ If arguments were passed to the skill, use that as the health URL.
 
 Otherwise:
 1. Check if `.claude-statusline` exists in the current project root
-2. If it has a `website=` line, propose `<website_url>/up` as the default
+2. If it has a `WEBSITE=` line, propose `<website_url>/up` as the default
 3. If no suggestion is possible, use AskUserQuestion to ask the user for the URL
 
 The health URL should return HTTP 200 when the site is healthy (e.g. `/up`, `/health`, `/healthz`).
@@ -158,15 +159,25 @@ The config file lives at `<project_root>/.claude-statusline`. Create it if missi
 
 Required format:
 ```
-website=https://mysite.com/
+WEBSITE=https://mysite.com
 HEALTH=https://mysite.com/up
 ```
 
 Rules:
-- `website=` is the display URL (shown in cyan in the statusline)
-- `HEALTH=` is the URL to poll (can differ from `website=`, e.g. `/up` endpoint)
-- If `website=` is already present, keep it — only add/update `HEALTH=`
-- If neither is present, add both (derive `website=` from the health URL base)
+- `WEBSITE=` is the display URL (shown in cyan in the statusline)
+- `HEALTH=` is the URL to poll (can differ from `WEBSITE=`, e.g. `/up` endpoint)
+- If `WEBSITE=` is already present, keep it — only add/update `HEALTH=`
+- If neither is present, add both (derive `WEBSITE=` from the health URL base)
+
+After writing `.claude-statusline`, ensure it is gitignored. This is personal config — production URLs should not be committed:
+
+```bash
+gitignore_file="${project_root}/.gitignore"
+if ! grep -qF '.claude-statusline' "$gitignore_file" 2>/dev/null; then
+  echo '.claude-statusline' >> "$gitignore_file"
+  echo "→ Added .claude-statusline to .gitignore (personal config, not for git)"
+fi
+```
 
 ---
 
@@ -186,7 +197,7 @@ grep -q 'health_url' ~/.claude/statusline-command.sh
 
 If already present, skip to Step 5.
 
-**If health check logic is missing**, make these three targeted edits to `~/.claude/statusline-command.sh`:
+**If health check logic is missing**, make these two targeted edits to `~/.claude/statusline-command.sh`:
 
 ### Edit A — Replace the website-reading comment and loop
 
@@ -198,7 +209,7 @@ project_dir=$(echo "$input" | jq -r '.workspace.project_dir // empty')
 for lookup_dir in "$project_dir" "$cwd"; do
   config_file="$lookup_dir/.claude-statusline"
   if [ -n "$lookup_dir" ] && [ -f "$config_file" ]; then
-    website=$(grep -E '^website=' "$config_file" | head -1 | cut -d= -f2-)
+    website=$(grep -E '^WEBSITE=' "$config_file" | head -1 | cut -d= -f2-)
     [ -n "$website" ] && break
   fi
 done
@@ -213,7 +224,7 @@ project_dir=$(echo "$input" | jq -r '.workspace.project_dir // empty')
 for lookup_dir in "$project_dir" "$cwd"; do
   config_file="$lookup_dir/.claude-statusline"
   if [ -n "$lookup_dir" ] && [ -f "$config_file" ]; then
-    website=$(grep -E '^website=' "$config_file" | head -1 | cut -d= -f2-)
+    website=$(grep -E '^WEBSITE=' "$config_file" | head -1 | cut -d= -f2-)
     health_url=$(grep -E '^HEALTH=' "$config_file" | head -1 | cut -d= -f2-)
     [ -n "$website" ] && break
   fi
@@ -222,7 +233,7 @@ done
 # Health check with 5-minute cache
 health_status=""
 if [ -n "$health_url" ]; then
-  cache_key=$(echo "$health_url" | md5 | cut -c1-8)
+  cache_key=$(echo "$health_url" | (md5 2>/dev/null || md5sum) | cut -c1-8)
   cache_file="/tmp/statusline-health-${cache_key}.cache"
   cache_age=$(($(date +%s) - $(stat -f %m "$cache_file" 2>/dev/null || stat -c %Y "$cache_file" 2>/dev/null || echo 0)))
   if [ ! -f "$cache_file" ] || [ "$cache_age" -gt 300 ]; then
@@ -261,7 +272,7 @@ if [ -n "$website" ]; then
   if [ "$health_status" = "up" ]; then
     suffix=$(printf ' \033[0;32m(up)\033[0m')
   elif [ -z "$health_url" ]; then
-    suffix=$(printf ' \033[2m(add HEALTH= to .claude-statusline)\033[0m')
+    suffix=$(printf ' \033[2m(!health)\033[0m')
   else
     suffix=""
   fi
@@ -271,7 +282,76 @@ fi
 
 ---
 
-## Step 5 — Verify
+## Step 5 — Ensure ~/.claude/statusline-command.sh has GH Actions CI badge
+
+Check if GH Actions logic is already present:
+```bash
+grep -q 'gh_status' ~/.claude/statusline-command.sh
+```
+
+If already present, skip to Step 6.
+
+**If CI logic is missing**, make these two targeted edits:
+
+### Edit C — Add GH Actions cache block after the health check block
+
+Find the line:
+```bash
+health_status=$(cat "$cache_file" 2>/dev/null)
+```
+
+After that block (after the "If site is down" exit block), insert:
+
+```bash
+# GH Actions last run with 5-minute cache (only for projects with .claude-statusline configured)
+gh_status=""
+if [ -n "$website" ] && command -v gh >/dev/null 2>&1 && git -C "$cwd" remote get-url origin >/dev/null 2>&1; then
+  _gh_repo_key=$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null | (md5 2>/dev/null || md5sum) | cut -c1-8)
+  _gh_cache="/tmp/statusline-gh-${_gh_repo_key}.cache"
+  _gh_age=$(($(date +%s) - $(stat -f %m "$_gh_cache" 2>/dev/null || stat -c %Y "$_gh_cache" 2>/dev/null || echo 0)))
+  if [ ! -f "$_gh_cache" ] || [ "$_gh_age" -gt 300 ]; then
+    _cur_branch=$(git -C "$cwd" branch --show-current 2>/dev/null)
+    _conclusion=$(gh run list --limit 1 --branch "$_cur_branch" --json conclusion -q '.[0].conclusion' 2>/dev/null || echo "")
+    echo "${_conclusion:-unknown}" > "$_gh_cache"
+  fi
+  gh_status=$(cat "$_gh_cache" 2>/dev/null)
+fi
+```
+
+### Edit D — Add CI badge to the assemble block
+
+Find:
+```bash
+# Assemble line — no trailing $ per statusLine conventions
+if [ -n "$git_info" ]; then
+  printf '%s %s' "$git_info" "$bold_yellow_path"
+else
+  printf '%s' "$bold_yellow_path"
+fi
+```
+
+Replace with:
+```bash
+# CI badge from GH Actions
+case "$gh_status" in
+  success)            ci_badge=$(printf ' \033[0;32m✓CI\033[0m') ;;
+  failure)            ci_badge=$(printf ' \033[0;31m✗CI\033[0m') ;;
+  cancelled)          ci_badge=$(printf ' \033[2m~CI\033[0m') ;;
+  in_progress|queued) ci_badge=$(printf ' \033[0;33m⋯CI\033[0m') ;;
+  *)                  ci_badge="" ;;
+esac
+
+# Assemble line — no trailing $ per statusLine conventions
+if [ -n "$git_info" ]; then
+  printf '%s%s %s' "$git_info" "$ci_badge" "$bold_yellow_path"
+else
+  printf '%s' "$bold_yellow_path"
+fi
+```
+
+---
+
+## Step 6 — Verify
 
 Run the statusline script with the current project as context:
 
@@ -280,13 +360,14 @@ echo "{\"workspace\":{\"current_dir\":\"$(pwd)\",\"project_dir\":\"$(pwd)\"}}" \
   | bash ~/.claude/statusline-command.sh
 ```
 
-Expected output contains the website URL followed by green `(up)` if the health check passes.
-
-If the output shows the red alert, the health URL is returning a non-200 status — check the URL is correct.
+Expected output:
+- Git branch followed by `✓CI` (green) or `✗CI` (red) if this repo has GitHub Actions
+- Website URL followed by `(up)` (green) if the health check passes
+- Red alert instead of all of the above if the site is down
 
 Force a cache refresh at any time:
 ```bash
-rm -f /tmp/statusline-health-*.cache
+rm -f /tmp/statusline-health-*.cache /tmp/statusline-gh-*.cache
 ```
 
 ---
@@ -295,5 +376,8 @@ rm -f /tmp/statusline-health-*.cache
 
 - [ ] Health endpoint returns HTTP 200 (`curl -sf <url>`)
 - [ ] `.claude-statusline` has `HEALTH=<url>`
+- [ ] `.claude-statusline` is in `.gitignore`
 - [ ] `~/.claude/statusline-command.sh` has `health_url` variable
+- [ ] `~/.claude/statusline-command.sh` has `gh_status` variable
 - [ ] Verification run shows `(up)` after the website URL
+- [ ] Verification run shows `✓CI` or `✗CI` next to the git branch (if repo has GitHub Actions)
