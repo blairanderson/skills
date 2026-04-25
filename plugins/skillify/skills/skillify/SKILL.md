@@ -1,6 +1,6 @@
 ---
 name: skillify
-version: 1.0.0
+version: 1.0.1
 description: "Use when: user says 'skillify this', 'skillify', 'is this a skill?', 'make this proper', or wants to add tests and evals to a feature, or check skill completeness against the 10-item checklist (SKILL.md, tests, evals, resolver triggers)"
 argument-hint: "skillify this, is this a skill?, check skill completeness, make this proper"
 allowed-tools: Bash, Read, Write, Edit, Glob
@@ -124,9 +124,36 @@ A skillify run produces, in order:
 
 ## Destination
 
-A skill can exist in many places: 
-- [ ] the current repository {pwd}/.claude/skills/*
-- [ ] the system ~/.claude/skills/*
-- [ ] the USER skills marketplace directory (print the actual directory name)
+Determine where to write the skill **before** creating any files.
 
-AskUserQuestion "Where should $skill-name go?"
+**Step 1 — Load user config at activation time:**
+
+`! cat ~/.claude/skillify-config.json 2>/dev/null || echo '{"custom_destinations":[]}'`
+
+**Step 2 — Build the destination list:**
+
+Always include these two built-ins:
+- **Project-local** — `{pwd}/.claude/skills/` (scoped to this repo only)
+- **User-global** — `~/.claude/skills/` (available across all your projects)
+
+Then append each entry from `custom_destinations` in the config above (each has `label` and `path`).
+
+Always append a final option: **"➕ Add a new destination"**
+
+**Step 3 — Call AskUserQuestion with those choices:**
+
+```
+AskUserQuestion(
+  question: "Where should '<skill-name>' go?",
+  options: [the list built in Step 2, one per line]
+)
+```
+
+**Step 4 — If the user selects "➕ Add a new destination":**
+
+1. `AskUserQuestion("What path should this destination use? (e.g. ~/dev/skills)")`
+2. `AskUserQuestion("What label should appear for this destination?")`
+3. Read `~/.claude/skillify-config.json`, append `{ "label": ..., "path": ... }` to `custom_destinations`, write it back.
+4. Use the newly added destination for this skill run.
+
+**Step 5 — Write all skill files to the chosen destination path.**
