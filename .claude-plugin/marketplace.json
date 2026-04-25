@@ -173,6 +173,16 @@
       "tags": ["jekyll", "seo", "structured-data", "sitemaps", "open-graph", "indexnow", "jekyll-seo-tag", "github-pages", "static-site", "llms-txt", "agent-discovery"]
     },
     {
+      "name": "statusline",
+      "source": "./plugins/statusline",
+      "description": "Claude Code status line enhancements — add website health checks with 5-minute caching, uptime indicators, and per-project config via .claude-statusline",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "productivity",
+      "tags": ["statusline", "health-check", "uptime", "monitoring", "devex"]
+    },
+    {
       "name": "claude-transcription",
       "source": {
         "source": "github",

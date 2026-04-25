@@ -1,0 +1,5 @@
+{
+  "name": "statusline",
+  "description": "Claude Code status line enhancements — add website health checks with 5-minute caching, uptime indicators, and per-project config via .claude-statusline",
+  "version": "1.0.0"
+}

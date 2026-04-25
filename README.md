@@ -55,6 +55,7 @@ Once installed, skills activate automatically based on context. You can also inv
 | `backlinks` | SEO | Find all domains linking to any domain using CommonCrawl hyperlinkgraph data and DuckDB |
 | `open-graph` | Productivity | Convert HTML/SVG designs or URLs into OG Shot TemplateDef JSON blobs — paste into the admin UI's JSON tab |
 | `skillify` | Productivity | The meta skill — audit any feature against the 10-item skill completeness checklist and fill in missing pieces |
+| `statusline` → `statusline-health` | Productivity | Add a cached uptime indicator to Claude Code's status line — polls your health URL every 5 minutes, shows green `(up)` or a full red alert |
 
 ## How Skills Work
 
