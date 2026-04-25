@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Curated collection of production-ready Claude Code skills",
-    "version": "1.25.0"
+    "version": "1.25.1"
   },
   "plugins": [
     {
@@ -17,7 +17,11 @@
         "name": "Blair Anderson"
       },
       "category": "planning",
-      "tags": ["spec", "code-generation", "planning"]
+      "tags": [
+        "spec",
+        "code-generation",
+        "planning"
+      ]
     },
     {
       "name": "hotfix",
@@ -27,17 +31,28 @@
         "name": "Blair Anderson"
       },
       "category": "git",
-      "tags": ["git", "hotfix", "deploy", "workflow"]
+      "tags": [
+        "git",
+        "hotfix",
+        "deploy",
+        "workflow"
+      ]
     },
     {
       "name": "todo",
       "source": "./plugins/todo",
-      "description": "Universal TODO and task tracker — manages tasks as markdown files in .tasks/ directory. Use /todo instead of built-in TaskCreate.",
+      "description": "Universal TODO and task tracker \u2014 manages tasks as markdown files in .tasks/ directory. Use /todo instead of built-in TaskCreate.",
       "author": {
         "name": "Blair Anderson"
       },
       "category": "productivity",
-      "tags": ["tasks", "todo", "project-management", "tracking", "workflow"]
+      "tags": [
+        "tasks",
+        "todo",
+        "project-management",
+        "tracking",
+        "workflow"
+      ]
     },
     {
       "name": "fix-last-run",
@@ -47,27 +62,45 @@
         "name": "Blair Anderson"
       },
       "category": "git",
-      "tags": ["github-actions", "ci", "workflow", "debugging", "fix"]
+      "tags": [
+        "github-actions",
+        "ci",
+        "workflow",
+        "debugging",
+        "fix"
+      ]
     },
     {
       "name": "blue-ocean",
       "source": "./plugins/blue-ocean",
-      "description": "Blue Ocean Strategy framework — stop competing, start creating uncontested market space",
+      "description": "Blue Ocean Strategy framework \u2014 stop competing, start creating uncontested market space",
       "author": {
         "name": "Blair Anderson"
       },
       "category": "planning",
-      "tags": ["strategy", "blue-ocean", "market-creation", "competitive-analysis", "business"]
+      "tags": [
+        "strategy",
+        "blue-ocean",
+        "market-creation",
+        "competitive-analysis",
+        "business"
+      ]
     },
     {
       "name": "document-feature",
       "source": "./plugins/document-feature",
-      "description": "Post-ship marketing documentation and page generation — ensures marketing site reflects shipped features",
+      "description": "Post-ship marketing documentation and page generation \u2014 ensures marketing site reflects shipped features",
       "author": {
         "name": "Blair Anderson"
       },
       "category": "productivity",
-      "tags": ["marketing", "documentation", "post-ship", "pages", "changelog"]
+      "tags": [
+        "marketing",
+        "documentation",
+        "post-ship",
+        "pages",
+        "changelog"
+      ]
     },
     {
       "name": "organizer",
@@ -77,27 +110,49 @@
         "name": "Blair Anderson"
       },
       "category": "productivity",
-      "tags": ["files", "organization", "cleanup", "desktop", "downloads"]
+      "tags": [
+        "files",
+        "organization",
+        "cleanup",
+        "desktop",
+        "downloads"
+      ]
     },
     {
       "name": "diff-review",
       "source": "./plugins/diff-review",
-      "description": "Adversarial git diff reviewer — finds bugs, performance issues, and correctness problems in changed code",
+      "description": "Adversarial git diff reviewer \u2014 finds bugs, performance issues, and correctness problems in changed code",
       "author": {
         "name": "Blair Anderson"
       },
       "category": "git",
-      "tags": ["git", "code-review", "bugs", "performance", "security", "diff"]
+      "tags": [
+        "git",
+        "code-review",
+        "bugs",
+        "performance",
+        "security",
+        "diff"
+      ]
     },
     {
       "name": "app-distribution-guide",
       "source": "./plugins/app-distribution-guide",
-      "description": "Design and build a multi-surface distribution layer — MCP server with OAuth, Claude and ChatGPT connectors, REST API/SDK, dashboard, and open source strategy",
+      "description": "Design and build a multi-surface distribution layer \u2014 MCP server with OAuth, Claude and ChatGPT connectors, REST API/SDK, dashboard, and open source strategy",
       "author": {
         "name": "Blair Anderson"
       },
       "category": "planning",
-      "tags": ["mcp", "api", "sdk", "distribution", "oauth", "claude-connector", "chatgpt", "open-source"]
+      "tags": [
+        "mcp",
+        "api",
+        "sdk",
+        "distribution",
+        "oauth",
+        "claude-connector",
+        "chatgpt",
+        "open-source"
+      ]
     },
     {
       "name": "app-onboarding-questionnaire",
@@ -107,12 +162,20 @@
         "name": "Adam Lyttle"
       },
       "category": "planning",
-      "tags": ["onboarding", "mobile", "conversion", "ux", "questionnaire", "paywall", "app-store"]
+      "tags": [
+        "onboarding",
+        "mobile",
+        "conversion",
+        "ux",
+        "questionnaire",
+        "paywall",
+        "app-store"
+      ]
     },
     {
       "name": "astro",
       "source": "./plugins/astro",
-      "description": "Astro developer tools — SEO with structured data, sitemaps, IndexNow, Open Graph, and hreflang",
+      "description": "Astro developer tools \u2014 SEO with structured data, sitemaps, IndexNow, Open Graph, and hreflang",
       "author": {
         "name": "Joost de Valk",
         "email": "joost@joost.blog"
@@ -120,7 +183,15 @@
       "homepage": "https://github.com/jdevalk/skills/tree/main/astro-seo",
       "license": "MIT",
       "category": "astro",
-      "tags": ["astro", "seo", "structured-data", "sitemaps", "open-graph", "indexnow", "hreflang"]
+      "tags": [
+        "astro",
+        "seo",
+        "structured-data",
+        "sitemaps",
+        "open-graph",
+        "indexnow",
+        "hreflang"
+      ]
     },
     {
       "name": "backlinks",
@@ -130,7 +201,14 @@
         "name": "Blair Anderson"
       },
       "category": "seo",
-      "tags": ["seo", "backlinks", "commoncrawl", "duckdb", "link-analysis", "domain-research"]
+      "tags": [
+        "seo",
+        "backlinks",
+        "commoncrawl",
+        "duckdb",
+        "link-analysis",
+        "domain-research"
+      ]
     },
     {
       "name": "open-graph",
@@ -140,47 +218,97 @@
         "name": "Blair Anderson"
       },
       "category": "productivity",
-      "tags": ["og-shot", "open-graph", "templates", "social-cards", "satori", "image-generation"]
+      "tags": [
+        "og-shot",
+        "open-graph",
+        "templates",
+        "social-cards",
+        "satori",
+        "image-generation"
+      ]
     },
     {
       "name": "rails",
       "source": "./plugins/rails",
-      "description": "Rails developer toolkit — authentication (OAuth, 2FA, sessions), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, and pgsync database sync",
+      "description": "Rails developer toolkit \u2014 authentication (OAuth, 2FA, sessions), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, and pgsync database sync",
       "author": {
         "name": "Blair Anderson"
       },
       "category": "rails",
-      "tags": ["rails", "authentication", "oauth", "2fa", "frontend", "erb", "bootstrap", "tailwind", "seo", "meta-tags", "schema-dot-org", "sitemaps", "conductor", "pgsync", "postgres", "hatchbox"]
+      "tags": [
+        "rails",
+        "authentication",
+        "oauth",
+        "2fa",
+        "frontend",
+        "erb",
+        "bootstrap",
+        "tailwind",
+        "seo",
+        "meta-tags",
+        "schema-dot-org",
+        "sitemaps",
+        "conductor",
+        "pgsync",
+        "postgres",
+        "hatchbox"
+      ]
     },
     {
       "name": "skillify",
       "source": "./plugins/skillify",
-      "description": "The meta skill — audit any feature against the 10-item skill completeness checklist and fill in missing pieces (SKILL.md, tests, evals, resolver triggers)",
+      "description": "The meta skill \u2014 audit any feature against the 10-item skill completeness checklist and fill in missing pieces (SKILL.md, tests, evals, resolver triggers)",
       "author": {
         "name": "Blair Anderson"
       },
       "category": "productivity",
-      "tags": ["skills", "meta", "checklist", "testing", "evals", "resolver", "completeness"]
+      "tags": [
+        "skills",
+        "meta",
+        "checklist",
+        "testing",
+        "evals",
+        "resolver",
+        "completeness"
+      ]
     },
     {
       "name": "jekyll",
       "source": "./plugins/jekyll",
-      "description": "Jekyll developer tools — SEO with structured data, sitemaps, IndexNow, Open Graph images, llms.txt, and agent discovery for Jekyll static sites",
+      "description": "Jekyll developer tools \u2014 SEO with structured data, sitemaps, IndexNow, Open Graph images, llms.txt, and agent discovery for Jekyll static sites",
       "author": {
         "name": "Blair Anderson"
       },
       "category": "jekyll",
-      "tags": ["jekyll", "seo", "structured-data", "sitemaps", "open-graph", "indexnow", "jekyll-seo-tag", "github-pages", "static-site", "llms-txt", "agent-discovery"]
+      "tags": [
+        "jekyll",
+        "seo",
+        "structured-data",
+        "sitemaps",
+        "open-graph",
+        "indexnow",
+        "jekyll-seo-tag",
+        "github-pages",
+        "static-site",
+        "llms-txt",
+        "agent-discovery"
+      ]
     },
     {
       "name": "statusline",
       "source": "./plugins/statusline",
-      "description": "Claude Code status line enhancements — add website health checks with 5-minute caching, uptime indicators, and per-project config via .claude-statusline",
+      "description": "Claude Code status line enhancements \u2014 add website health checks with 5-minute caching, uptime indicators, and per-project config via .claude-statusline",
       "author": {
         "name": "Blair Anderson"
       },
       "category": "productivity",
-      "tags": ["statusline", "health-check", "uptime", "monitoring", "devex"]
+      "tags": [
+        "statusline",
+        "health-check",
+        "uptime",
+        "monitoring",
+        "devex"
+      ]
     },
     {
       "name": "claude-transcription",
