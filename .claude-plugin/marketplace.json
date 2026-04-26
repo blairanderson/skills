@@ -230,7 +230,7 @@
     {
       "name": "rails",
       "source": "./plugins/rails",
-      "description": "Rails developer toolkit \u2014 authentication (OAuth, 2FA, sessions), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, and pgsync database sync",
+      "description": "Rails developer toolkit \u2014 authentication (OAuth, 2FA, sessions), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, pgsync database sync, and Cloudflare proxy setup (SSL, sessions, CSRF, IP spoofing)",
       "author": {
         "name": "Blair Anderson"
       },
@@ -251,7 +251,12 @@
         "conductor",
         "pgsync",
         "postgres",
-        "hatchbox"
+        "hatchbox",
+        "cloudflare",
+        "ssl",
+        "session",
+        "csrf",
+        "proxy"
       ]
     },
     {

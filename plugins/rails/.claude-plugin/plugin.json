@@ -1,5 +1,5 @@
 {
   "name": "rails",
-  "description": "Rails developer tools — authentication, SEO, Conductor config, and pgsync database sync",
-  "version": "2.1.0"
+  "description": "Rails developer tools — authentication, SEO, Conductor config, pgsync database sync, and Cloudflare proxy setup",
+  "version": "2.2.0"
 }

@@ -12,7 +12,7 @@ Install Skill:
 /plugin install rails@blairanderson-skills 
 ```
 
-This plugin adds four skills for Rails development.
+This plugin adds five skills for Rails development.
 
 ---
 
@@ -93,3 +93,24 @@ bin/pgsync-tunnel group:core   # a named group
 ```
 
 The tunnel opens automatically before pgsync runs and closes when it finishes.
+
+---
+
+## `/cloudflare`
+
+Audits and configures a Rails app to work correctly behind Cloudflare's DNS proxy.
+
+Triggers on: Cloudflare, CDN proxy, session cookies broken, CSRF invalid, wrong IP in logs, Set-Cookie stripped, Rack::Attack not working, or "secure flag missing".
+
+Covers six fix areas in order:
+
+| Fix | Problem | Solution |
+|---|---|---|
+| SSL Mode | Flexible SSL breaks cookies + CSRF | Switch to Full (Strict) |
+| assume_ssl | Rails sees HTTP even behind TLS | `config.assume_ssl = true` (Rails 7.1+) |
+| Real client IP | CF edge IP in logs, Rack::Attack bypassed | `cloudflare-rails` gem |
+| Cache Rules | Set-Cookie stripped, users can't log in | Audit CF cache rules for dynamic paths |
+| Cookie attributes | Missing Secure/SameSite flags | Verify with `curl -sI` |
+| CSRF failures | InvalidAuthenticityToken on form POST | SSL mode + email obfuscation off |
+
+Reference docs included for SSL modes, IP spoofing, session cookies, and CSRF.
