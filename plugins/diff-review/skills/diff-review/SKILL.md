@@ -16,9 +16,8 @@ Run these right away, no questions asked:
 ```bash
 git diff
 git diff --cached
+git status --short
 ```
-
-If both are empty — no unstaged or staged changes — say "No changes to review." and stop. Do not continue to Step 2.
 
 If the user passed an argument (commit range, SHA, etc.), use that instead:
 ```bash
@@ -29,6 +28,10 @@ Then get the diff again with extra context for analysis:
 ```bash
 git diff -U10  # 10 lines of surrounding context helps catch nearby issues
 ```
+
+**Untracked files:** Parse `git status --short` for lines starting with `??`. These are new files not yet staged — read each one with the Read tool. They are part of the changeset and must be reviewed too. Bugs hide in new files that never touched `git add`.
+
+If `git diff`, `git diff --cached`, and `git status --short` all show nothing — say "No changes to review." and stop. Do not continue to Step 2.
 
 If the diff is very large (>2000 lines), break it into per-file chunks and review each separately. Never skip files — large diffs are where bugs hide.
 
