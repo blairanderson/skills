@@ -1,26 +1,28 @@
 ---
 name: statusline-health
-description: "Use when: user wants to add a health check to their Claude Code status line, wants to monitor website uptime in the statusline, wants to set up HEALTH= in .claude-statusline, or wants the statusline to show (up) or a red alert when a site goes down"
+description: "Use when: user wants to add a health check to their Claude Code status line, wants to monitor website uptime in the statusline, wants to set up HEALTH= in .claude-statusline, wants a JOBS badge showing background queue health (failed jobs count), or wants the statusline to show (up) or a red alert when a site goes down"
 allowed-tools: Bash, Read, Write, Edit
 argument-hint: "https://mysite.com/up"
-version: "1.1.0"
+version: "1.2.0"
 ---
 
 # Skill: statusline-health
 
-Add a cached uptime indicator and CI status badge to your Claude Code status line. The statusline polls your health URL every 5 minutes and shows:
+Add a cached uptime indicator, CI status badge, and background-jobs queue badge to your Claude Code status line. The statusline polls your health URL every 5 minutes and shows:
 
 - Green `(up)` after the website URL when healthy
 - Full red alert `WEBSITE IS DOWN. I REPEAT <url> IS DOWN` replacing the entire status line when the check fails
 - Dim `(!health)` reminder when a project has `WEBSITE=` but no `HEALTH=`
 - `✓CI` / `✗CI` / `⋯CI` badge next to the git branch showing the last GitHub Actions run result
+- `✓JOBS` / `✗JOBS(N)` / `?JOBS` badge next to CI showing per-project background queue health (optional, requires a per-project hook script)
 
 ## What this skill sets up
 
 | File | Purpose |
 |---|---|
 | `.claude-statusline` in project root | Stores `HEALTH=<url>` (and `website=`) — gitignored, personal config |
-| `~/.claude/statusline-command.sh` | Main statusline script — patched with health check and CI logic |
+| `.claude/statusline-jobs.sh` in project root | Per-project hook for the JOBS badge — emits failed-job count (optional) |
+| `~/.claude/statusline-command.sh` | Main statusline script — patched with health check, CI, and JOBS logic |
 
 ---
 
@@ -351,7 +353,158 @@ fi
 
 ---
 
-## Step 6 — Verify
+## Step 6 — JOBS badge for background queue monitoring (optional, per-project)
+
+The JOBS badge is the third per-branch indicator, sitting next to the CI badge. Unlike CI — which uses the `gh` CLI universally — every app inspects its background queue differently (SolidQueue, Sidekiq, Resque, GoodJob, a custom CLI, an admin HTTP endpoint). The statusline dispatches to a per-project hook script and renders the result.
+
+States:
+- `✓JOBS` (green) — queue is clean (hook prints `0` or empty)
+- `✗JOBS(N)` (red) — `N` failed jobs in the queue (hook prints a positive integer)
+- `?JOBS` (dim) — hook is broken or unreachable (hook exits non-zero)
+- Nothing rendered — project has no `.claude/statusline-jobs.sh`
+
+Check if JOBS dispatcher logic is already in `~/.claude/statusline-command.sh`:
+
+```bash
+grep -q 'jobs_badge' ~/.claude/statusline-command.sh
+```
+
+If already present, skip to "Per-project hook" below.
+
+**If JOBS logic is missing**, make these two targeted edits:
+
+### Edit E — Insert the JOBS dispatcher after the CI badge case
+
+Find the CI badge case statement (added in Edit D):
+```bash
+case "$gh_status" in
+  success)            ci_badge=$(printf ' \033[0;32m✓CI\033[0m') ;;
+  failure)            ci_badge=$(printf ' \033[0;31m✗CI\033[0m') ;;
+  cancelled)          ci_badge=$(printf ' \033[2m~CI\033[0m') ;;
+  in_progress|queued) ci_badge=$(printf ' \033[0;33m⋯CI\033[0m') ;;
+  *)                  ci_badge="" ;;
+esac
+```
+
+Immediately after it (and before the assemble block), insert:
+
+```bash
+# JOBS badge — per-project hook via .claude/statusline-jobs.sh in project root
+jobs_badge=""
+_jobs_script="${project_dir}/.claude/statusline-jobs.sh"
+if [ -n "$project_dir" ] && [ -f "$_jobs_script" ]; then
+  _jobs_repo_key=$(echo "$project_dir" | (md5 2>/dev/null || md5sum) | cut -c1-8)
+  _jobs_cache="/tmp/statusline-jobs-${_jobs_repo_key}.cache"
+  _jobs_age=$(($(date +%s) - $(stat -f %m "$_jobs_cache" 2>/dev/null || stat -c %Y "$_jobs_cache" 2>/dev/null || echo 0)))
+  if [ ! -f "$_jobs_cache" ] || [ "$_jobs_age" -gt 60 ]; then
+    _jobs_out=$(bash "$_jobs_script" 2>/dev/null)
+    _jobs_exit=$?
+    if [ $_jobs_exit -ne 0 ]; then
+      echo "unknown" > "$_jobs_cache"
+    elif [ -z "$_jobs_out" ] || [ "$_jobs_out" = "0" ]; then
+      echo "0" > "$_jobs_cache"
+    else
+      echo "$_jobs_out" > "$_jobs_cache"
+    fi
+  fi
+  _jobs_val=$(cat "$_jobs_cache" 2>/dev/null)
+  case "$_jobs_val" in
+    0)       jobs_badge=$(printf ' \033[0;32m✓JOBS\033[0m') ;;
+    unknown) jobs_badge=$(printf ' \033[2m?JOBS\033[0m') ;;
+    *)       jobs_badge=$(printf ' \033[0;31m✗JOBS(%s)\033[0m' "$_jobs_val") ;;
+  esac
+fi
+```
+
+Cache TTL is 60s (shorter than the 5min health/CI caches — failed jobs need faster feedback). Cache file: `/tmp/statusline-jobs-<repo-hash>.cache`.
+
+### Edit F — Add `$jobs_badge` to the assemble line
+
+Find:
+```bash
+# Assemble line — no trailing $ per statusLine conventions
+if [ -n "$git_info" ]; then
+  printf '%s%s %s' "$git_info" "$ci_badge" "$bold_yellow_path"
+else
+  printf '%s' "$bold_yellow_path"
+fi
+```
+
+Replace with:
+```bash
+# Assemble line — no trailing $ per statusLine conventions
+if [ -n "$git_info" ]; then
+  printf '%s%s%s %s' "$git_info" "$ci_badge" "$jobs_badge" "$bold_yellow_path"
+else
+  printf '%s' "$bold_yellow_path"
+fi
+```
+
+### Per-project hook: `.claude/statusline-jobs.sh`
+
+Each project that wants the JOBS badge needs an executable script at `<project_root>/.claude/statusline-jobs.sh`. The contract:
+
+| Exit code | stdout | Statusline renders |
+|-----------|--------|--------------------|
+| 0 | `0` or empty | green `✓JOBS` |
+| 0 | positive integer `N` | red `✗JOBS(N)` |
+| non-zero | (ignored) | dim `?JOBS` |
+
+Caching is handled by the statusline (60s TTL per project), so the hook can be a synchronous call — but **keep it fast**. The statusline blocks on the hook once per minute when the cache expires. A 4+ second hook means a 4+ second prompt hang.
+
+#### Concrete example: Rails app with an admin CLI wrapping a JSON ops API
+
+Verified shape for a Rails 8 + SolidQueue project whose `bin/admin_api jobs --limit 1` returns `"N of M failed jobs (most recent first)"` as the first line. We extract `M` (the total).
+
+```bash
+#!/usr/bin/env bash
+# Statusline JOBS hook — emits the count of failed background jobs.
+#
+# Contract:
+#   exit 0 + integer  → that many failed jobs (0 = clean)
+#   exit 0 + empty    → treated as 0
+#   non-zero exit     → "unknown" (dim ?JOBS in statusline)
+
+set -e
+cd "$(dirname "$0")/.." || exit 1
+
+line=$(bin/admin_api jobs --limit 1 2>/dev/null | head -1) || exit 1
+count=$(printf '%s\n' "$line" | sed -nE 's/^[0-9]+ of ([0-9]+) failed jobs.*/\1/p')
+[ -z "$count" ] && exit 1
+echo "$count"
+```
+
+After writing, make it executable:
+```bash
+chmod +x .claude/statusline-jobs.sh
+```
+
+#### Sketches for other queue systems
+
+The shape stays the same — print the count, exit 0. Substitute the count source for your queue. **Verify the command works before shipping** — none of these are pre-tested by this skill:
+
+- **Sidekiq:** `Sidekiq::Stats.new.failed` via `bin/rails runner -e production`, or a redis probe (`redis-cli LLEN sidekiq:retry`), or the Sidekiq Web `/sidekiq/dashboard.json` endpoint behind HTTP basic auth
+- **Resque:** `Resque.info[:failed]` via `bin/rails runner -e production`
+- **GoodJob:** `GoodJob::Job.discarded.count` via rails runner, or the GoodJob Web dashboard JSON
+- **Generic admin HTTP endpoint:** any JSON endpoint that returns `{"failed":N}` — pipe through `jq` to extract the count
+- **Cron / no queue:** if there's no background queue at all, skip this step entirely (the badge stays hidden)
+
+If your queue check requires production credentials, prefer fast auth paths over slow ones. For example, in this app `bin/admin_api` auths via `OPS_USERNAME` / `OPS_PASSWORD` env vars (~120ms HTTP call) when `.env` is populated, and falls back to `bin/rails runner -e production` (~4s) when not. Slow fallbacks turn into noticeable prompt hangs once a minute.
+
+#### Gotchas
+
+- **`.claude/` is often gitignored.** Many Rails projects (and others) put the entire `.claude/` directory in `.gitignore`, which means `.claude/statusline-jobs.sh` lives per-machine. If teammates want a shared hook, add an exception after the broader rule:
+  ```
+  .claude/
+  !.claude/statusline-jobs.sh
+  ```
+- **Force-refresh:** delete `/tmp/statusline-jobs-*.cache` to skip the 60s cache.
+- **Slow hook = slow prompt.** If the hook takes more than ~1s, consider backgrounding the actual check to a side-cache file and have the hook print whatever's in the side-cache instantly. The 60s statusline cache then renders that stale value, and a freshness daemon (or just a periodic `bin/admin_api jobs` in cron) keeps the side-cache current.
+- **Idempotent on re-run.** The skill should detect the existing JOBS dispatcher (`grep -q 'jobs_badge'`) and not re-insert. The hook script is per-project — only create it if the user wants the badge for *that* project.
+
+---
+
+## Step 7 — Verify
 
 Run the statusline script with the current project as context:
 
@@ -362,12 +515,13 @@ echo "{\"workspace\":{\"current_dir\":\"$(pwd)\",\"project_dir\":\"$(pwd)\"}}" \
 
 Expected output:
 - Git branch followed by `✓CI` (green) or `✗CI` (red) if this repo has GitHub Actions
+- Followed by `✓JOBS` / `✗JOBS(N)` / `?JOBS` if `.claude/statusline-jobs.sh` exists
 - Website URL followed by `(up)` (green) if the health check passes
 - Red alert instead of all of the above if the site is down
 
 Force a cache refresh at any time:
 ```bash
-rm -f /tmp/statusline-health-*.cache /tmp/statusline-gh-*.cache
+rm -f /tmp/statusline-health-*.cache /tmp/statusline-gh-*.cache /tmp/statusline-jobs-*.cache
 ```
 
 ---
@@ -379,5 +533,8 @@ rm -f /tmp/statusline-health-*.cache /tmp/statusline-gh-*.cache
 - [ ] `.claude-statusline` is in `.gitignore`
 - [ ] `~/.claude/statusline-command.sh` has `health_url` variable
 - [ ] `~/.claude/statusline-command.sh` has `gh_status` variable
+- [ ] `~/.claude/statusline-command.sh` has `jobs_badge` variable (if JOBS configured)
+- [ ] `.claude/statusline-jobs.sh` is executable and emits a count or exits non-zero (optional, per project)
 - [ ] Verification run shows `(up)` after the website URL
 - [ ] Verification run shows `✓CI` or `✗CI` next to the git branch (if repo has GitHub Actions)
+- [ ] Verification run shows `✓JOBS` or `✗JOBS(N)` next to the CI badge (if hook configured)
