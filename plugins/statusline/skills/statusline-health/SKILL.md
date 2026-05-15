@@ -3,7 +3,6 @@ name: statusline-health
 description: "Use when: user wants to add a health check to their Claude Code status line, wants to monitor website uptime in the statusline, wants to set up HEALTH= in .claude-statusline, wants a JOBS badge showing background queue health (failed jobs count), or wants the statusline to show (up) or a red alert when a site goes down"
 allowed-tools: Bash, Read, Write, Edit
 argument-hint: "https://mysite.com/up"
-version: "1.2.0"
 ---
 
 # Skill: statusline-health
