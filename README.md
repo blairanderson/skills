@@ -41,6 +41,7 @@ Once installed, skills activate automatically based on context. You can also inv
 | `rails` → `rails-authentication` | Rails | End-to-end Rails authentication — OAuth, 2FA, sessions |
 | `rails` → `rails-conductor-setup-config` | Rails | Set up Conductor workspaces and config for Rails projects |
 | `rails` → `pgsync` | Rails | Sync production Postgres data to local dev via pgsync + SSH tunnel |
+| `rails` → `ralph` | Rails | Bootstrap Geoffrey Huntley's Ralph autonomous agent loop in a sibling git worktree, Rails-tailored (zeitwerk:check, bin/rails test, rubocop, slug-prefix commits) |
 | `hotfix` | Git | Stay on master, commit, pull with rebase, push, and watch GitHub workflows |
 | `todo` | Productivity | Universal TODO and task tracker — manages tasks as markdown files in .tasks/ |
 | `fix-last-run` | Git | Check the last GitHub Actions workflow run and fix failures |

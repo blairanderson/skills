@@ -1,0 +1,22 @@
+{
+  "project": "{PROJECT_NAME}",
+  "branchName": "{BRANCH_NAME}",
+  "description": "REPLACE ME: one-line description of the feature being shipped via Ralph. Reference a master plan at ~/.claude/plans/<your-plan>.md if applicable.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "REPLACE ME — example story title",
+      "description": "As a <user>, I want <feature> so that <benefit>.",
+      "acceptanceCriteria": [
+        "Specific verifiable criterion #1",
+        "Specific verifiable criterion #2",
+        "bin/rails test passes",
+        "bin/rails zeitwerk:check passes",
+        "bin/rubocop <changed files> passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Replace this story with your real PRD. Use /ralph-skills:ralph to convert an existing markdown PRD into this format, or hand-edit. Each story must be completable in one Claude context window — split big work into multiple stories."
+    }
+  ]
+}

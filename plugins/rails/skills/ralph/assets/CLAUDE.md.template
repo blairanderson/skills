@@ -1,0 +1,102 @@
+# Ralph Agent Instructions ({PROJECT_NAME} / Rails)
+
+You are an autonomous coding agent working on a Ruby on Rails app
+({PROJECT_NAME}). The project's root `CLAUDE.md` is the authoritative
+source of conventions — read it if you haven't already this iteration.
+
+## Your Task
+
+1. Read `prd.json` (same directory as this file: `scripts/ralph/`)
+2. Read `progress.txt` (check "Codebase Patterns" at the top first)
+3. Verify branch matches PRD `branchName` (this worktree is pinned to `{BRANCH_NAME}`)
+4. Pick the **highest priority** story where `passes: false`
+5. Implement that single story per its acceptance criteria
+6. Run quality checks (see below)
+7. Commit (see commit format below)
+8. Update `prd.json` to set `passes: true` for that story
+9. Append your progress to `progress.txt`
+
+## Quality Checks (run ALL before committing)
+
+    bin/rails zeitwerk:check        # autoload sanity, fast
+    bin/rails test                   # full Minitest / RSpec suite
+    bin/rubocop <changed files>      # lint only what you touched
+
+Story-specific criteria (per acceptance list):
+- "Verify in browser using browse skill" → use `/browse` (gstack) if available, otherwise document a manual browser check in progress.txt.
+- "bin/rails runner ..." → run it, paste output into progress.txt.
+
+## Commit Format
+
+Match the project's existing master branch commit style. Run
+`git log --oneline -10 master` first to see the convention. Common patterns:
+
+- **Slug-prefix** (most Rails projects with structured commits): `{FEATURE_NAME}-usNNN / one-line summary`
+- **Conventional Commits** (`feat:` / `chore:`): only if the master log shows this style
+- **Plain prose**: only if there's no consistent pattern
+
+Example slug-prefix:
+
+    {FEATURE_NAME}-us001 / add safety-net tests for <module>
+
+    Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+
+## Rails Conventions
+
+The vendor-db root `CLAUDE.md` is the source of truth. Common rules you
+should expect to see:
+
+- **No private methods** (in some Rails apps — check root CLAUDE.md)
+- **No Turbo / Hotwire** (in some Rails apps — check root CLAUDE.md)
+- **`bin/rails generate`** for migrations, models, jobs (never hand-write)
+- **`Rails.application.credentials`** instead of `ENV[...]`
+- **Money**: `_cents` integer columns; `humanized_money_with_symbol(...)` in views
+- **Time**: `Time.current` / `Date.current` (never `Time.now` / `Date.today`)
+- **`bin/rails runner`** verification required after writing new methods
+
+If a project-specific rule conflicts with general best practice, the
+project rule wins. Surface conflicts in progress.txt for the next
+iteration.
+
+## Progress Report Format
+
+APPEND to progress.txt (never replace):
+
+    ## [ISO timestamp] - [Story ID]
+    - What was implemented
+    - Files changed
+    - **Learnings for future iterations:**
+      - Patterns discovered
+      - Gotchas encountered
+      - Useful context
+    ---
+
+## Codebase Patterns Header (top of progress.txt)
+
+Maintain a `## Codebase Patterns` section at the top of progress.txt
+with general reusable findings. The first iteration creates this section;
+subsequent iterations append.
+
+Examples of valuable patterns:
+
+    ## Codebase Patterns
+    - Test fixtures live in test/fixtures/<table>.yml
+    - Background jobs inherit from ApplicationJob (Delayed::Job backend)
+    - Service objects live in app/services/, take config in constructor, expose .call
+
+Only patterns that **generalize across stories**. Story-specific
+implementation details go in the per-story entries below.
+
+## Stop Condition
+
+After completing a story, check if ALL stories have `passes: true`.
+
+- If ALL pass: reply `<promise>COMPLETE</promise>` and stop.
+- Else: end normally; next iteration picks the next story.
+
+## Important
+
+- ONE story per iteration.
+- Commit frequently (one commit per story is the norm).
+- Keep CI green.
+- Never `--no-verify` or skip `bin/rails test`.

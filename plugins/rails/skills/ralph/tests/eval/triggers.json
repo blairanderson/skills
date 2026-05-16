@@ -1,0 +1,80 @@
+{
+  "skill": "rails:ralph",
+  "description": "Trigger eval: assert which user phrases route to rails:ralph (this skill) versus ralph-skills:ralph (the PRD converter) versus neither.",
+  "should_route_here": [
+    {
+      "input": "setup ralph for this rails project",
+      "rationale": "explicit bootstrap intent on a Rails app"
+    },
+    {
+      "input": "bootstrap ralph",
+      "rationale": "bootstrap is this skill's exclusive verb"
+    },
+    {
+      "input": "ralph this rails app",
+      "rationale": "verbed form, Rails context"
+    },
+    {
+      "input": "set up ralph in vendor-db",
+      "rationale": "named project, setup intent"
+    },
+    {
+      "input": "configure ralph for rails",
+      "rationale": "configure = setup synonym"
+    },
+    {
+      "input": "I want to run ralph autonomously on this rails project",
+      "rationale": "Rails context + setup-then-run intent"
+    },
+    {
+      "input": "ralph rails",
+      "rationale": "shortest possible trigger"
+    },
+    {
+      "input": "make a worktree for ralph",
+      "rationale": "worktree is this skill's signature side effect"
+    }
+  ],
+  "should_route_elsewhere": [
+    {
+      "input": "convert this prd to prd.json",
+      "expected_skill": "ralph-skills:ralph",
+      "rationale": "PRD conversion, not setup"
+    },
+    {
+      "input": "create prd.json from this plan",
+      "expected_skill": "ralph-skills:ralph",
+      "rationale": "explicit prd.json output, no setup mention"
+    },
+    {
+      "input": "turn this into ralph format",
+      "expected_skill": "ralph-skills:ralph",
+      "rationale": "format conversion, not bootstrap"
+    },
+    {
+      "input": "create a prd for a new feature",
+      "expected_skill": "ralph-skills:prd",
+      "rationale": "PRD generation, not Ralph at all"
+    },
+    {
+      "input": "run ralph",
+      "expected_skill": null,
+      "rationale": "the user runs ./scripts/ralph/ralph.sh themselves; no skill handles this"
+    },
+    {
+      "input": "fix a bug in active record",
+      "expected_skill": null,
+      "rationale": "unrelated to Ralph entirely"
+    }
+  ],
+  "ambiguous_cases": [
+    {
+      "input": "ralph",
+      "rationale": "by itself, could be either skill — leave to user disambiguation. The resolver should ideally surface both as candidates rather than silently pick one."
+    },
+    {
+      "input": "I want to use ralph on this project",
+      "rationale": "'use' is ambiguous between setup and convert; description should disambiguate via the Rails context cue"
+    }
+  ]
+}

@@ -230,7 +230,7 @@
     {
       "name": "rails",
       "source": "./plugins/rails",
-      "description": "Rails developer toolkit \u2014 authentication (OAuth, 2FA, sessions), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, pgsync database sync, and Cloudflare proxy setup (SSL, sessions, CSRF, IP spoofing)",
+      "description": "Rails developer toolkit \u2014 authentication (OAuth, 2FA, sessions), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, pgsync database sync, Cloudflare proxy setup (SSL, sessions, CSRF, IP spoofing), and Ralph autonomous agent bootstrap (sibling worktree, Rails-tailored quality checks)",
       "author": {
         "name": "Blair Anderson"
       },
@@ -256,7 +256,10 @@
         "ssl",
         "session",
         "csrf",
-        "proxy"
+        "proxy",
+        "ralph",
+        "autonomous-agent",
+        "worktree"
       ]
     },
     {
