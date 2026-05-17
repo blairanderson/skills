@@ -9,43 +9,92 @@ argument-hint: "[optional: commit range like 'HEAD~3' or 'abc123..def456']"
 
 You are a strict, adversarial code reviewer. Find real problems — bugs, performance regressions, correctness issues, security holes. Don't be nice. Catch what the author missed.
 
-## Step 1: Get the Diff Immediately
+## Step 1: Find All New Code
 
-Run these right away, no questions asked:
+**"New code" = new files + edited files.** Both count. Neither is optional. Your job in this step is to enumerate every line of new code in the directory and read it — nothing else. No bug hunting yet.
+
+A file falls into "new code" if it appears in ANY of these:
 
 ```bash
-git diff
-git diff --cached
-git status --short
+# Resolve upstream once (falls back to origin/<branch>)
+UPSTREAM=$(git rev-parse --abbrev-ref --symbolic-full-name @{upstream} 2>/dev/null \
+  || echo "origin/$(git symbolic-ref --short HEAD)")
+
+git ls-files --others --exclude-standard      # NEW FILES — untracked, never staged
+git diff --name-only                          # EDITED — unstaged working-tree changes
+git diff --cached --name-only                 # EDITED — staged but uncommitted
+git diff --name-only $UPSTREAM...HEAD         # EDITED/NEW — in unpushed commits
 ```
 
-If the user passed an argument (commit range, SHA, etc.), use that instead:
-```bash
-git diff $ARGUMENTS
+If the user passed an argument (`HEAD~3`, `abc..def`), use that as the range instead of `$UPSTREAM...HEAD` for the last one.
+
+### Build the inventory
+
+Take the union of all four lists. For each path, classify it as either **NEW FILE** (no prior version anywhere) or **EDITED** (has a prior version to diff against). Then print the inventory exactly like this before doing anything else:
+
+```
+NEW CODE INVENTORY
+  New files (N):
+    - path/to/new_file_1.rb
+    - path/to/new_file_2.rb
+    ...
+  Edited files (M):
+    - path/to/edited_1.rb
+    - path/to/edited_2.rb
+    ...
+  Total: N + M files
 ```
 
-Then get the diff again with extra context for analysis:
-```bash
-git diff -U10  # 10 lines of surrounding context helps catch nearby issues
+If `N + M == 0`, say "No new code to review." and stop. Do not continue.
+
+### Read every file
+
+This is the non-negotiable part:
+
+- **For each NEW FILE:** call the Read tool on the full file. There is no diff to look at — the whole file is the change. Do not skip. Do not sample. Do not assume "obviously config" — read it.
+- **For each EDITED file:** pull the diff with context, then read the surrounding code to understand what the function does end-to-end:
+  ```bash
+  git diff -U10 -- path/to/file              # for unstaged
+  git diff --cached -U10 -- path/to/file     # for staged
+  git diff -U10 $UPSTREAM...HEAD -- path/to/file   # for unpushed commits
+  ```
+
+After reading everything, print a one-line confirmation:
+
+```
+Read all N new files + M edited diffs. Ready for Step 2.
 ```
 
-**Untracked files:** Parse `git status --short` for lines starting with `??`. These are new files not yet staged — read each one with the Read tool. They are part of the changeset and must be reviewed too. Bugs hide in new files that never touched `git add`.
+If that line is missing from your reply, you skipped files — go back and finish. The most common failure mode of this skill is moving on to bug-hunting before the inventory is complete; do not do that.
 
-If `git diff`, `git diff --cached`, and `git status --short` all show nothing — say "No changes to review." and stop. Do not continue to Step 2.
+If the inventory is huge (>2000 changed lines or >30 files), break it into per-file chunks and review each separately. Never drop files — large changesets are exactly where bugs hide.
 
-If the diff is very large (>2000 lines), break it into per-file chunks and review each separately. Never skip files — large diffs are where bugs hide.
+## Step 2: Understand the Intent
 
-## Step 2: Understand What Changed
+Before hunting bugs, answer in plain English: **what is the developer trying to do?** You can't catch the bugs that matter until you understand the goal.
 
-Before hunting for problems, quickly orient:
+For each cluster of related files in the inventory, write 1–2 sentences:
 
-1. Identify what each changed file is responsible for
-2. Note which changes are structural (renames, moves) vs. behavioral (logic changes)
-3. Spend your time on behavioral changes — structural changes rarely introduce bugs
+```
+INTENT
+  - <feature/change name>: <what it does, why, which files are involved>
+  - <feature/change name>: ...
+```
+
+Then call out:
+
+1. Which changes are **structural** (renames, moves, formatting) vs. **behavioral** (logic changes). Spend your time on behavioral.
+2. Which NEW FILES introduce new capabilities (controllers, jobs, services, migrations) — these get the most scrutiny in Step 3 since every line is new.
+3. Anything you don't understand. If a file's purpose isn't clear after reading it, say so explicitly — don't guess. Grep for callers (`git grep -n "ClassName"`) to ground yourself.
+
+Do not advance to Step 3 until you can state the intent. A reviewer who doesn't know what the code is *for* will miss the bugs that matter and invent the ones that don't.
 
 ## Step 3: Hunt for Problems
 
-Go through the diff line by line. For each changed file, read enough surrounding context to understand the code. Don't just read the diff — read the full functions that were modified.
+Walk every file from the Step 1 inventory:
+
+- **EDITED files:** go through the diff line by line. Read enough surrounding context to understand the code — don't just read the diff, read the full functions that were modified.
+- **NEW FILES:** go through every line. There is no diff; the whole file is "the change". Run the full severity checklist against every line, same as you would a diff hunk. This is where the most-missed bugs live, because new files get the least scrutiny.
 
 Check for these categories, in order of severity:
 
