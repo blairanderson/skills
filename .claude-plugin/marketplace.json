@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Curated collection of production-ready Claude Code skills",
-    "version": "1.30.0"
+    "version": "1.31.0"
   },
   "plugins": [
     {
@@ -338,6 +338,25 @@
         "audio",
         "whisper",
         "gemini"
+      ]
+    },
+    {
+      "name": "chatterbox",
+      "source": "./plugins/chatterbox",
+      "description": "Make AI-powered outbound phone calls via VOCAL (Voice Outreach Call Automation Layer) — schedule appointments, reschedule, get quotes, follow up via chatterboxagent.com",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "productivity",
+      "tags": [
+        "phone",
+        "voice",
+        "ai-agent",
+        "vocal",
+        "chatterbox",
+        "outbound-calls",
+        "scheduling",
+        "automation"
       ]
     }
   ]
