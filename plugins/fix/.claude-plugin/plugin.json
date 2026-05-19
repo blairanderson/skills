@@ -1,0 +1,5 @@
+{
+  "name": "fix",
+  "description": "Diagnose and fix things that broke — GitHub Actions workflow runs and failing background jobs",
+  "version": "1.1.0"
+}

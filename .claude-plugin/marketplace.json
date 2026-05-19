@@ -55,9 +55,9 @@
       ]
     },
     {
-      "name": "fix-last-run",
-      "source": "./plugins/fix-last-run",
-      "description": "Check the last GitHub Actions workflow run and fix failures",
+      "name": "fix",
+      "source": "./plugins/fix",
+      "description": "Diagnose and fix things that broke — GitHub Actions workflow runs and failing background jobs (Sidekiq, Solid Queue, GoodJob)",
       "author": {
         "name": "Blair Anderson"
       },
@@ -67,7 +67,11 @@
         "ci",
         "workflow",
         "debugging",
-        "fix"
+        "fix",
+        "sidekiq",
+        "solid-queue",
+        "background-jobs",
+        "rails"
       ]
     },
     {

@@ -44,7 +44,8 @@ Once installed, skills activate automatically based on context. You can also inv
 | `rails` → `ralph` | Rails | Bootstrap Geoffrey Huntley's Ralph autonomous agent loop in a sibling git worktree, Rails-tailored (zeitwerk:check, bin/rails test, rubocop, slug-prefix commits) |
 | `hotfix` | Git | Stay on master, commit, pull with rebase, push, and watch GitHub workflows |
 | `todo` | Productivity | Universal TODO and task tracker — manages tasks as markdown files in .tasks/ |
-| `fix-last-run` | Git | Check the last GitHub Actions workflow run and fix failures |
+| `fix` → `fix-last-run` | Git | Check the last GitHub Actions workflow run and fix failures |
+| `fix` → `fix-failing-jobs` | Git | Diagnose and fix failing background jobs in Rails apps (Sidekiq, Solid Queue, GoodJob) |
 | `blue-ocean` | Planning | Blue Ocean Strategy framework — stop competing, start creating uncontested market space |
 | `document-feature` | Productivity | Post-ship marketing documentation and page generation workflow |
 | `organizer` | Productivity | Organize files across Desktop, Downloads, and Documents with business-aware routing |

@@ -189,7 +189,7 @@ cd ~/dev/skills-openai && git add -A && git commit -m "feat: mirror <plugin-name
 | `hotfix` | git | `plugins/hotfix/` |
 | `todo` | productivity | `plugins/todo/` |
 | `frontend-rails` | rails | `plugins/frontend-rails/` |
-| `fix-last-run` | git | `plugins/fix-last-run/` |
+| `fix` | git | `plugins/fix/` |
 | `blue-ocean` | planning | `plugins/blue-ocean/` |
 | `document-feature` | productivity | `plugins/document-feature/` |
 | `organizer` | productivity | `plugins/organizer/` |
