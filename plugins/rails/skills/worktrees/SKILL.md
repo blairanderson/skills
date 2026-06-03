@@ -27,6 +27,10 @@ test -f bin/worktree && echo "OK: bin/worktree present" || echo "MISSING"
 - **If present** → skip to the create/close commands below.
 - **If MISSING** → run the setup steps in **Step 1** before doing anything else.
 
+Running `bin/worktree` with no arguments prints its help/usage menu — run it to
+confirm the exact supported commands and flags for the installed version before
+acting on the documented commands below.
+
 ## Step 1 — Install the gem (only if `bin/worktree` is missing)
 
 1. Add the gem to the **development** group in the `Gemfile`. Open the `Gemfile`,
