@@ -234,7 +234,7 @@
     {
       "name": "rails",
       "source": "./plugins/rails",
-      "description": "Rails developer toolkit \u2014 authentication (OAuth, 2FA, sessions), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, pgsync database sync, Cloudflare proxy setup (SSL, sessions, CSRF, IP spoofing), and Ralph autonomous agent bootstrap (sibling worktree, Rails-tailored quality checks)",
+      "description": "Rails developer toolkit \u2014 authentication (OAuth, 2FA, sessions), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, pgsync database sync, Cloudflare proxy setup (SSL, sessions, CSRF, IP spoofing), Ralph autonomous agent bootstrap (sibling worktree, Rails-tailored quality checks), and git worktrees with isolated per-branch databases (rails-worktree gem)",
       "author": {
         "name": "Blair Anderson"
       },

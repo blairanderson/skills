@@ -12,7 +12,7 @@ Install Skill:
 /plugin install rails@blairanderson-skills 
 ```
 
-This plugin adds five skills for Rails development.
+This plugin adds skills for Rails development.
 
 ---
 
@@ -114,3 +114,20 @@ Covers six fix areas in order:
 | CSRF failures | InvalidAuthenticityToken on form POST | SSL mode + email obfuscation off |
 
 Reference docs included for SSL modes, IP spoofing, session cookies, and CSRF.
+
+---
+
+## `/worktrees`
+
+Creates and deletes isolated git worktrees for a Rails app using the [FastTravelAS/rails-worktree](https://github.com/FastTravelAS/rails-worktree) gem.
+
+Each worktree gets its own development + test databases, copied config (`.env`, `database.yml`, credentials, `node_modules`), migrations, and seeds — so you can work multiple branches in parallel without database collisions.
+
+First confirms `bin/worktree` exists. If missing, it adds `gem "rails-worktree"` to the Gemfile's `:development` group, runs `bundle install` (which generates the binstub), and verifies `config/database.yml` reads `DATABASE_NAME_DEVELOPMENT` / `DATABASE_NAME_TEST`.
+
+| Command | Action |
+|---|---|
+| `bin/worktree feature-x` | Create a worktree from the current branch |
+| `bin/worktree feature-x main` | Create from an explicit base branch |
+| `bin/worktree --close feature-x` | Drop databases, remove dir, delete branch (from main repo) |
+| `bin/worktree --close` | Same, run from inside the worktree |
