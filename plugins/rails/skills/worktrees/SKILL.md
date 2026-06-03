@@ -16,20 +16,36 @@ development and test databases, copied config (`.env`, `database.yml`, credentia
 parallel without DB collisions. Wraps the
 [FastTravelAS/rails-worktree](https://github.com/FastTravelAS/rails-worktree) gem.
 
-## Step 0 — Confirm `bin/worktree` exists
+## Step 0 — Preflight checks
 
-Always run this check first:
+Always run BOTH checks before creating or closing a worktree.
+
+### 0a — Confirm `bin/worktree` exists
 
 ```sh
 test -f bin/worktree && echo "OK: bin/worktree present" || echo "MISSING"
 ```
 
-- **If present** → skip to the create/close commands below.
+- **If present** → continue to check 0b.
 - **If MISSING** → run the setup steps in **Step 1** before doing anything else.
 
 Running `bin/worktree` with no arguments prints its help/usage menu — run it to
 confirm the exact supported commands and flags for the installed version before
 acting on the documented commands below.
+
+### 0b — Confirm `config/database.yml` reads the ENV database names
+
+The gem only isolates databases if `config/database.yml` reads
+`DATABASE_NAME_DEVELOPMENT` (and `DATABASE_NAME_TEST`). Verify:
+
+```sh
+grep -q "DATABASE_NAME_DEVELOPMENT" config/database.yml && echo "OK: database.yml reads ENV" || echo "MISSING"
+```
+
+- **If OK** → skip to the create/close commands below.
+- **If MISSING** → apply the **Required `config/database.yml` setup** edits in
+  **Step 1** before creating a worktree. Skipping this means new worktrees reuse
+  the main app's databases, defeating isolation.
 
 ## Step 1 — Install the gem (only if `bin/worktree` is missing)
 
@@ -57,7 +73,8 @@ acting on the documented commands below.
    bundle exec rake worktree:install
    ```
 
-3. Re-run the Step 0 check to confirm `bin/worktree` now exists.
+3. Re-run the **Step 0** preflight checks to confirm `bin/worktree` now exists
+   and `config/database.yml` reads the ENV database names.
 
 ### Required `config/database.yml` setup
 
@@ -81,9 +98,34 @@ app's databases — defeating the isolation.
 
 ## Create a worktree
 
+### Derive the branch slug (always prefix with the app directory)
+
+The user usually describes the work in plain language ("building a new messaging
+tool"), not a branch name. Turn that into a slug, then **prefix it with the
+current app's directory name** so the worktree is traceable back to its source app
+later.
+
+1. Get the app directory name: `basename "$PWD"` (e.g. `cheese-app`).
+2. Slugify the user's description: lowercase, keep the meaningful words, drop
+   filler ("building", "new", "a", "the"), join with hyphens
+   (e.g. "building a new messaging tool" → `messaging-tool`).
+3. Combine as `<app-dir>-<slug>` → `cheese-app-messaging-tool`.
+
 ```sh
-bin/worktree feature-branch        # branch off the CURRENT branch
-bin/worktree feature-branch main   # branch off an explicit base branch
+APP="$(basename "$PWD")"        # cheese-app
+SLUG="messaging-tool"           # derived from the user's description
+bin/worktree "$APP-$SLUG"       # → cheese-app-messaging-tool
+```
+
+Never use the bare slug (`messaging-tool`) — without the app prefix it's hard to
+tell which app a worktree belongs to when several exist side by side. Confirm the
+final name with the user if the description is ambiguous.
+
+### Run the create command
+
+```sh
+bin/worktree cheese-app-messaging-tool        # branch off the CURRENT branch
+bin/worktree cheese-app-messaging-tool main   # branch off an explicit base branch
 ```
 
 Creating a worktree automatically:
