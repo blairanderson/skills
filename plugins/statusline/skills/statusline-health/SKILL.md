@@ -14,6 +14,7 @@ Add a cached uptime indicator, CI status badge, and background-jobs queue badge 
 - Dim `(!health)` reminder when a project has `WEBSITE=` but no `HEALTH=`
 - `✓CI` / `✗CI` / `⋯CI` badge next to the git branch showing the last GitHub Actions run result
 - `✓JOBS` / `✗JOBS(N)` / `?JOBS` badge next to CI showing per-project background queue health (optional, requires a per-project hook script)
+- A `/issues (N open)` list of the top open GitHub issues for the repo (via the `issues` plugin's `issue_loader`), cached 5 minutes and busted on every issue create/update/close
 
 ## What this skill sets up
 
@@ -503,7 +504,93 @@ If your queue check requires production credentials, prefer fast auth paths over
 
 ---
 
-## Step 7 — Verify
+## Step 7 — Open issues list (GitHub Issues, replaces any `.tasks/` block)
+
+The statusline shows the repo's top open issues as dim `/issues (N open):` lines below the website. It reads from the `issues` plugin's `issue_loader` CLI (a `gh issue list` wrapper that also handles `$GH_PAT` fallback) — there is **no `.tasks/` directory and no local task files**. If an older statusline had a `.tasks/`-scanning block, this replaces it.
+
+Display rules:
+- Only open issues are shown (closed/completed are filtered out)
+- Sorted by `priority:N` label ascending; issues with no priority label sort last as `later`
+- Up to 5 rendered; a `(N shown, M open)` header appears when there are more
+- `in_progress`-labelled issues get a yellow `▸`, the rest a grey `·`
+- Cached 5 minutes in `/tmp/statusline-issues-<repo-hash>.cache`; `issue_loader` deletes this cache on every `create`/`update`/`close` so edits appear on the next render
+
+This step requires the `issues` plugin (`issue_loader` on `$PATH`). If it isn't installed, the block renders nothing and is otherwise harmless.
+
+Check if the issues block is already in `~/.claude/statusline-command.sh`:
+
+```bash
+grep -q 'statusline-issues' ~/.claude/statusline-command.sh
+```
+
+If already present, skip to Step 8. Also remove any legacy `.tasks`-scanning block:
+
+```bash
+grep -n '\.tasks' ~/.claude/statusline-command.sh
+```
+
+If that matches, delete the old `tasks_dir`/`.tasks` block (it is superseded by the issues block below).
+
+### Edit G — Replace the tasks block (or append after the website block)
+
+If a `.tasks/` block exists (starts with `tasks_dir="${project_dir:-.}/.tasks"`), replace the whole block. Otherwise, append this after the website display block (Edit B):
+
+```bash
+# Show open GitHub issues, sorted by priority ascending (later last), top 5.
+# Source: issue_loader (the issues plugin's gh wrapper). Cached 5 minutes in
+# /tmp/statusline-issues-<repo>.cache; issue_loader busts this cache on every
+# create/update/close so CRUD shows up immediately on the next render.
+if command -v issue_loader >/dev/null 2>&1 && git -C "$cwd" remote get-url origin >/dev/null 2>&1; then
+  _iss_key=$(git -C "$cwd" rev-parse --show-toplevel 2>/dev/null | (md5 2>/dev/null || md5sum) | cut -c1-8)
+  _iss_cache="/tmp/statusline-issues-${_iss_key}.cache"
+  _iss_age=$(($(date +%s) - $(stat -f %m "$_iss_cache" 2>/dev/null || stat -c %Y "$_iss_cache" 2>/dev/null || echo 0)))
+  if [ ! -f "$_iss_cache" ] || [ "$_iss_age" -gt 300 ]; then
+    (cd "$cwd" && issue_loader list 2>/dev/null) > "$_iss_cache" 2>/dev/null || : > "$_iss_cache"
+  fi
+
+  # issue_loader list rows: "id | status | priority | created | title | desc".
+  # Keep numeric ids only (drops "No issues found"), skip completed/closed.
+  # Split on " | " so pipes inside the title don't shift the leading fields.
+  issue_entries=$(awk -F' \\| ' '
+    $1 ~ /^[0-9]+$/ && $2 != "completed" && $2 != "closed" {
+      if ($3 ~ /^[0-9]+$/) { key = $3; lab = "p" $3 } else { key = 9999; lab = "later" }
+      printf "%s\t%s\t%s\t%s\t%s\n", key, $1, $2, $5, lab
+    }' "$_iss_cache" 2>/dev/null)
+
+  if [ -n "$issue_entries" ]; then
+    total_pending=$(printf '%s\n' "$issue_entries" | grep -c .)
+    count=0
+    issue_lines=""
+    while IFS=$'\t' read -r _key id status title pri_label; do
+      [ -z "$id" ] && continue
+      case "$status" in
+        in_progress) label=$(printf '\033[0;33m▸ #%s (%s): %s\033[0m' "$id" "$pri_label" "$title") ;;
+        *)           label=$(printf '\033[0;37m· #%s (%s): %s\033[0m' "$id" "$pri_label" "$title") ;;
+      esac
+      issue_lines="${issue_lines}\n  ${label}"
+      count=$((count + 1))
+      [ "$count" -ge 5 ] && break
+    done < <(printf '%s\n' "$issue_entries" | sort -t$'\t' -k1,1n -k2,2n)
+    if [ "$count" -gt 0 ]; then
+      remaining=$((total_pending - count))
+      if [ "$remaining" -gt 0 ]; then
+        dim_header=$(printf '\033[2m/issues (%d shown, %d open):\033[0m' "$count" "$total_pending")
+      else
+        dim_header=$(printf '\033[2m/issues (%d open):\033[0m' "$count")
+      fi
+      printf '\n  %s%b' "$dim_header" "$issue_lines"
+    fi
+  fi
+fi
+```
+
+### Cache invalidation on CRUD
+
+The 5-minute TTL is the upper bound on staleness. For instant updates, `issue_loader` removes `/tmp/statusline-issues-*.cache` after every `create`, `update`, and `close`, so the next statusline render refetches. This lives in the `issues` plugin's `bin/issue_loader` (helper `_bust_statusline_cache`, called from the three write commands) — no extra setup is needed if that plugin is installed.
+
+---
+
+## Step 8 — Verify
 
 Run the statusline script with the current project as context:
 
@@ -516,11 +603,12 @@ Expected output:
 - Git branch followed by `✓CI` (green) or `✗CI` (red) if this repo has GitHub Actions
 - Followed by `✓JOBS` / `✗JOBS(N)` / `?JOBS` if `.claude/statusline-jobs.sh` exists
 - Website URL followed by `(up)` (green) if the health check passes
+- A `/issues (N open):` list of the top open GitHub issues (if `issue_loader` is installed and the repo has open issues)
 - Red alert instead of all of the above if the site is down
 
 Force a cache refresh at any time:
 ```bash
-rm -f /tmp/statusline-health-*.cache /tmp/statusline-gh-*.cache /tmp/statusline-jobs-*.cache
+rm -f /tmp/statusline-health-*.cache /tmp/statusline-gh-*.cache /tmp/statusline-jobs-*.cache /tmp/statusline-issues-*.cache
 ```
 
 ---
@@ -537,3 +625,7 @@ rm -f /tmp/statusline-health-*.cache /tmp/statusline-gh-*.cache /tmp/statusline-
 - [ ] Verification run shows `(up)` after the website URL
 - [ ] Verification run shows `✓CI` or `✗CI` next to the git branch (if repo has GitHub Actions)
 - [ ] Verification run shows `✓JOBS` or `✗JOBS(N)` next to the CI badge (if hook configured)
+- [ ] No `.tasks/` block remains in `~/.claude/statusline-command.sh` (`grep '\.tasks'` is empty)
+- [ ] `~/.claude/statusline-command.sh` has the `statusline-issues` block
+- [ ] Verification run shows `/issues (N open):` with open GitHub issues (if `issue_loader` installed)
+- [ ] `issue_loader` busts `/tmp/statusline-issues-*.cache` on create/update/close

@@ -38,6 +38,12 @@ case "${ISSUE_LOADER_BACKEND:-}" in
 esac
 _have_gh() { [[ "$HAVE_GH" -eq 1 ]]; }
 
+# Invalidate the statusline issues cache after any write (create/update/close)
+# so the next prompt render reflects the change instead of waiting out the 5-min TTL.
+_bust_statusline_cache() {
+  rm -f /tmp/statusline-issues-*.cache 2>/dev/null || true
+}
+
 _token() {
   local v
   for v in "${GH_PAT:-}" "${GH_TOKEN:-}" "${GITHUB_TOKEN:-}"; do
@@ -278,6 +284,7 @@ cmd_create() {
     number="$(_api POST issues -d "$payload" | python3 -c 'import json,sys; print(json.load(sys.stdin)["number"])')"
   fi
 
+  _bust_statusline_cache
   echo "$number"
 }
 
@@ -298,6 +305,7 @@ cmd_update() {
       *) echo "Unknown option: $1" >&2; exit 1 ;;
     esac
   done
+  _bust_statusline_cache
   echo "Updated issue: #$n"
 }
 
@@ -308,6 +316,7 @@ cmd_close() {
   else
     _api PATCH "issues/$n" -d '{"state":"closed","state_reason":"completed"}' >/dev/null
   fi
+  _bust_statusline_cache
   echo "Closed issue: #$n"
 }
 
