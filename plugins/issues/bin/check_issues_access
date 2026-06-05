@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Preflight for the issues skills. Prints one token:
+#   OK       — github.com 'origin' remote detected AND gh-authenticated or a PAT is set
+#   NO_REPO  — not a git repo, or 'origin' is not a github.com remote
+#   NO_AUTH  — repo OK but no gh auth and no $GH_PAT/$GH_TOKEN/$GITHUB_TOKEN
+
+url="$(git remote get-url origin 2>/dev/null)" || { echo "NO_REPO"; exit 0; }
+case "$url" in
+  *github.com:*|*github.com/*) ;;
+  *) echo "NO_REPO"; exit 0 ;;
+esac
+
+# gh authenticated? (gh also reads GH_TOKEN/GITHUB_TOKEN automatically)
+if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
+  echo "OK"; exit 0
+fi
+
+# A PAT is enough for the curl fallback.
+if [[ -n "${GH_PAT:-}${GH_TOKEN:-}${GITHUB_TOKEN:-}" ]]; then
+  echo "OK"; exit 0
+fi
+
+echo "NO_AUTH"

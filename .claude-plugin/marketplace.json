@@ -39,16 +39,17 @@
       ]
     },
     {
-      "name": "todo",
-      "source": "./plugins/todo",
-      "description": "Universal TODO and task tracker \u2014 manages tasks as markdown files in .tasks/ directory. Use /todo instead of built-in TaskCreate.",
+      "name": "issues",
+      "source": "./plugins/issues",
+      "description": "GitHub Issues task tracker \u2014 capture, triage, plan, work, and close tasks as issues in the current repo. Requires gh CLI or a GH_PAT token with read/write Issues access.",
       "author": {
         "name": "Blair Anderson"
       },
       "category": "productivity",
       "tags": [
+        "issues",
+        "github",
         "tasks",
-        "todo",
         "project-management",
         "tracking",
         "workflow"

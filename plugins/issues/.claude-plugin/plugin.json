@@ -1,0 +1,5 @@
+{
+  "name": "issues",
+  "description": "GitHub Issues task tracker — capture, triage, plan, work, and close tasks as issues in the current repo. Requires gh CLI or a GH_PAT token with read/write Issues access.",
+  "version": "4.0.0"
+}

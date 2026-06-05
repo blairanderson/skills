@@ -187,7 +187,7 @@ cd ~/dev/skills-openai && git add -A && git commit -m "feat: mirror <plugin-name
 | `code-spec` | planning | `plugins/code-spec/` |
 | `rails-authentication` | rails | `plugins/rails-authentication/` |
 | `hotfix` | git | `plugins/hotfix/` |
-| `todo` | productivity | `plugins/todo/` |
+| `issues` | productivity | `plugins/issues/` |
 | `frontend-rails` | rails | `plugins/frontend-rails/` |
 | `fix` | git | `plugins/fix/` |
 | `blue-ocean` | planning | `plugins/blue-ocean/` |

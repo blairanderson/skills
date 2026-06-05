@@ -1,0 +1,346 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# issue_loader — manage tasks as GitHub Issues in the current repo.
+#
+# Backend: tries the `gh` CLI first, falls back to curl + a Personal Access Token.
+#   - Token read from $GH_PAT, then $GH_TOKEN, then $GITHUB_TOKEN.
+#   - Repo (owner/name) auto-detected from `git remote get-url origin`.
+#   - Force a backend with ISSUE_LOADER_BACKEND=gh|curl (mainly for testing/fallback).
+#
+# Field mapping (task -> issue):
+#   id          -> issue number
+#   name        -> issue title
+#   description -> issue body
+#   pending     -> open, no status label
+#   in_progress -> open + "in_progress" label
+#   completed   -> closed
+#   priority N  -> "priority:N" label (0..3); "later" = no priority label
+
+API="https://api.github.com"
+
+# Let gh pick up a PAT supplied as GH_PAT.
+if [[ -z "${GH_TOKEN:-}" && -n "${GH_PAT:-}" ]]; then
+  export GH_TOKEN="$GH_PAT"
+fi
+
+# ---- backend detection ---------------------------------------------------
+case "${ISSUE_LOADER_BACKEND:-}" in
+  gh)   HAVE_GH=1 ;;
+  curl) HAVE_GH=0 ;;
+  *)
+    if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
+      HAVE_GH=1
+    else
+      HAVE_GH=0
+    fi
+    ;;
+esac
+_have_gh() { [[ "$HAVE_GH" -eq 1 ]]; }
+
+_token() {
+  local v
+  for v in "${GH_PAT:-}" "${GH_TOKEN:-}" "${GITHUB_TOKEN:-}"; do
+    if [[ -n "$v" ]]; then echo "$v"; return 0; fi
+  done
+  return 1
+}
+
+_repo() {
+  local url
+  url="$(git remote get-url origin 2>/dev/null)" || return 1
+  url="${url%.git}"
+  url="${url%/}"
+  case "$url" in
+    *github.com:*)  echo "${url##*github.com:}" ;;  # git@github.com:owner/repo
+    *github.com/*)  echo "${url##*github.com/}" ;;  # https://github.com/owner/repo
+    *) return 1 ;;
+  esac
+}
+
+# _api METHOD PATH [curl-args...]
+_api() {
+  local method="$1" path="$2"; shift 2
+  local token repo
+  token="$(_token)" || { echo "No GitHub token. Set GH_PAT (or GH_TOKEN)." >&2; exit 1; }
+  repo="$(_repo)"   || { echo "Cannot detect repo from 'git remote origin'." >&2; exit 1; }
+  curl -fsS -X "$method" \
+    -H "Authorization: Bearer $token" \
+    -H "Accept: application/vnd.github+json" \
+    -H "X-GitHub-Api-Version: 2022-11-28" \
+    "$API/repos/$repo/$path" "$@"
+}
+
+# ---- JSON formatting helpers (handle both gh and REST shapes) -------------
+# NOTE: the python source is held in a variable and run via `python3 -c` so that
+# stdin stays connected to the piped JSON (a heredoc would steal stdin).
+PY_ROWS="$(cat <<'PYEOF'
+import sys, json, re
+mode = sys.argv[1]
+raw = json.load(sys.stdin)
+issues = raw if isinstance(raw, list) else [raw]
+rows = []
+for it in issues:
+    if 'pull_request' in it:          # REST /issues includes PRs; skip them
+        continue
+    num = it.get('number')
+    title = it.get('title') or ''
+    body = it.get('body') or ''
+    state = (it.get('state') or '').lower()
+    labels = [(l.get('name') if isinstance(l, dict) else l) for l in (it.get('labels') or [])]
+    created = it.get('created_at') or it.get('createdAt') or ''
+    created = created[:10] if created else '-'
+    if state == 'closed':
+        status = 'completed'
+    elif 'in_progress' in labels:
+        status = 'in_progress'
+    else:
+        status = 'pending'
+    pri = 'later'
+    for l in labels:
+        m = re.match(r'^priority:([0-9])$', l)
+        if m:
+            pri = m.group(1); break
+    first = ''
+    for line in body.splitlines():
+        s = line.strip()
+        if s:
+            first = s; break
+    if len(first) > 60:
+        first = first[:57] + '...'
+    rows.append((str(num), status, pri, created, title, first))
+
+if not rows:
+    print("No issues found")
+    sys.exit(0)
+
+if mode == 'list':
+    for r in rows:
+        print(" | ".join(r))
+elif mode == 'table':
+    headers = ("ID", "Status", "Priority", "Created", "Title", "Description")
+    allrows = [headers] + rows
+    widths = [max(len(r[i]) for r in allrows) for i in range(len(headers))]
+    def fmt(r):
+        return "| " + " | ".join(v.ljust(w) for v, w in zip(r, widths)) + " |"
+    sep = "+" + "+".join("-" * (w + 2) for w in widths) + "+"
+    print(sep); print(fmt(headers)); print(sep)
+    for r in rows:
+        print(fmt(r))
+    print(sep)
+PYEOF
+)"
+_py_rows() { python3 -c "$PY_ROWS" "$1"; }
+
+PY_SHOW="$(cat <<'PYEOF'
+import sys, json, re
+it = json.load(sys.stdin)
+num = it.get('number')
+title = it.get('title') or ''
+body = it.get('body') or ''
+state = (it.get('state') or '').lower()
+labels = [(l.get('name') if isinstance(l, dict) else l) for l in (it.get('labels') or [])]
+created = (it.get('created_at') or it.get('createdAt') or '')[:10]
+if state == 'closed':
+    status = 'completed'
+elif 'in_progress' in labels:
+    status = 'in_progress'
+else:
+    status = 'pending'
+pri = 'later'
+for l in labels:
+    m = re.match(r'^priority:([0-9])$', l)
+    if m:
+        pri = m.group(1); break
+print(f"#{num} — {title}")
+print(f"status: {status}")
+print(f"priority: {pri}")
+print(f"created: {created or '-'}")
+print(f"labels: {', '.join(labels) if labels else '-'}")
+print("---")
+print(body)
+PYEOF
+)"
+_py_show() { python3 -c "$PY_SHOW"; }
+
+# ---- label primitives (gh vs curl) ---------------------------------------
+_add_label() {  # number label
+  local n="$1" l="$2"
+  if _have_gh; then
+    gh label create "$l" --force >/dev/null 2>&1 || true
+    gh issue edit "$n" --add-label "$l" >/dev/null
+  else
+    _api POST "issues/$n/labels" \
+      -d "$(python3 -c 'import json,sys; print(json.dumps({"labels":[sys.argv[1]]}))' "$l")" >/dev/null
+  fi
+}
+
+_remove_label() {  # number label
+  local n="$1" l="$2"
+  if _have_gh; then
+    gh issue edit "$n" --remove-label "$l" >/dev/null 2>&1 || true
+  else
+    local enc
+    enc="$(python3 -c 'import urllib.parse,sys; print(urllib.parse.quote(sys.argv[1], safe=""))' "$l")"
+    _api DELETE "issues/$n/labels/$enc" >/dev/null 2>&1 || true
+  fi
+}
+
+_labels_of() {  # number -> one label name per line
+  local n="$1"
+  if _have_gh; then
+    gh issue view "$n" --json labels --jq '.labels[].name'
+  else
+    _api GET "issues/$n" | python3 -c 'import json,sys; [print(l["name"]) for l in json.load(sys.stdin).get("labels",[])]'
+  fi
+}
+
+_set_priority() {  # number priority(0..3|later)
+  local n="$1" pri="$2" l
+  while read -r l; do
+    case "$l" in priority:*) _remove_label "$n" "$l" ;; esac
+  done < <(_labels_of "$n")
+  case "$pri" in 0|1|2|3) _add_label "$n" "priority:$pri" ;; esac
+}
+
+_set_status() {  # number pending|in_progress
+  local n="$1" st="$2"
+  case "$st" in
+    in_progress) _add_label "$n" "in_progress" ;;
+    pending)     _remove_label "$n" "in_progress" ;;
+    *) echo "Unknown status: $st (use pending|in_progress)" >&2; exit 1 ;;
+  esac
+}
+
+# ---- commands ------------------------------------------------------------
+cmd_list() {
+  if _have_gh; then
+    gh issue list --state all --limit 200 \
+      --json number,title,state,labels,createdAt,body | _py_rows list
+  else
+    _api GET "issues?state=all&per_page=100" | _py_rows list
+  fi
+}
+
+cmd_table() {
+  if _have_gh; then
+    gh issue list --state all --limit 200 \
+      --json number,title,state,labels,createdAt,body | _py_rows table
+  else
+    _api GET "issues?state=all&per_page=100" | _py_rows table
+  fi
+}
+
+cmd_show() {
+  local n="$1"
+  if _have_gh; then
+    gh issue view "$n" --json number,title,state,labels,createdAt,body | _py_show
+  else
+    _api GET "issues/$n" | _py_show
+  fi
+}
+
+cmd_create() {
+  local title="" body="" status="pending" priority="later"
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --title)    title="$2"; shift 2 ;;
+      --body)     body="$2"; shift 2 ;;
+      --status)   status="$2"; shift 2 ;;
+      --priority) priority="$2"; shift 2 ;;
+      *) echo "Unknown option: $1" >&2; exit 1 ;;
+    esac
+  done
+  if [[ -z "$title" ]]; then
+    echo "Usage: issue_loader create --title \"...\" [--body \"...\"] [--priority 0..3] [--status in_progress]" >&2
+    exit 1
+  fi
+
+  local labels=()
+  [[ "$status" == "in_progress" ]] && labels+=("in_progress")
+  case "$priority" in 0|1|2|3) labels+=("priority:$priority") ;; esac
+
+  local number
+  if _have_gh; then
+    local label_args=() l url
+    for l in ${labels[@]+"${labels[@]}"}; do
+      gh label create "$l" --force >/dev/null 2>&1 || true
+      label_args+=(--label "$l")
+    done
+    url="$(gh issue create --title "$title" --body "$body" ${label_args[@]+"${label_args[@]}"})"
+    number="${url##*/}"
+  else
+    local labels_json payload
+    labels_json="$(printf '%s\n' ${labels[@]+"${labels[@]}"} \
+      | python3 -c 'import json,sys; print(json.dumps([l for l in sys.stdin.read().splitlines() if l]))')"
+    payload="$(python3 -c 'import json,sys; print(json.dumps({"title":sys.argv[1],"body":sys.argv[2],"labels":json.loads(sys.argv[3])}))' \
+      "$title" "$body" "$labels_json")"
+    number="$(_api POST issues -d "$payload" | python3 -c 'import json,sys; print(json.load(sys.stdin)["number"])')"
+  fi
+
+  echo "$number"
+}
+
+cmd_update() {
+  local n="$1"; shift
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --title)
+        if _have_gh; then gh issue edit "$n" --title "$2" >/dev/null
+        else _api PATCH "issues/$n" -d "$(python3 -c 'import json,sys; print(json.dumps({"title":sys.argv[1]}))' "$2")" >/dev/null; fi
+        shift 2 ;;
+      --body)
+        if _have_gh; then gh issue edit "$n" --body "$2" >/dev/null
+        else _api PATCH "issues/$n" -d "$(python3 -c 'import json,sys; print(json.dumps({"body":sys.argv[1]}))' "$2")" >/dev/null; fi
+        shift 2 ;;
+      --status)   _set_status "$n" "$2"; shift 2 ;;
+      --priority) _set_priority "$n" "$2"; shift 2 ;;
+      *) echo "Unknown option: $1" >&2; exit 1 ;;
+    esac
+  done
+  echo "Updated issue: #$n"
+}
+
+cmd_close() {
+  local n="$1"
+  if _have_gh; then
+    gh issue close "$n" >/dev/null
+  else
+    _api PATCH "issues/$n" -d '{"state":"closed","state_reason":"completed"}' >/dev/null
+  fi
+  echo "Closed issue: #$n"
+}
+
+cmd_doctor() {
+  local repo token
+  if repo="$(_repo)"; then
+    echo "repo:    $repo"
+  else
+    echo "repo:    NOT DETECTED (need a github.com 'origin' remote)"
+  fi
+  if _have_gh; then
+    echo "backend: gh CLI (authenticated)"
+  elif token="$(_token)"; then
+    echo "backend: curl + PAT (token present)"
+  else
+    echo "backend: NONE — run 'gh auth login' or export GH_PAT=<token>"
+  fi
+}
+
+# ---- dispatch ------------------------------------------------------------
+command="${1:-}"
+shift || true
+
+case "$command" in
+  list)   cmd_list ;;
+  table)  cmd_table ;;
+  show)   cmd_show "${1:?Usage: issue_loader show <number>}" ;;
+  create) cmd_create "$@" ;;
+  update) cmd_update "${1:?Usage: issue_loader update <number> --priority ...}" "${@:2}" ;;
+  close|done) cmd_close "${1:?Usage: issue_loader close <number>}" ;;
+  doctor) cmd_doctor ;;
+  *)
+    echo "Usage: issue_loader <list|table|show|create|update|close|doctor> [args]"
+    exit 1
+    ;;
+esac

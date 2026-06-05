@@ -1,0 +1,228 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Test suite for issue_loader.
+# Fully offline: stubs `gh` and `curl` on PATH, and uses throwaway git repos
+# for remote-URL parsing. Never touches the network or real GitHub.
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+LOADER="$SCRIPT_DIR/issue_loader"
+CHECK="$SCRIPT_DIR/check_issues_access"
+TMP="$(mktemp -d)"
+PASS=0
+FAIL=0
+
+cleanup() { rm -rf "$TMP"; }
+trap cleanup EXIT
+
+assert_eq() {
+  local label="$1" expected="$2" actual="$3"
+  if [[ "$expected" == "$actual" ]]; then
+    echo "  PASS: $label"; PASS=$((PASS + 1))
+  else
+    echo "  FAIL: $label"; echo "    expected: $expected"; echo "    actual:   $actual"; FAIL=$((FAIL + 1))
+  fi
+}
+assert_contains() {
+  local label="$1" needle="$2" haystack="$3"
+  if [[ "$haystack" == *"$needle"* ]]; then
+    echo "  PASS: $label"; PASS=$((PASS + 1))
+  else
+    echo "  FAIL: $label"; echo "    expected to contain: $needle"; echo "    actual: $haystack"; FAIL=$((FAIL + 1))
+  fi
+}
+assert_not_contains() {
+  local label="$1" needle="$2" haystack="$3"
+  if [[ "$haystack" != *"$needle"* ]]; then
+    echo "  PASS: $label"; PASS=$((PASS + 1))
+  else
+    echo "  FAIL: $label"; echo "    expected NOT to contain: $needle"; echo "    actual: $haystack"; FAIL=$((FAIL + 1))
+  fi
+}
+
+# ─── Stubs ───────────────────────────────────────────────────────────────────
+
+STUB="$TMP/stub"; mkdir -p "$STUB"
+
+# gh fixtures (gh --json shape: uppercase state, camelCase createdAt)
+cat > "$TMP/gh_list.json" <<'JSON'
+[
+  {"number":1,"title":"Task One","state":"OPEN","labels":[{"name":"priority:1"}],"createdAt":"2026-01-02T00:00:00Z","body":"first body line\nmore"},
+  {"number":2,"title":"Task Two","state":"OPEN","labels":[{"name":"in_progress"}],"createdAt":"2026-01-03T00:00:00Z","body":""},
+  {"number":3,"title":"Done Task","state":"CLOSED","labels":[],"createdAt":"2026-01-01T00:00:00Z","body":"done"}
+]
+JSON
+cat > "$TMP/gh_view.json" <<'JSON'
+{"number":1,"title":"Task One","state":"OPEN","labels":[{"name":"priority:1"}],"createdAt":"2026-01-02T00:00:00Z","body":"line one\nline two"}
+JSON
+
+cat > "$STUB/gh" <<EOF
+#!/usr/bin/env bash
+if [[ "\$1 \$2" == "auth status" ]]; then exit 0; fi
+case "\$1" in
+  issue)
+    sub="\$2"; shift 2
+    case "\$sub" in
+      list)   cat "$TMP/gh_list.json" ;;
+      view)   if [[ "\$*" == *"--jq"* ]]; then echo "priority:1"; else cat "$TMP/gh_view.json"; fi ;;
+      create) echo "https://github.com/test/repo/issues/42" ;;
+      edit|close) exit 0 ;;
+      *) exit 1 ;;
+    esac ;;
+  label) exit 0 ;;
+  *) exit 1 ;;
+esac
+EOF
+chmod +x "$STUB/gh"
+
+# curl fixtures (REST shape: lowercase state, snake_case created_at, PR included)
+cat > "$TMP/curl_list.json" <<'JSON'
+[
+  {"number":10,"title":"Rest One","state":"open","labels":[{"name":"priority:0"}],"created_at":"2026-02-01T00:00:00Z","body":"rest body"},
+  {"number":11,"title":"A Pull Request","state":"open","labels":[],"created_at":"2026-02-02T00:00:00Z","body":"pr","pull_request":{"url":"x"}}
+]
+JSON
+
+cat > "$STUB/curl" <<EOF
+#!/usr/bin/env bash
+method=GET; url=""
+while [[ \$# -gt 0 ]]; do
+  case "\$1" in
+    -X) method="\$2"; shift 2 ;;
+    -H) shift 2 ;;
+    -d) shift 2 ;;
+    http*://*) url="\$1"; shift ;;
+    *) shift ;;
+  esac
+done
+if [[ "\$method" == POST && "\$url" == */issues ]]; then
+  echo '{"number":99}'
+elif [[ "\$method" == GET && "\$url" == *"/issues?"* ]]; then
+  cat "$TMP/curl_list.json"
+elif [[ "\$method" == GET && "\$url" == */issues/* ]]; then
+  echo '{"number":10,"title":"Rest One","state":"open","labels":[{"name":"priority:0"}],"created_at":"2026-02-01T00:00:00Z","body":"rest body"}'
+else
+  echo '{}'
+fi
+EOF
+chmod +x "$STUB/curl"
+
+# A gh stub whose `auth status` fails (for NO_AUTH testing)
+STUB_NOAUTH="$TMP/stub_noauth"; mkdir -p "$STUB_NOAUTH"
+cat > "$STUB_NOAUTH/gh" <<'EOF'
+#!/usr/bin/env bash
+exit 1
+EOF
+chmod +x "$STUB_NOAUTH/gh"
+
+# A throwaway git repo with a github origin (for curl path + doctor)
+mk_repo() {  # url -> echoes repo dir
+  local url="$1" d
+  d="$(mktemp -d "$TMP/repo.XXXXXX")"
+  ( cd "$d" && git init -q && git remote add origin "$url" )
+  echo "$d"
+}
+
+# ─── gh backend: list ────────────────────────────────────────────────────────
+echo "== gh backend: list (status + priority mapping) =="
+out="$(PATH="$STUB:$PATH" ISSUE_LOADER_BACKEND=gh "$LOADER" list)"
+assert_contains "open + no status label -> pending"      "1 | pending | 1 | 2026-01-02 | Task One | first body line" "$out"
+assert_contains "in_progress label -> in_progress"       "2 | in_progress | later | 2026-01-03 | Task Two |" "$out"
+assert_contains "closed -> completed"                    "3 | completed | later | 2026-01-01 | Done Task | done" "$out"
+
+echo ""
+echo "== gh backend: table =="
+out="$(PATH="$STUB:$PATH" ISSUE_LOADER_BACKEND=gh "$LOADER" table)"
+assert_contains "table has header" "ID" "$out"
+assert_contains "table has Priority col" "Priority" "$out"
+assert_contains "table shows Task One" "Task One" "$out"
+
+echo ""
+echo "== gh backend: show =="
+out="$(PATH="$STUB:$PATH" ISSUE_LOADER_BACKEND=gh "$LOADER" show 1)"
+assert_contains "show header"   "#1 — Task One" "$out"
+assert_contains "show status"   "status: pending" "$out"
+assert_contains "show priority" "priority: 1" "$out"
+assert_contains "show labels"   "labels: priority:1" "$out"
+assert_contains "show body"     "line one" "$out"
+
+echo ""
+echo "== gh backend: create returns issue number =="
+out="$(PATH="$STUB:$PATH" ISSUE_LOADER_BACKEND=gh "$LOADER" create --title "New" --body "b" --priority 2)"
+assert_eq "create prints number from gh URL" "42" "$out"
+
+echo ""
+echo "== gh backend: update / close plumbing =="
+out="$(PATH="$STUB:$PATH" ISSUE_LOADER_BACKEND=gh "$LOADER" update 1 --priority 2 --status in_progress --title "X")"
+assert_contains "update confirms" "Updated issue: #1" "$out"
+out="$(PATH="$STUB:$PATH" ISSUE_LOADER_BACKEND=gh "$LOADER" close 1)"
+assert_contains "close confirms" "Closed issue: #1" "$out"
+
+# ─── curl backend ────────────────────────────────────────────────────────────
+echo ""
+echo "== curl backend: list filters PRs =="
+REPO="$(mk_repo "https://github.com/test/repo.git")"
+out="$(cd "$REPO" && PATH="$STUB:$PATH" ISSUE_LOADER_BACKEND=curl GH_PAT=fake "$LOADER" list)"
+assert_contains "rest issue shown"  "10 | pending | 0 | 2026-02-01 | Rest One | rest body" "$out"
+assert_not_contains "pull request filtered out" "A Pull Request" "$out"
+
+echo ""
+echo "== curl backend: create returns issue number =="
+out="$(cd "$REPO" && PATH="$STUB:$PATH" ISSUE_LOADER_BACKEND=curl GH_PAT=fake "$LOADER" create --title "New" --body "b" --priority 1)"
+assert_eq "create prints number from REST json" "99" "$out"
+
+echo ""
+echo "== curl backend: missing token exits 1 =="
+code=0
+( cd "$REPO" && PATH="$STUB:$PATH" ISSUE_LOADER_BACKEND=curl env -u GH_PAT -u GH_TOKEN -u GITHUB_TOKEN "$LOADER" list >/dev/null 2>&1 ) || code=$?
+assert_eq "no token -> exit 1" "1" "$code"
+
+# ─── repo detection (doctor) ─────────────────────────────────────────────────
+echo ""
+echo "== doctor: repo parsing (ssh + https) =="
+REPO_SSH="$(mk_repo "git@github.com:foo/bar.git")"
+out="$(cd "$REPO_SSH" && ISSUE_LOADER_BACKEND=curl GH_PAT=fake "$LOADER" doctor)"
+assert_contains "ssh remote -> foo/bar" "repo:    foo/bar" "$out"
+
+REPO_HTTPS="$(mk_repo "https://github.com/foo/bar")"
+out="$(cd "$REPO_HTTPS" && ISSUE_LOADER_BACKEND=curl GH_PAT=fake "$LOADER" doctor)"
+assert_contains "https remote (no .git) -> foo/bar" "repo:    foo/bar" "$out"
+
+echo ""
+echo "== doctor: backend / token precedence =="
+out="$(cd "$REPO_HTTPS" && ISSUE_LOADER_BACKEND=curl GH_PAT=fake "$LOADER" doctor)"
+assert_contains "PAT present -> curl backend" "curl + PAT (token present)" "$out"
+out="$(cd "$REPO_HTTPS" && ISSUE_LOADER_BACKEND=curl env -u GH_PAT -u GH_TOKEN -u GITHUB_TOKEN "$LOADER" doctor)"
+assert_contains "no token -> NONE" "backend: NONE" "$out"
+
+# ─── check_issues_access ─────────────────────────────────────────────────────
+echo ""
+echo "== check_issues_access =="
+NONGIT="$(mktemp -d "$TMP/nongit.XXXXXX")"
+out="$(cd "$NONGIT" && "$CHECK")"
+assert_eq "no git repo -> NO_REPO" "NO_REPO" "$out"
+
+out="$(cd "$REPO" && GH_PAT=fake "$CHECK")"
+assert_eq "github remote + PAT -> OK" "OK" "$out"
+
+out="$(cd "$REPO" && PATH="$STUB_NOAUTH:$PATH" env -u GH_PAT -u GH_TOKEN -u GITHUB_TOKEN "$CHECK")"
+assert_eq "github remote, no auth, no token -> NO_AUTH" "NO_AUTH" "$out"
+
+# ─── usage / bad input ───────────────────────────────────────────────────────
+echo ""
+echo "== bad input =="
+code=0; ( PATH="$STUB:$PATH" ISSUE_LOADER_BACKEND=gh "$LOADER" >/dev/null 2>&1 ) || code=$?
+assert_eq "no command -> exit 1" "1" "$code"
+code=0; ( PATH="$STUB:$PATH" ISSUE_LOADER_BACKEND=gh "$LOADER" foobar >/dev/null 2>&1 ) || code=$?
+assert_eq "unknown command -> exit 1" "1" "$code"
+code=0; ( PATH="$STUB:$PATH" ISSUE_LOADER_BACKEND=gh "$LOADER" create --bogus x >/dev/null 2>&1 ) || code=$?
+assert_eq "create unknown flag -> exit 1" "1" "$code"
+code=0; ( PATH="$STUB:$PATH" ISSUE_LOADER_BACKEND=gh "$LOADER" create --body "no title" >/dev/null 2>&1 ) || code=$?
+assert_eq "create without --title -> exit 1" "1" "$code"
+
+# ─── results ─────────────────────────────────────────────────────────────────
+echo ""
+echo "================================"
+echo "Results: $PASS passed, $FAIL failed"
+echo "================================"
+[[ "$FAIL" -gt 0 ]] && exit 1 || exit 0

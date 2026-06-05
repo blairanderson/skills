@@ -1,7 +1,7 @@
 ---
 name: bump
-description: Bump the marketplace version in the blairanderson/skills repo, commit, and push to master. Use whenever the user says "bump", "bump version", "release", or asks to increment the version in the skills repo. Also handles plugin-specific bumps like "bump todo:capture".
-argument-hint: 'e.g. /bump or /bump todo:capture'
+description: Bump the marketplace version in the blairanderson/skills repo, commit, and push to master. Use whenever the user says "bump", "bump version", "release", or asks to increment the version in the skills repo. Also handles plugin-specific bumps like "bump issues:capture".
+argument-hint: 'e.g. /bump or /bump issues:capture'
 ---
 
 # Bump — smart version increment, commit, push
@@ -12,13 +12,13 @@ argument-hint: 'e.g. /bump or /bump todo:capture'
 
 ## Mode A — Plugin bump: `/bump <plugin-name>` or `/bump <plugin>:<skill>`
 
-If an argument is given (e.g. `todo` or `todo:capture`), bump the **plugin's own version** in `plugins/<plugin>/.claude-plugin/plugin.json`.
+If an argument is given (e.g. `todo` or `issues:capture`), bump the **plugin's own version** in `plugins/<plugin>/.claude-plugin/plugin.json`.
 
 The `<plugin>` is always the part before the colon (or the whole argument if no colon).
 
 ### Steps
 
-1. Derive the plugin directory: `plugins/<plugin>/` (e.g. `plugins/todo/`)
+1. Derive the plugin directory: `plugins/<plugin>/` (e.g. `plugins/issues/`)
 2. Read `plugins/<plugin>/.claude-plugin/plugin.json` and find the current `version` value
 3. Check git log for recent changes to that plugin's directory: `git log --oneline -10 -- plugins/<plugin>/`
 4. Decide the version increment:

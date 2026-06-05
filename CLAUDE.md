@@ -90,7 +90,7 @@ The `source` path must match the actual directory. The `name` field is used in i
 | `code-spec` | planning | Yes | Spec extraction from code |
 | `rails-authentication` | rails | Yes | Phased auth setup, 9 reference docs |
 | `hotfix` | git | Yes | Commit/push/watch workflow |
-| `tasks` | productivity | Yes | Task tracker with task_loader/test_task_loader scripts |
+| `issues` | productivity | Yes | GitHub Issues task tracker (issue_loader/check_issues_access/test_issue_loader scripts; needs gh CLI or GH_PAT) |
 
 ## Gotchas
 
