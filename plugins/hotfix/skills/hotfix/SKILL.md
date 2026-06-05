@@ -2,6 +2,7 @@
 name: hotfix
 description: Stay on master/main, commit changed files, pull with rebase, push to master, be proactive about watch github workflow runs for future failures
 argument-hint: "quickly commit and push, commit to main. push"
+model: sonnet
 ---
 
 # HotFix - commit, push, watch for errors.
