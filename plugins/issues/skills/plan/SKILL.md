@@ -1,5 +1,5 @@
 ---
-name: issues:plan
+name: plan
 description: "Use when: user wants to expand a task, flesh out a plan, break down a TODO into steps, add detail to an existing task, or plan the implementation of a specific work item. Takes an issue number or picks one interactively and builds it into a thorough plan."
 argument-hint: 'e.g. /issues:plan 42'
 allowed-tools: Bash(issue_loader*), Bash(gh issue*), Bash(check_issues_access), AskUserQuestion

@@ -1,5 +1,5 @@
 ---
-name: issues:done
+name: done
 description: "Use when: user wants to mark a task as done, close a completed task, clean up a finished task, or says 'done with task X'. Confirms with user before closing the GitHub issue."
 argument-hint: 'e.g. /issues:done or /issues:done 42'
 allowed-tools: Bash(issue_loader*), Bash(gh issue*), Bash(check_issues_access), AskUserQuestion

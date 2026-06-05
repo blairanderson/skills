@@ -1,5 +1,5 @@
 ---
-name: issues:work
+name: work
 description: "Use when: user wants to start working, asks what to work on next, wants to pick a task to tackle, or is ready to begin implementation. Shows top 10 tasks and asks which one to work on using an interactive prompt."
 argument-hint: 'e.g. /issues:work'
 allowed-tools: Bash(issue_loader*), Bash(gh issue*), Bash(check_issues_access), Bash, Read, Write, Edit, Glob

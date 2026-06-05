@@ -1,5 +1,5 @@
 ---
-name: issues:capture
+name: capture
 description: "Use when: user wants to quickly capture tasks, brainstorm TODOs, jot down ideas, dump a list of things to do, or do a brain dump of work items. Enters fast capture mode — NO code written, every line typed becomes its own GitHub issue immediately."
 argument-hint: 'e.g. /issues:capture'
 allowed-tools: Bash(issue_loader*), Bash(gh issue*), Bash(check_issues_access), Bash(gh auth status)

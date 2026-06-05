@@ -1,5 +1,5 @@
 ---
-name: issues:triage
+name: triage
 description: "Use when: user wants to review tasks, process the inbox, update priorities, organize TODOs, clean up stale items, or see a task dashboard. The PM batch-processing step between capture and work."
 argument-hint: 'e.g. /issues:triage'
 allowed-tools: Bash(issue_loader*), Bash(gh issue*), Bash(check_issues_access), AskUserQuestion
