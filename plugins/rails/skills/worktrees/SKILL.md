@@ -3,7 +3,7 @@ name: worktrees
 description: "Use when: user wants to create or delete a Rails git worktree, set up isolated dev/test databases per branch, work on multiple branches in parallel, or asks about bin/worktree, rails-worktree, or the FastTravelAS worktree gem"
 allowed-tools: Bash, Read, Write, Edit
 argument-hint: "create feature-x, create feature-x main, close feature-x, setup"
-version: "1.0.0"
+version: "1.0.1"
 ---
 
 # Skill: Rails worktrees (rails-worktree)
@@ -15,6 +15,13 @@ development and test databases, copied config (`.env`, `database.yml`, credentia
 `node_modules`), migrations, and seeds — so you can work on several branches in
 parallel without DB collisions. Wraps the
 [FastTravelAS/rails-worktree](https://github.com/FastTravelAS/rails-worktree) gem.
+
+> **This skill never modifies `config/database.yml`.** It is a tracked file that
+> already resolves its database names from ENV, and the gem writes the per-worktree
+> database names into each worktree's `.env`. So `database.yml` never needs to
+> change. Treat it as read-only: verify it reads the ENV vars, but never edit it.
+> If the ENV references are missing, that is a one-time prerequisite for the user
+> to add — surface it and stop, don't patch the tracked file yourself.
 
 ## Step 0 — Preflight checks
 
@@ -43,9 +50,11 @@ grep -q "DATABASE_NAME_DEVELOPMENT" config/database.yml && echo "OK: database.ym
 ```
 
 - **If OK** → skip to the create/close commands below.
-- **If MISSING** → apply the **Required `config/database.yml` setup** edits in
-  **Step 1** before creating a worktree. Skipping this means new worktrees reuse
-  the main app's databases, defeating isolation.
+- **If MISSING** → **do not edit `config/database.yml` yourself.** It is a tracked
+  file. Show the user the **`config/database.yml` ENV reference** snippet in
+  **Step 1** and ask them to add it (or re-run the gem installer, which sets it
+  up). Stop until the check passes — skipping it means new worktrees reuse the
+  main app's databases, defeating isolation.
 
 ## Step 1 — Install the gem (only if `bin/worktree` is missing)
 
@@ -76,10 +85,13 @@ grep -q "DATABASE_NAME_DEVELOPMENT" config/database.yml && echo "OK: database.ym
 3. Re-run the **Step 0** preflight checks to confirm `bin/worktree` now exists
    and `config/database.yml` reads the ENV database names.
 
-### Required `config/database.yml` setup
+### `config/database.yml` ENV reference (verify only — never edit)
 
 The gem assigns each worktree a unique database by reading two env vars. Confirm
-`config/database.yml` references them with fallback defaults (edit if not):
+`config/database.yml` references them with fallback defaults. **This is a
+read-only check — never edit `database.yml` from this skill.** If the references
+are missing, show the user this snippet and ask them to add it (it is a tracked
+file and a one-time prerequisite):
 
 ```yaml
 development:
@@ -156,6 +168,6 @@ Closing a worktree automatically:
 | Symptom | Fix |
 |---|---|
 | `bin/worktree` missing after `bundle install` | Run `bundle exec rake worktree:install` |
-| New worktree shares the main app's DB | `config/database.yml` isn't reading `DATABASE_NAME_DEVELOPMENT`/`_TEST` — add the ENV refs above |
+| New worktree shares the main app's DB | `config/database.yml` isn't reading `DATABASE_NAME_DEVELOPMENT`/`_TEST` — ask the user to add the ENV refs above (or re-run the gem installer). Never hand-edit the tracked `database.yml`. |
 | `gem "rails-worktree"` not found | Confirm it's in the `:development` group and re-run `bundle install` |
 | Can't close from main repo | Pass the branch name: `bin/worktree --close feature-branch` |
