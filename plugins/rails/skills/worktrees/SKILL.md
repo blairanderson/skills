@@ -3,7 +3,7 @@ name: worktrees
 description: "Use when: user wants to create or delete a Rails git worktree, set up isolated dev/test databases per branch, work on multiple branches in parallel, or asks about bin/worktree, rails-worktree, or the FastTravelAS worktree gem"
 allowed-tools: Bash, Read, Write, Edit
 argument-hint: "create feature-x, create feature-x main, close feature-x, setup"
-version: "1.0.1"
+version: "1.1.0"
 ---
 
 # Skill: Rails worktrees (rails-worktree)
@@ -49,12 +49,50 @@ The gem only isolates databases if `config/database.yml` reads
 grep -q "DATABASE_NAME_DEVELOPMENT" config/database.yml && echo "OK: database.yml reads ENV" || echo "MISSING"
 ```
 
-- **If OK** → skip to the create/close commands below.
+- **If OK** → continue to check 0c.
 - **If MISSING** → **do not edit `config/database.yml` yourself.** It is a tracked
   file. Show the user the **`config/database.yml` ENV reference** snippet in
   **Step 1** and ask them to add it (or re-run the gem installer, which sets it
   up). Stop until the check passes — skipping it means new worktrees reuse the
   main app's databases, defeating isolation.
+
+### 0c — Confirm `bin/setup` does not boot the dev server
+
+The gem's `--init` runs `bin/setup` non-interactively. The stock Rails `bin/setup`
+ends with `exec "bin/dev"` (unless `--skip-server` is passed — and the gem passes
+no flags). That means worktree init either **blocks on a foreman server** or
+**crashes** (foreman isn't in the Gemfile, so the bundler-wrapped exec dies with
+`Gem::Exception: can't find executable foreman`). Setup should set up, not run.
+
+```sh
+grep -q 'exec "bin/dev"' bin/setup && echo "WILL BOOT SERVER" || echo "OK: setup does not start server"
+```
+
+- **If OK** → continue to the create/close commands below.
+- **If WILL BOOT SERVER** → propose this fix to the user (with confirmation —
+  `bin/setup` is tracked) **before** creating the worktree:
+
+  1. In `bin/setup`, delete the trailing server block:
+
+     ```ruby
+     unless ARGV.include?("--skip-server")
+       puts "\n== Starting development server =="
+       STDOUT.flush
+       exec "bin/dev"
+     end
+     ```
+
+     Replace with: `puts "\n== Done! Run bin/dev to start the server =="`.
+
+  2. While there, make `bin/dev` survive bundler contexts (the foreman shim
+     refuses to run inside a bundled env). Just before its `exec foreman` line:
+
+     ```sh
+     unset BUNDLE_GEMFILE BUNDLE_BIN_PATH RUBYOPT RUBYLIB
+     ```
+
+  Remind the user the fix only reaches *future* worktrees once committed —
+  worktrees check out tracked files from the branch.
 
 ## Step 1 — Install the gem (only if `bin/worktree` is missing)
 
@@ -146,22 +184,72 @@ Creating a worktree automatically:
 - copies `node_modules` from the main worktree
 - runs migrations and seeds the new databases
 
+### After running: inspect the output
+
+The gem prints `✓ Worktree initialized successfully!` **even when `bin/setup`
+failed** — do not trust the success banner alone. Scan the output for these
+signatures and act on them:
+
+| Output contains | Diagnosis → action |
+|---|---|
+| `Warning: bin/setup failed` | Setup partially ran. Find the real error above this line and match it against the rows below. Verify the DBs were actually created and migrated before declaring success. |
+| `can't find executable foreman` (`Gem::Exception`) | `bin/setup` exec'd `bin/dev`, whose foreman exec dies inside the bundler env. Apply the **Step 0c** fix. The worktree and DBs are usually fine — only the (unwanted) server start failed. |
+| `== Starting development server ==` then a hang | `bin/setup` booted the server and is blocking the init. Stop it, then apply the **Step 0c** fix. |
+| `database ... already exists` / migrations against the main DB name | `database.yml` isn't reading the ENV names — re-check **Step 0b**. |
+
+When a known signature matches, don't just report the error — propose the
+specific fix, apply it on user confirmation, and offer to re-run the failed step
+(e.g. `cd <worktree> && bin/setup --skip-server`).
+
 ## Close (delete) a worktree
 
-```sh
-bin/worktree --close feature-branch   # run from the MAIN repo
-bin/worktree --close                  # run from INSIDE the worktree
-```
+> **Do NOT use `bin/worktree --close` in this setup.** The gem assumes the worktree
+> directory is named after the branch and lives at `<main>/.worktrees/<branch>`.
+> But worktrees here are created by the `ccw` shell function, which puts the dir at
+> `<repo>-<branch>` (a repo-prefixed sibling) while keeping the branch bare
+> (`<branch>`). So `--close` `Dir.chdir`s into a path that never existed and crashes:
+> `Dir.chdir': No such file or directory @ ... /.worktrees/<branch>` — failing
+> *before* it drops the DBs, leaving everything orphaned. Tear down manually instead
+> (this mirrors exactly what `ccw -d` does).
 
-Closing a worktree automatically:
-- drops both the development and test databases
-- removes the worktree directory
-- deletes the associated branch
-- cleans up git references
+### Manual teardown (the correct path here)
 
-> Closing is destructive — it drops databases and deletes the branch. Confirm the
-> branch name with the user before running `--close`, and make sure any wanted work
-> is merged or pushed first.
+1. **Find the worktree's actual path and confirm work is safe.** Never assume the
+   path — read it from git:
+
+   ```sh
+   git worktree list                              # locate the <repo>-<branch> dir
+   git -C <worktree-path> status --short          # must be clean (no uncommitted work)
+   git log --oneline main..<branch>               # any commits not on main?
+   ```
+
+   If there are unmerged commits, confirm they're pushed / the PR is merged
+   (`git ls-remote --heads origin <branch>`, `gh pr list --head <branch> --state all`)
+   before deleting. Closing is destructive and irreversible.
+
+2. **Derive the two database names** (the gem wrote them into the worktree's `.env`):
+
+   ```sh
+   grep DATABASE_NAME <worktree-path>/.env
+   # DATABASE_NAME_DEVELOPMENT=<repo>_<branch>_development
+   # DATABASE_NAME_TEST=<repo>_<branch>_test
+   ```
+
+3. **Drop DBs, remove the worktree at its real path, delete the branch, prune refs:**
+
+   ```sh
+   cd <main-repo>
+   dropdb --if-exists "<repo>_<branch>_development"
+   dropdb --if-exists "<repo>_<branch>_test"
+   git worktree remove <worktree-path> --force
+   git branch -D <branch>
+   git worktree prune
+   ```
+
+4. **Verify:** `git worktree list` no longer shows it and the directory is gone.
+
+This is destructive — it drops both databases and deletes the branch. Confirm the
+branch name with the user and make sure any wanted work is merged or pushed first.
 
 ## Troubleshooting
 
@@ -170,4 +258,6 @@ Closing a worktree automatically:
 | `bin/worktree` missing after `bundle install` | Run `bundle exec rake worktree:install` |
 | New worktree shares the main app's DB | `config/database.yml` isn't reading `DATABASE_NAME_DEVELOPMENT`/`_TEST` — ask the user to add the ENV refs above (or re-run the gem installer). Never hand-edit the tracked `database.yml`. |
 | `gem "rails-worktree"` not found | Confirm it's in the `:development` group and re-run `bundle install` |
-| Can't close from main repo | Pass the branch name: `bin/worktree --close feature-branch` |
+| `can't find executable foreman` during create | `bin/setup` exec's `bin/dev` and foreman isn't in the Gemfile — apply the **Step 0c** fix (remove the server block from `bin/setup`, unset bundler env in `bin/dev`) |
+| `Warning: bin/setup failed` but `✓ Worktree initialized successfully!` | The success banner is unreliable — read the error above the warning, match it in **After running: inspect the output**, and verify DBs/migrations actually completed |
+| `Dir.chdir': No such file or directory @ ... /.worktrees/<branch>` during close | `bin/worktree --close` assumes the dir is `.worktrees/<branch>`, but `ccw` creates it at `<repo>-<branch>` with a bare branch. **Don't use `--close` here** — use the **Manual teardown** above (dropdb ×2 + `git worktree remove --force` at the real path + `git branch -D`). |
