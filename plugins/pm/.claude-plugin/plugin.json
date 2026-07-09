@@ -1,0 +1,5 @@
+{
+  "name": "pm",
+  "description": "PM mode — interactive product-management session + pm agent that orchestrates the knowledge-work product-management skills, tracks per-project cadence in .claude/pm/state.json, suggests what to work on next, and files GitHub issues conversationally. Requires the product-management plugin from anthropics/knowledge-work-plugins (and gh CLI for issue filing)",
+  "version": "1.0.0"
+}

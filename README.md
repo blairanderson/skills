@@ -59,6 +59,7 @@ Once installed, skills activate automatically based on context. You can also inv
 | `skillify` | Productivity | The meta skill — audit any feature against the 10-item skill completeness checklist and fill in missing pieces |
 | `statusline` → `statusline-health` | Productivity | Add a cached uptime indicator to Claude Code's status line — polls your health URL every 5 minutes, shows green `(up)` or a full red alert |
 | `chatterbox` → `phonecall` | Productivity | Make AI-powered outbound phone calls via VOCAL (Voice Outreach Call Automation Layer) — schedule, reschedule, quote, follow up via chatterboxagent.com |
+| `pm` | Planning | PM mode — interactive session + `pm` agent orchestrating the [knowledge-work product-management skills](https://github.com/anthropics/knowledge-work-plugins/tree/main/product-management/skills) with per-project cadence tracking, next-work suggestions, and conversational GitHub issue filing (requires the product-management plugin + gh CLI) |
 
 ## How Skills Work
 

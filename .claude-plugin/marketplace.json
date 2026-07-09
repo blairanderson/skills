@@ -346,6 +346,26 @@
       ]
     },
     {
+      "name": "pm",
+      "source": "./plugins/pm",
+      "description": "PM mode — interactive product-management session + pm agent that orchestrates the knowledge-work product-management skills (write-spec, roadmap-update, metrics-review, sprint-planning, stakeholder-update, synthesize-research, competitive-brief, product-brainstorming), tracks per-project cadence in .claude/pm/state.json, suggests what to work on next, and files GitHub issues conversationally. Requires the product-management plugin from anthropics/knowledge-work-plugins (and gh CLI for issue filing)",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "planning",
+      "tags": [
+        "product-management",
+        "pm",
+        "roadmap",
+        "metrics",
+        "sprint-planning",
+        "specs",
+        "stakeholder-updates",
+        "cadence",
+        "agent"
+      ]
+    },
+    {
       "name": "chatterbox",
       "source": "./plugins/chatterbox",
       "description": "Make AI-powered outbound phone calls via VOCAL (Voice Outreach Call Automation Layer) — schedule appointments, reschedule, get quotes, follow up via chatterboxagent.com",
