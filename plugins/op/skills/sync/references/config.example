@@ -1,0 +1,20 @@
+# op-sync configuration
+#
+# Copy to  ~/.config/op-sync/config  (or run `op-sync setup`).
+# For a single repo, drop a file named `.op-sync` at the repo root with the same
+# keys to override these — handy for pointing one app at a shared team vault.
+#
+# Resolution order (later wins):
+#   built-in defaults -> ~/.config/op-sync/config -> <repo>/.op-sync -> env vars
+#   (OP_SYNC_VAULT, OP_SYNC_ENV_MODE, OP_SYNC_ACCOUNT)
+
+# Which 1Password vault stores the secrets.
+vault=Private
+
+# How .env files sync:
+#   blob     — store each .env file whole, as a 1Password document (default)
+#   template — render .env from a committed .env.tpl via `op inject`
+env_mode=blob
+
+# Optional: pin a 1Password account (shorthand or sign-in address).
+# account=my.1password.com

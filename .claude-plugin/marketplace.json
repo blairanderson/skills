@@ -383,6 +383,25 @@
         "scheduling",
         "automation"
       ]
+    },
+    {
+      "name": "op",
+      "source": "./plugins/op",
+      "description": "Share a Rails app's master/credentials keys and .env files across machines via the 1Password CLI (op)",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "rails",
+      "tags": [
+        "1password",
+        "op",
+        "secrets",
+        "rails",
+        "master-key",
+        "credentials",
+        "dotenv",
+        "sync"
+      ]
     }
   ]
 }

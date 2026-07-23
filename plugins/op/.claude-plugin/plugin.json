@@ -1,0 +1,5 @@
+{
+  "name": "op",
+  "description": "Share a Rails app's master/credentials keys and .env files across machines via the 1Password CLI (op)",
+  "version": "1.0.0"
+}
