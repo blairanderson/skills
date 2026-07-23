@@ -1,0 +1,5 @@
+{
+  "name": "cf",
+  "description": "Cloudflare Workers developer tools — Wrangler setup, deployment, bindings, D1 databases, KV, R2, and Workers AI",
+  "version": "1.0.0"
+}

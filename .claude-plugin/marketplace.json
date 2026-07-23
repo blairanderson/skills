@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Curated collection of production-ready Claude Code skills",
-    "version": "1.35.0"
+    "version": "1.36.0"
   },
   "plugins": [
     {
@@ -41,7 +41,7 @@
     {
       "name": "issues",
       "source": "./plugins/issues",
-      "description": "GitHub Issues task tracker \u2014 capture, triage, plan, work, and close tasks as issues in the current repo. Requires gh CLI or a GH_PAT token with read/write Issues access.",
+      "description": "GitHub Issues task tracker — capture, triage, plan, work, and close tasks as issues in the current repo. Requires gh CLI or a GH_PAT token with read/write Issues access.",
       "author": {
         "name": "Blair Anderson"
       },
@@ -78,7 +78,7 @@
     {
       "name": "blue-ocean",
       "source": "./plugins/blue-ocean",
-      "description": "Blue Ocean Strategy framework \u2014 stop competing, start creating uncontested market space",
+      "description": "Blue Ocean Strategy framework — stop competing, start creating uncontested market space",
       "author": {
         "name": "Blair Anderson"
       },
@@ -94,7 +94,7 @@
     {
       "name": "document-feature",
       "source": "./plugins/document-feature",
-      "description": "Post-ship marketing documentation and page generation \u2014 ensures marketing site reflects shipped features",
+      "description": "Post-ship marketing documentation and page generation — ensures marketing site reflects shipped features",
       "author": {
         "name": "Blair Anderson"
       },
@@ -126,7 +126,7 @@
     {
       "name": "diff-review",
       "source": "./plugins/diff-review",
-      "description": "Adversarial git diff reviewer \u2014 finds bugs, performance issues, and correctness problems in changed code",
+      "description": "Adversarial git diff reviewer — finds bugs, performance issues, and correctness problems in changed code",
       "author": {
         "name": "Blair Anderson"
       },
@@ -143,7 +143,7 @@
     {
       "name": "app-distribution-guide",
       "source": "./plugins/app-distribution-guide",
-      "description": "Design and build a multi-surface distribution layer \u2014 MCP server with OAuth, Claude and ChatGPT connectors, REST API/SDK, dashboard, and open source strategy",
+      "description": "Design and build a multi-surface distribution layer — MCP server with OAuth, Claude and ChatGPT connectors, REST API/SDK, dashboard, and open source strategy",
       "author": {
         "name": "Blair Anderson"
       },
@@ -180,7 +180,7 @@
     {
       "name": "astro",
       "source": "./plugins/astro",
-      "description": "Astro developer tools \u2014 SEO with structured data, sitemaps, IndexNow, Open Graph, and hreflang",
+      "description": "Astro developer tools — SEO with structured data, sitemaps, IndexNow, Open Graph, and hreflang",
       "author": {
         "name": "Joost de Valk",
         "email": "joost@joost.blog"
@@ -235,7 +235,7 @@
     {
       "name": "rails",
       "source": "./plugins/rails",
-      "description": "Rails developer toolkit \u2014 authentication (OAuth, 2FA, sessions), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, pgsync database sync, Cloudflare proxy setup (SSL, sessions, CSRF, IP spoofing), Ralph autonomous agent bootstrap (sibling worktree, Rails-tailored quality checks), and git worktrees with isolated per-branch databases (rails-worktree gem)",
+      "description": "Rails developer toolkit — authentication (OAuth, 2FA, sessions), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, pgsync database sync, Cloudflare proxy setup (SSL, sessions, CSRF, IP spoofing), Ralph autonomous agent bootstrap (sibling worktree, Rails-tailored quality checks), and git worktrees with isolated per-branch databases (rails-worktree gem)",
       "author": {
         "name": "Blair Anderson"
       },
@@ -270,7 +270,7 @@
     {
       "name": "skillify",
       "source": "./plugins/skillify",
-      "description": "The meta skill \u2014 audit any feature against the 10-item skill completeness checklist and fill in missing pieces (SKILL.md, tests, evals, resolver triggers)",
+      "description": "The meta skill — audit any feature against the 10-item skill completeness checklist and fill in missing pieces (SKILL.md, tests, evals, resolver triggers)",
       "author": {
         "name": "Blair Anderson"
       },
@@ -288,7 +288,7 @@
     {
       "name": "jekyll",
       "source": "./plugins/jekyll",
-      "description": "Jekyll developer tools \u2014 SEO with structured data, sitemaps, IndexNow, Open Graph images, llms.txt, and agent discovery for Jekyll static sites",
+      "description": "Jekyll developer tools — SEO with structured data, sitemaps, IndexNow, Open Graph images, llms.txt, and agent discovery for Jekyll static sites",
       "author": {
         "name": "Blair Anderson"
       },
@@ -310,7 +310,7 @@
     {
       "name": "statusline",
       "source": "./plugins/statusline",
-      "description": "Claude Code status line enhancements \u2014 add website health checks with 5-minute caching, uptime indicators, and per-project config via .claude-statusline",
+      "description": "Claude Code status line enhancements — add website health checks with 5-minute caching, uptime indicators, and per-project config via .claude-statusline",
       "author": {
         "name": "Blair Anderson"
       },
@@ -329,7 +329,7 @@
         "source": "github",
         "repo": "danielrosehill/Claude-Transcription-Plugin"
       },
-      "description": "Claude Code plugin: audio transcription workflow \u2014 denoise, VAD, transcribe (Gemini/AssemblyAI/Whisper), clean, structure, export, with cloud and local engine backends.",
+      "description": "Claude Code plugin: audio transcription workflow — denoise, VAD, transcribe (Gemini/AssemblyAI/Whisper), clean, structure, export, with cloud and local engine backends.",
       "version": "1.0.0",
       "author": {
         "name": "Daniel Rosehill",
@@ -382,6 +382,28 @@
         "outbound-calls",
         "scheduling",
         "automation"
+      ]
+    },
+    {
+      "name": "cf",
+      "source": "./plugins/cf",
+      "description": "Cloudflare Workers developer tools — Wrangler setup, deployment, bindings configuration, D1 databases, KV storage, R2 buckets, and Workers AI integration",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "cloudflare",
+      "tags": [
+        "cloudflare",
+        "workers",
+        "wrangler",
+        "edge",
+        "serverless",
+        "d1",
+        "kv",
+        "r2",
+        "durable-objects",
+        "workers-ai",
+        "deployment"
       ]
     }
   ]

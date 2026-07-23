@@ -60,6 +60,7 @@ Once installed, skills activate automatically based on context. You can also inv
 | `statusline` → `statusline-health` | Productivity | Add a cached uptime indicator to Claude Code's status line — polls your health URL every 5 minutes, shows green `(up)` or a full red alert |
 | `chatterbox` → `phonecall` | Productivity | Make AI-powered outbound phone calls via VOCAL (Voice Outreach Call Automation Layer) — schedule, reschedule, quote, follow up via chatterboxagent.com |
 | `pm` | Planning | PM mode — interactive session + `pm` agent orchestrating the [knowledge-work product-management skills](https://github.com/anthropics/knowledge-work-plugins/tree/main/product-management/skills) with per-project cadence tracking, next-work suggestions, and conversational GitHub issue filing (requires the product-management plugin + gh CLI) |
+| `cf` → `wrangler` | Cloudflare | Audit and configure Cloudflare Workers projects — Wrangler setup, bindings (KV, D1, R2), deployment, and local development |
 
 ## How Skills Work
 
