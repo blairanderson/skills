@@ -20,8 +20,15 @@ op-sync <cmd>                                   # after `op-sync setup` installs
 bash "${CLAUDE_PLUGIN_ROOT}/skills/sync/scripts/op-sync.sh" <cmd>   # always works
 ```
 
-Run it from **inside the target Rails app** (the script derives the app name
-from `git config remote.origin.url`, so every machine agrees on the name).
+Run it from the **root of the target Rails app** — the directory holding
+`config/application.rb`. The app name is derived from
+`git config remote.origin.url`, so every machine agrees on the name.
+
+`status`, `rails-key`, and `env` refuse to run anywhere else, exiting with
+`Sorry must be inside Rails app root`. That covers a subdirectory of the app as
+well as any non-Rails directory. If you hit it, `cd` to the app root and retry —
+do not try to work around it. (`setup` and `link` are machine-scoped and work
+from anywhere.)
 
 ## Preflight (always)
 
@@ -31,7 +38,9 @@ from `git config remote.origin.url`, so every machine agrees on the name).
    script authenticates on demand when it runs the real command; if the user
    truly isn't authorized, op's own error surfaces with a hint. Never try to
    sign them in for them.
-2. Confirm the cwd is a git repo with a remote (`git remote -v`). If there's no
+2. Confirm the cwd is the Rails app root (`test -f config/application.rb`). If
+   it isn't, `cd` there first — the script will refuse otherwise.
+3. Confirm the cwd is a git repo with a remote (`git remote -v`). If there's no
    remote, the app name falls back to the directory basename — mention this so
    the user knows the name won't match a differently-named clone.
 

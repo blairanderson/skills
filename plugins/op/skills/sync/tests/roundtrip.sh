@@ -119,6 +119,17 @@ git remote add origin "git@github.com:blairanderson/op-testapp.git"
 APP="op-testapp"
 
 mkdir -p config/credentials
+# Minimal but genuine Rails app root — op-sync refuses to run without this.
+printf 'source "https://rubygems.org"\ngem "rails"\n' > Gemfile
+cat > config/application.rb <<'RB'
+require_relative "boot"
+require "rails/all"
+module OpTestapp
+  class Application < Rails::Application
+    config.load_defaults 7.1
+  end
+end
+RB
 printf 'aaaa1111aaaa1111aaaa1111aaaa1111'  > config/master.key
 printf 'bbbb2222bbbb2222bbbb2222bbbb2222'  > config/credentials/production.key
 printf 'SECRET=hunter2\nDB=postgres://localhost/foo\n' > .env
@@ -148,7 +159,9 @@ yes ".env.local pushed as document"  "[ -f \"$OP_FAKE_HOME/docs/env:$APP:.env.lo
 no  ".env.example NOT pushed"         "[ -f \"$OP_FAKE_HOME/docs/env:$APP:.env.example.content\" ]"
 
 echo "== wipe + pull =="
-rm -rf config .env .env.local .env.example
+# Simulate a fresh clone: gitignored secrets are gone, but the app itself
+# (Gemfile, config/application.rb) is still checked in.
+rm -rf config/master.key config/credentials .env .env.local .env.example
 bash "$SCRIPT" rails-key pull
 bash "$SCRIPT" env pull
 
@@ -173,6 +186,35 @@ eq  "local still differs (not overwritten)" "LOCALDIFF" "$(cat config/master.key
 bash "$SCRIPT" rails-key pull --force >/dev/null 2>&1
 eq  "force restored vault value" "aaaa1111aaaa1111aaaa1111aaaa1111" "$(cat config/master.key)"
 yes "backup file created" "ls config/master.key.bak.* >/dev/null 2>&1"
+
+echo "== refuses to run outside a Rails app root =="
+GUARD_MSG="Sorry must be inside Rails app root"
+
+# A subdirectory of the Rails app is NOT the root.
+mkdir -p "$REPO/app/models"
+out=$(cd "$REPO/app/models" && bash "$SCRIPT" rails-key pull 2>&1); rc=$?
+eq  "subdir: exits nonzero"  "1" "$rc"
+yes "subdir: correct message" "printf '%s' \"\$out\" | grep -qF \"\$GUARD_MSG\""
+no  "subdir: wrote no key"    "[ -f \"$REPO/app/models/config/master.key\" ]"
+
+# A plain directory with no Rails app at all.
+PLAIN="$WORK/plain"; mkdir -p "$PLAIN"
+for cmd in "rails-key pull" "rails-key push" "env pull" "env push" "status"; do
+  out=$(cd "$PLAIN" && bash "$SCRIPT" $cmd 2>&1); rc=$?
+  eq  "plain dir: '$cmd' exits nonzero" "1" "$rc"
+  yes "plain dir: '$cmd' correct message" "printf '%s' \"\$out\" | grep -qF \"\$GUARD_MSG\""
+done
+
+# A directory that merely LOOKS like a Rails root must not pass.
+FAKE="$WORK/fake"; mkdir -p "$FAKE/config"
+: > "$FAKE/config/application.rb"
+printf 'gem "rails"\n' > "$FAKE/Gemfile"
+out=$(cd "$FAKE" && bash "$SCRIPT" rails-key pull 2>&1)
+yes "empty config/application.rb rejected" "printf '%s' \"\$out\" | grep -qF \"\$GUARD_MSG\""
+
+# setup/link are machine-scoped and must still work anywhere.
+out=$(cd "$PLAIN" && bash "$SCRIPT" setup 2>&1); rc=$?
+eq "setup still works outside Rails" "0" "$rc"
 
 echo
 echo "================  $pass passed, $fail failed  ================"

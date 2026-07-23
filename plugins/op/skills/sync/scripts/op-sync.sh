@@ -30,6 +30,10 @@
 #   op-sync env pull [-f]         # restore .env files (blob) / render (template)
 #   op-sync link                  # (re)install the ~/bin/op-sync convenience symlink
 #
+# status, rails-key, and env must be run from a Rails app root (the directory
+# holding config/application.rb); anywhere else they refuse. setup and link are
+# machine-scoped and work from anywhere.
+#
 # --force / -f lets pull overwrite a local file whose contents differ from the
 # vault (a timestamped .bak is made first). Without it, differing files are kept.
 
@@ -111,6 +115,19 @@ item_get_json() {
   esac
 }
 
+# ----------------------------------------------------------------------------- rails root
+# Every app-scoped command must run from the root of a Rails app. That's what
+# makes the relative paths below (config/master.key, .env) unambiguous.
+#
+# config/application.rb declaring a Rails::Application is the definition of a
+# Rails app root: a subdirectory doesn't have it, and neither does a random
+# directory that happens to contain a stray config/ folder.
+require_rails_root() {
+  [ -f config/application.rb ] \
+    && grep -q 'Rails::Application' config/application.rb 2>/dev/null \
+    || die "Sorry must be inside Rails app root"
+}
+
 # ----------------------------------------------------------------------------- identity
 app_name() {
   local remote
@@ -123,7 +140,10 @@ app_name() {
   fi
 }
 
-repo_root() { git rev-parse --show-toplevel 2>/dev/null || pwd; }
+# The Rails app root. require_rails_root has already proven this is it, so the
+# app's files are anchored here rather than at the git toplevel — those differ
+# when a Rails app lives in a subdirectory of a larger repo.
+rails_root() { pwd; }
 
 # config/master.key -> master_key ; config/credentials/production.key -> production_key
 keyfield_for() { local b; b=$(basename "$1" .key); printf '%s_key' "$b"; }
@@ -211,7 +231,7 @@ rails_key_pull() {
 # ----------------------------------------------------------------------------- env files
 # top-level .env / .env.* (excluding examples, templates, and our own backups)
 env_files() {
-  local root f base; root=$(repo_root)
+  local root f base; root=$(rails_root)
   for f in "$root"/.env "$root"/.env.*; do
     [ -f "$f" ] || continue
     base=$(basename "$f")
@@ -253,7 +273,7 @@ env_push() {
 env_pull() {
   local app root
   app=$(app_name)
-  root=$(repo_root)
+  root=$(rails_root)
 
   if [ "$OPS_ENV_MODE" = template ]; then
     [ -f "$root/.env.tpl" ] || die "env_mode=template but no .env.tpl found in repo root."
@@ -345,7 +365,10 @@ cmd_status() {
 }
 
 usage() {
-  sed -n '2,40p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+  # Print the header comment block: every line after the shebang up to the
+  # first non-comment line. No hardcoded line numbers, so editing the header
+  # can't spill code into the help text.
+  awk 'NR==1 {next} /^#/ {sub(/^# ?/, ""); print; next} {exit}' "${BASH_SOURCE[0]}"
   exit "${1:-0}"
 }
 
@@ -363,16 +386,16 @@ main() {
   case "$group" in
     setup)  cmd_setup;;
     link)   cmd_link;;
-    status) require_op; cmd_status;;
+    status) require_rails_root; require_op; cmd_status;;
     rails-key)
-      require_op
+      require_rails_root; require_op
       case "$action" in
         push) rails_key_push;;
         pull) rails_key_pull;;
         *) die "usage: op-sync rails-key {push|pull}";;
       esac;;
     env)
-      require_op
+      require_rails_root; require_op
       case "$action" in
         push) env_push;;
         pull) env_pull;;
