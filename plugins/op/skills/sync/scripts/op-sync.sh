@@ -95,7 +95,21 @@ op_guard() {
   fi
 }
 
-item_exists() { op_ item get "$1" --vault "$OPS_VAULT" >/dev/null 2>&1; }
+# Look up an item by title. Prints the item JSON on stdout and returns 0 when
+# found; returns 1 when the item genuinely doesn't exist; prints op's error and
+# returns 2 on any other failure (auth, network, bad vault, ambiguous title).
+# Never treat rc=2 as "not found" — that's how duplicate items get created.
+item_get_json() {
+  local title="$1" errf rc=0 err
+  errf=$(mktemp)
+  op_ item get "$title" --vault "$OPS_VAULT" --format json 2>"$errf" || rc=$?
+  err=$(cat "$errf"); rm -f "$errf"
+  [ "$rc" -eq 0 ] && return 0
+  case "$err" in
+    *"isn't an item"*|*"not found"*) return 1;;
+    *) printf 'op-sync: 1Password lookup for %s failed: %s\n' "$title" "$err" >&2; return 2;;
+  esac
+}
 
 # ----------------------------------------------------------------------------- identity
 app_name() {
@@ -147,12 +161,13 @@ rails_key_push() {
   local files; files=$(rails_key_files)
   [ -z "$files" ] && die "No Rails key files here (config/master.key or config/credentials/*.key)."
 
-  local json mode
-  if item_exists "$app"; then
-    json=$(op_ item get "$app" --vault "$OPS_VAULT" --format json); mode=edit
-  else
-    json=$(jq -n --arg t "$app" '{title:$t, category:"SECURE_NOTE", tags:["op-sync","rails-key"], fields:[]}'); mode=create
-  fi
+  local json mode rc=0
+  json=$(item_get_json "$app") || rc=$?
+  case "$rc" in
+    0) mode=edit;;
+    1) json=$(jq -n --arg t "$app" '{title:$t, category:"SECURE_NOTE", tags:["op-sync","rails-key"], fields:[]}'); mode=create;;
+    *) die "couldn't determine whether item '$app' exists — refusing to risk a duplicate. Fix the error above (often: unlock the 1Password app) and re-run.";;
+  esac
 
   local f field val
   while IFS= read -r f; do
@@ -217,18 +232,21 @@ env_push() {
   local files; files=$(env_files)
   [ -z "$files" ] && die "No .env files here to push."
 
-  local f base title
+  local f base title rc
   while IFS= read -r f; do
     base=$(basename "$f")
     title="env:${app}:${base}"
-    if item_exists "$title"; then
-      op_guard document edit "$title" "$f" --vault "$OPS_VAULT" >/dev/null
-      info "  updated document: $title"
-    else
-      op_guard document create "$f" --title "$title" --file-name "$base" \
-        --tags op-sync,env-sync --vault "$OPS_VAULT" >/dev/null
-      info "  created document: $title"
-    fi
+    rc=0; item_get_json "$title" >/dev/null || rc=$?
+    case "$rc" in
+      0)
+        op_guard document edit "$title" "$f" --vault "$OPS_VAULT" >/dev/null
+        info "  updated document: $title";;
+      1)
+        op_guard document create "$f" --title "$title" --file-name "$base" \
+          --tags op-sync,env-sync --vault "$OPS_VAULT" >/dev/null
+        info "  created document: $title";;
+      *) die "couldn't determine whether document '$title' exists — refusing to risk a duplicate. Fix the error above and re-run.";;
+    esac
   done <<<"$files"
 }
 
@@ -309,17 +327,20 @@ cmd_status() {
   info "app:      $app  (vault '$OPS_VAULT', env_mode '$OPS_ENV_MODE')"
   info "rails keys (local):"
   local f; while IFS= read -r f; do [ -n "$f" ] && info "  $f"; done <<<"$(rails_key_files)"
-  if item_exists "$app"; then
-    info "rails keys (stored fields):"
-    op_ item get "$app" --vault "$OPS_VAULT" --format json \
-      | jq -r '.fields[]? | select((.id // "")|endswith("_key")) | "  " + .id' || true
-  else
-    info "rails keys (stored): none — item '$app' not found"
-  fi
+  local item_json rc=0
+  item_json=$(item_get_json "$app") || rc=$?
+  case "$rc" in
+    0)
+      info "rails keys (stored fields):"
+      printf '%s' "$item_json" \
+        | jq -r '.fields[]? | select((.id // "")|endswith("_key")) | "  " + .id' || true;;
+    1) info "rails keys (stored): none — item '$app' not found";;
+    *) info "rails keys (stored): UNKNOWN — 1Password lookup failed (see error above)";;
+  esac
   info ".env files (local):"
   while IFS= read -r f; do [ -n "$f" ] && info "  ${f##*/}"; done <<<"$(env_files)"
   info ".env documents (stored):"
-  op_ item list --vault "$OPS_VAULT" --categories Document --format json 2>/dev/null \
+  op_ item list --vault "$OPS_VAULT" --categories Document --format json \
     | jq -r --arg p "env:${app}:" '.[] | select(.title|startswith($p)) | "  " + .title' || true
 }
 
