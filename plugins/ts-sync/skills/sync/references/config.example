@@ -1,0 +1,17 @@
+# ts-sync configuration
+#
+# Copy to  ~/.config/ts-sync/config  (or run `ts-sync setup`).
+# For a single repo, drop a file named `.ts-sync` at the repo root with the
+# same keys to override these — handy when one app lives on a specific box.
+#
+# Resolution order (later wins):
+#   built-in defaults -> ~/.config/ts-sync/config -> <repo>/.ts-sync -> env vars
+#   (TS_SYNC_HOST, TS_SYNC_USER)
+
+# Default remote machine to sync with — an ssh target: a Tailscale MagicDNS
+# name, plain hostname, IP, or ~/.ssh/config alias.
+# Run `ts-sync hosts` to list your online Tailscale peers.
+# host=desktop.your-tailnet.ts.net
+
+# Optional: ssh username, if it differs between machines.
+# user=blair

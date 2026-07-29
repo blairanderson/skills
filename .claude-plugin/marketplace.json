@@ -402,6 +402,26 @@
         "dotenv",
         "sync"
       ]
+    },
+    {
+      "name": "ts-sync",
+      "source": "./plugins/ts-sync",
+      "description": "Sync a Rails app's master/credentials keys and .env files between your machines over SSH/Tailscale",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "rails",
+      "tags": [
+        "tailscale",
+        "ssh",
+        "scp",
+        "secrets",
+        "rails",
+        "master-key",
+        "credentials",
+        "dotenv",
+        "sync"
+      ]
     }
   ]
 }
