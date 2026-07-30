@@ -422,6 +422,25 @@
         "dotenv",
         "sync"
       ]
+    },
+    {
+      "name": "verification-skill",
+      "source": "./plugins/verification-skill",
+      "description": "Generate and maintain a project-local verification skill that drives your app the way a user does — launch/doctor/drive/evidence harness plus a feature map, kept honest as the app changes",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "testing",
+      "tags": [
+        "verification",
+        "testing",
+        "qa",
+        "harness",
+        "feature-map",
+        "browser",
+        "cli",
+        "proof"
+      ]
     }
   ]
 }

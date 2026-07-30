@@ -1,0 +1,5 @@
+{
+  "name": "verification-skill",
+  "description": "Generate and maintain a project-local verification skill that drives your app the way a user does — build a launch/doctor/drive/evidence harness plus a feature map, then keep it honest as the app changes",
+  "version": "1.0.0"
+}

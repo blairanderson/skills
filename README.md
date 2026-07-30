@@ -62,6 +62,7 @@ Once installed, skills activate automatically based on context. You can also inv
 | `pm` | Planning | PM mode — interactive session + `pm` agent orchestrating the [knowledge-work product-management skills](https://github.com/anthropics/knowledge-work-plugins/tree/main/product-management/skills) with per-project cadence tracking, next-work suggestions, and conversational GitHub issue filing (requires the product-management plugin + gh CLI) |
 | `op` → `sync` | Rails | Share a Rails app's master/credentials keys and .env files across machines via the 1Password CLI — keyed by git remote, values never in argv, restored files chmod 600 |
 | `ts-sync` → `sync` | Rails | Sync a Rails app's master/credentials keys and .env files between your machines over SSH/Tailscale — same-path clones, lists files before transfer, diff-guarded with backups, chmod 600 |
+| `verification-skill` → `create` / `maintain` | Testing | Generate a project-local verification skill that drives your app like a user (launch/doctor/drive/evidence harness + feature map), then keep the map honest as the app changes (vendored from [cursor/plugins](https://github.com/cursor/plugins/tree/main/pstack), adapted for `.claude`) |
 
 ## How Skills Work
 
