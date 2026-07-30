@@ -1,5 +1,5 @@
 {
   "name": "ts-sync",
   "description": "Sync a Rails app's master/credentials keys and .env files between your machines over SSH/Tailscale",
-  "version": "1.0.0"
+  "version": "1.0.1"
 }
