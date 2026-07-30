@@ -12,6 +12,11 @@ Wraps a deterministic script (`scripts/ts-sync.sh`). The script does all the
 ssh/tar work; this skill picks the right subcommand, shows the user what will
 move **before** anything transfers, and reports the result.
 
+ts-sync is a thin **teaching wrapper around `ssh`/`scp`**. When the agent can
+run a step, it runs it; when it can't (see _When SSH auth fails_), it shows the
+user the equivalent raw `ssh`/`scp` command to paste into their own terminal —
+so the user learns the underlying tool, not just the wrapper.
+
 ## The script
 
 Prefer the installed CLI if present, else call it by absolute path:
@@ -29,10 +34,16 @@ clear message — tell the user to clone the repo there first.
 ## Preflight (always)
 
 1. Confirm the cwd is a git repo (`git rev-parse --show-toplevel`).
-2. The script itself verifies ssh reachability (`BatchMode` — it never hangs on
-   a password prompt). If ssh fails, relay the script's hint (check
-   `tailscale status`, Tailscale SSH, or key auth) — don't try to fix auth for
-   the user.
+2. **Check what's actually missing locally first.** Before any network call,
+   run `ts-sync status` and compare against the app's expected secrets
+   (`.env`, `config/master.key`, `config/credentials/*.key`). If the file the
+   user needs is already present, say so and stop — no sync required. Only the
+   *missing* files justify a pull; report the gap explicitly, e.g.
+   "missing locally: .env — everything else present."
+3. The script verifies ssh reachability (`BatchMode` — it never hangs on a
+   password prompt). If ssh fails, **don't try to fix auth silently — follow
+   _When SSH auth fails_ below** and hand the user the underlying `ssh`/`scp`
+   command to run themselves.
 
 ## The pull flow (ALWAYS in this order)
 
@@ -54,6 +65,35 @@ differing files are kept and reported.
 Same shape, reversed: `ts-sync list <host>` → show the table → `ts-sync push
 <host>`. The same diff-guards run **on the remote** — a differing remote file
 is kept unless `--force`, and remote backups/`chmod 600` apply there too.
+
+## When SSH auth fails (the copy-paste fallback)
+
+The agent's Bash tool runs in a **non-interactive shell with no TTY**, and the
+script forces `BatchMode=yes`. So if the remote needs a password — or the right
+key isn't loaded in an agent this shell can reach — every `list`/`pull`/`push`
+fails with "Permission denied" or "Too many authentication failures", and
+**there is no way to type a password through the agent.** Do not keep retrying,
+and never collect a password with a prompt tool (it would land in plaintext in
+the transcript).
+
+Instead, since ts-sync is a teaching wrapper, hand the user the exact command to
+paste into *their own* terminal (where their TTY and ssh-agent work), and stop:
+
+    # run this in YOUR terminal, then tell me when it's done:
+    cd <repo-root>
+    ts-sync pull <host>                          # the wrapper, or the raw equivalent:
+    scp <host>:<repo-root>/.env <repo-root>/.env # plain scp does the same transfer
+
+Then offer the durable fix so it never recurs — this also makes the agent's own
+shell able to auth next time (key auth works from every shell, TTY or not):
+
+    ssh-copy-id -i ~/.ssh/id_ed25519.pub <host>  # one-time; enables key auth
+
+After key auth is set up, `ts-sync` (and plain `scp`) work directly from the
+agent — no copy-paste needed. If key auth already works in the user's terminal
+but not here, the key is loaded in their interactive agent only; `ssh-add
+~/.ssh/id_ed25519` re-loads it into the shared macOS launchd agent this shell
+also sees.
 
 ## Commands
 
@@ -90,3 +130,11 @@ Resolution order, later wins:
   `list`/`pull`/`push` work with any ssh-reachable host.
 - ssh runs with `BatchMode=yes` — it will never prompt for a password. If auth
   fails, the user needs Tailscale SSH enabled or ssh keys set up.
+- **You cannot type an SSH password through the agent.** No TTY + hardcoded
+  `BatchMode=yes` means password / keyboard-interactive auth is impossible from
+  the agent's shell, and a prompt tool would leak the password into the
+  transcript. Supported paths are key-based: (1) `ssh-copy-id` once (best —
+  passwordless everywhere), or (2) `ssh-add ~/.ssh/id_ed25519` in the user's
+  terminal to load the key into the shared macOS launchd agent this shell also
+  sees. Anything password-only must run in the user's own terminal — hand them
+  the raw `ssh`/`scp` command (see _When SSH auth fails_).
