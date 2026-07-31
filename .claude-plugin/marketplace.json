@@ -424,6 +424,25 @@
       ]
     },
     {
+      "name": "ssh-tailscale-mesh",
+      "source": "./plugins/ssh-tailscale-mesh",
+      "description": "Wire your machines on a Tailscale tailnet into a full passwordless SSH mesh with identical ~/.ssh/config host aliases, and onboard new servers into it",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "productivity",
+      "tags": [
+        "ssh",
+        "tailscale",
+        "mesh",
+        "passwordless",
+        "authorized-keys",
+        "ssh-config",
+        "onboarding",
+        "devops"
+      ]
+    },
+    {
       "name": "verification-skill",
       "source": "./plugins/verification-skill",
       "description": "Generate and maintain a project-local verification skill that drives your app the way a user does — launch/doctor/drive/evidence harness plus a feature map, kept honest as the app changes",

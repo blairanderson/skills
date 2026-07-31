@@ -1,0 +1,5 @@
+{
+  "name": "ssh-tailscale-mesh",
+  "description": "Wire your machines on a Tailscale tailnet into a full passwordless SSH mesh with identical ~/.ssh/config host aliases, and onboard new servers into it",
+  "version": "1.0.0"
+}
