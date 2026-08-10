@@ -235,7 +235,7 @@
     {
       "name": "rails",
       "source": "./plugins/rails",
-      "description": "Rails developer toolkit — authentication (OAuth, 2FA, sessions), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, pgsync database sync, Cloudflare proxy setup (SSL, sessions, CSRF, IP spoofing), Ralph autonomous agent bootstrap (sibling worktree, Rails-tailored quality checks), and git worktrees with isolated per-branch databases (rails-worktree gem)",
+      "description": "Rails developer toolkit — authentication (OAuth, 2FA, sessions), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, pgsync database sync, Cloudflare proxy setup (SSL, sessions, CSRF, IP spoofing), Ralph autonomous agent bootstrap (sibling worktree, Rails-tailored quality checks), git worktrees with isolated per-branch databases (rails-worktree gem), and version-by-version upgrade guides (6.0 → 8.1, from the official Rails upgrade guide)",
       "author": {
         "name": "Blair Anderson"
       },
@@ -264,7 +264,9 @@
         "proxy",
         "ralph",
         "autonomous-agent",
-        "worktree"
+        "worktree",
+        "upgrade",
+        "migration"
       ]
     },
     {

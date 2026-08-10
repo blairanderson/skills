@@ -42,6 +42,7 @@ Once installed, skills activate automatically based on context. You can also inv
 | `rails` → `rails-conductor-setup-config` | Rails | Set up Conductor workspaces and config for Rails projects |
 | `rails` → `pgsync` | Rails | Sync production Postgres data to local dev via pgsync + SSH tunnel |
 | `rails` → `ralph` | Rails | Bootstrap Geoffrey Huntley's Ralph autonomous agent loop in a sibling git worktree, Rails-tailored (zeitwerk:check, bin/rails test, rubocop, slug-prefix commits) |
+| `rails` → `rails-upgrade` | Rails | Version-by-version Rails upgrade guides (6.0 → 8.1) — breaking changes, app:update, framework defaults |
 | `hotfix` | Git | Stay on master, commit, pull with rebase, push, and watch GitHub workflows |
 | `issues` | Productivity | GitHub Issues task tracker — capture, triage, plan, work, and close tasks as issues (needs gh CLI or a GH_PAT token) |
 | `fix` → `fix-last-run` | Git | Check the last GitHub Actions workflow run and fix failures |

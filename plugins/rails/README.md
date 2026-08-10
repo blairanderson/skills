@@ -131,3 +131,24 @@ First confirms `bin/worktree` exists. If missing, it adds `gem "rails-worktree"`
 | `bin/worktree feature-x main` | Create from an explicit base branch |
 | `bin/worktree --close feature-x` | Drop databases, remove dir, delete branch (from main repo) |
 | `bin/worktree --close` | Same, run from inside the worktree |
+
+---
+
+## `/rails-upgrade`
+
+Guides a Rails app through version upgrades one hop at a time, using the official Rails upgrade guide bundled as per-version reference files.
+
+Detects the current version from `Gemfile.lock` (and whether `config.load_defaults` lags behind it), plans the hop path, then for each hop: bump the Gemfile pin → `bundle update rails` → `bin/rails app:update` → apply that hop's breaking changes → run tests → flip framework defaults one at a time → commit.
+
+Reference docs (verbatim chapters from the official guide, v8.1.2):
+
+| Hop | Reference |
+|---|---|
+| General advice | Test coverage, Ruby versions, the update task, framework defaults |
+| 5.2 → 6.0 | Zeitwerk, Webpacker, force_ssl, purpose cookies, Action Cable JS |
+| 6.0 → 6.1 | `ActiveModel::Error`, HTTPS redirect status, callback args |
+| 6.1 → 7.0 | Zeitwerk required, Sprockets optional, `AS::Dependencies` removal |
+| 7.0 → 7.1 | secret_key_base path, cache format, autoload paths, encryption |
+| 7.1 → 7.2 | Active Job queue adapter config, `alias_attribute` |
+| 7.2 → 8.0 | Minimal changes |
+| 8.0 → 8.1 | `schema.rb` column sorting |
