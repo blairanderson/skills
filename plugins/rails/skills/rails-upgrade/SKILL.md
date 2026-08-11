@@ -83,3 +83,9 @@ For every hop, in order:
   For anything newer, check the live guide.
 - Deprecation warnings in the current version are the to-do list for the next
   hop — run the suite with deprecations visible and clear them before moving on.
+
+## Maintenance
+
+Run `scripts/check-new-versions.sh` monthly. It compares the chapters on the
+live guide against `references/` and exits 1 (with next steps) when the guide
+has a chapter this skill does not.

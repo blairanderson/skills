@@ -152,3 +152,5 @@ Reference docs (verbatim chapters from the official guide, v8.1.2):
 | 7.1 → 7.2 | Active Job queue adapter config, `alias_attribute` |
 | 7.2 → 8.0 | Minimal changes |
 | 8.0 → 8.1 | `schema.rb` column sorting |
+
+To find new guide chapters, run `scripts/check-new-versions.sh` one time each month. It reports each chapter that has no reference file.
