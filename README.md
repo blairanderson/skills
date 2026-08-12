@@ -65,6 +65,7 @@ Once installed, skills activate automatically based on context. You can also inv
 | `ts-sync` → `sync` | Rails | Sync a Rails app's master/credentials keys and .env files between your machines over SSH/Tailscale — same-path clones, lists files before transfer, diff-guarded with backups, chmod 600 |
 | `ssh-tailscale-mesh` | Productivity | Wire your machines on a Tailscale tailnet into a full passwordless SSH mesh with identical `~/.ssh/config` host aliases — hub/courier key distribution, idempotent config sync, reachability matrix, and onboarding new servers |
 | `verification-skill` → `create` / `maintain` | Testing | Generate a project-local verification skill that drives your app like a user (launch/doctor/drive/evidence harness + feature map), then keep the map honest as the app changes (vendored from [cursor/plugins](https://github.com/cursor/plugins/tree/main/pstack), adapted for `.claude`) |
+| `instagram` → `dm-video` | Productivity | Download every video from an Instagram DM thread at full quality (1080p + audio) via your logged-in Chrome session — network-log capture, DASH video/audio merge with ffmpeg |
 
 ## How Skills Work
 

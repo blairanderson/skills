@@ -479,6 +479,24 @@
         "draft",
         "recap"
       ]
+    },
+    {
+      "name": "instagram",
+      "source": "./plugins/instagram",
+      "description": "Instagram automation via the user's logged-in Chrome session — download DM videos in full quality",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "productivity",
+      "tags": [
+        "instagram",
+        "dm",
+        "video",
+        "download",
+        "chrome",
+        "browser-automation",
+        "ffmpeg"
+      ]
     }
   ]
 }
