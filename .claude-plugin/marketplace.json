@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Curated collection of production-ready Claude Code skills",
-    "version": "1.43.0"
+    "version": "1.44.0"
   },
   "plugins": [
     {
@@ -235,7 +235,7 @@
     {
       "name": "rails",
       "source": "./plugins/rails",
-      "description": "Rails developer toolkit — authentication (OAuth, 2FA, sessions), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, pgsync database sync, Cloudflare proxy setup (SSL, sessions, CSRF, IP spoofing), Ralph autonomous agent bootstrap (sibling worktree, Rails-tailored quality checks), git worktrees with isolated per-branch databases (rails-worktree gem), version-by-version upgrade guides (6.0 → 8.1, from the official Rails upgrade guide), and Postmark email setup (sending via postmark-rails, receiving via the Action Mailbox Postmark ingress, DKIM/Return-Path/DMARC DNS)",
+      "description": "Rails developer toolkit — authentication (OAuth, 2FA, sessions), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, pgsync database sync, Cloudflare proxy setup (SSL, sessions, CSRF, IP spoofing), Hatchbox deploys via the hatchbox CLI (app create, env vars, RAILS_MASTER_KEY, Postgres provisioning and attachment, custom domains with Caddy/Let's Encrypt SSL, GitHub auto-deploy), Postmark email setup (sending via postmark-rails, receiving via the Action Mailbox Postmark ingress, DKIM/Return-Path/DMARC DNS), Ralph autonomous agent bootstrap (sibling worktree, Rails-tailored quality checks), git worktrees with isolated per-branch databases (rails-worktree gem), version-by-version upgrade guides (6.0 → 8.1, from the official Rails upgrade guide), and a new-app production checklist that routes all of the above in dependency order",
       "author": {
         "name": "Blair Anderson"
       },
@@ -274,7 +274,17 @@
         "inbound-email",
         "dkim",
         "dmarc",
-        "deliverability"
+        "deliverability",
+        "deploy",
+        "deployment",
+        "auto-deploy",
+        "env-vars",
+        "checklist",
+        "new-app",
+        "production",
+        "caddy",
+        "lets-encrypt",
+        "action-mailer"
       ]
     },
     {

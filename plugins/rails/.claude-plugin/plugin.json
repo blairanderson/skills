@@ -1,5 +1,5 @@
 {
   "name": "rails",
-  "description": "Rails developer tools — authentication, SEO, Conductor config, pgsync database sync, Cloudflare proxy setup, Ralph autonomous agent bootstrap, git worktrees with isolated databases, version upgrade guides (6.0 → 8.1), and Postmark email (sending + Action Mailbox inbound)",
-  "version": "2.6.0"
+  "description": "Rails developer tools — authentication, SEO, Conductor config, pgsync database sync, Cloudflare proxy setup, Hatchbox deploys (env vars, database, domains, auto-deploy), Postmark email (sending + Action Mailbox inbound), Ralph autonomous agent bootstrap, git worktrees with isolated databases, version upgrade guides (6.0 → 8.1), and a new-app production checklist that routes them in order",
+  "version": "2.7.0"
 }
