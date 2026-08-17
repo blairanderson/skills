@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Curated collection of production-ready Claude Code skills",
-    "version": "1.42.0"
+    "version": "1.43.0"
   },
   "plugins": [
     {
@@ -235,7 +235,7 @@
     {
       "name": "rails",
       "source": "./plugins/rails",
-      "description": "Rails developer toolkit — authentication (OAuth, 2FA, sessions), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, pgsync database sync, Cloudflare proxy setup (SSL, sessions, CSRF, IP spoofing), Ralph autonomous agent bootstrap (sibling worktree, Rails-tailored quality checks), git worktrees with isolated per-branch databases (rails-worktree gem), and version-by-version upgrade guides (6.0 → 8.1, from the official Rails upgrade guide)",
+      "description": "Rails developer toolkit — authentication (OAuth, 2FA, sessions), SEO (meta-tags, JSON-LD, sitemaps), Conductor workspace config, pgsync database sync, Cloudflare proxy setup (SSL, sessions, CSRF, IP spoofing), Ralph autonomous agent bootstrap (sibling worktree, Rails-tailored quality checks), git worktrees with isolated per-branch databases (rails-worktree gem), version-by-version upgrade guides (6.0 → 8.1, from the official Rails upgrade guide), and Postmark email setup (sending via postmark-rails, receiving via the Action Mailbox Postmark ingress, DKIM/Return-Path/DMARC DNS)",
       "author": {
         "name": "Blair Anderson"
       },
@@ -266,7 +266,15 @@
         "autonomous-agent",
         "worktree",
         "upgrade",
-        "migration"
+        "migration",
+        "postmark",
+        "email",
+        "actionmailer",
+        "action-mailbox",
+        "inbound-email",
+        "dkim",
+        "dmarc",
+        "deliverability"
       ]
     },
     {
