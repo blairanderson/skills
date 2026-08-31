@@ -1,0 +1,5 @@
+{
+  "name": "site-perf-guide",
+  "description": "Meta-skill that tracks a full site quality program across addyosmani/web-quality-skills (performance, core-web-vitals, accessibility, seo, best-practices, web-quality-audit) plus agent-ready — remembers when each sub-skill last ran, keeps the improvement backlog, and walks each sub-skill to completion",
+  "version": "1.0.0"
+}

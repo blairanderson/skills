@@ -536,6 +536,28 @@
         "browser-automation",
         "ffmpeg"
       ]
+    },
+    {
+      "name": "site-perf-guide",
+      "source": "./plugins/site-perf-guide",
+      "description": "Meta-skill for a tracked site quality program — orchestrates addyosmani/web-quality-skills (web-quality-audit, performance, core-web-vitals, accessibility, seo, best-practices) plus agent-ready, remembers when each sub-skill last ran, keeps the improvement backlog, and walks each sub-skill to verified completion",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "planning",
+      "tags": [
+        "performance",
+        "core-web-vitals",
+        "accessibility",
+        "seo",
+        "best-practices",
+        "agent-ready",
+        "web-quality",
+        "audit",
+        "lighthouse",
+        "meta-skill",
+        "tracker"
+      ]
     }
   ]
 }

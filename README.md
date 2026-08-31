@@ -57,6 +57,7 @@ Once installed, skills activate automatically based on context. You can also inv
 | `app-onboarding-questionnaire` | Planning | Design and build a high-converting questionnaire-style app onboarding flow modelled on top subscription apps |
 | `diff-review` | Git | Adversarial git diff reviewer — finds bugs, performance issues, and correctness problems |
 | `app-distribution-guide` | Planning | Design and build a multi-surface distribution layer — MCP server, OAuth, Claude/ChatGPT connectors, REST API/SDK, and open source strategy |
+| `site-perf-guide` | Planning | Tracked site quality program — orchestrates addyosmani/web-quality-skills + agent-ready, remembers last-run dates per sub-skill, and walks the improvement backlog to verified completion |
 | `astro` | Astro | Audit and improve SEO for Astro sites — structured data, sitemaps, IndexNow, Open Graph, hreflang (vendored from [jdevalk/skills](https://github.com/jdevalk/skills), MIT) |
 | `jekyll` | Jekyll | Audit and improve SEO for Jekyll sites — jekyll-seo-tag, linked @graph JSON-LD, sitemaps, IndexNow via GitHub Actions, OG images, llms.txt, and agent discovery |
 | `backlinks` | SEO | Find all domains linking to any domain using CommonCrawl hyperlinkgraph data and DuckDB |
