@@ -10,6 +10,27 @@
   },
   "plugins": [
     {
+      "name": "agent-ready",
+      "source": "./plugins/agent-ready",
+      "description": "Audit and improve any website's AI-agent readiness against both scoring standards — isitagentready.com (five-dimension rubric: Discoverability, Content Accessibility, Bot Access Control, Protocol Discovery, Commerce) and is-agentic.com (essential/recommended behavioral checks, npx CLI scanning)",
+      "author": {
+        "name": "Blair Anderson"
+      },
+      "category": "seo",
+      "tags": [
+        "agent-ready",
+        "isitagentready",
+        "is-agentic",
+        "ai-agents",
+        "robots-txt",
+        "content-signal",
+        "llms-txt",
+        "mcp",
+        "well-known",
+        "seo"
+      ]
+    },
+    {
       "name": "code-spec",
       "source": "./plugins/code-spec",
       "description": "Generate structured code specifications",

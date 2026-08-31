@@ -4,6 +4,8 @@ This reference covers the technical steps to improve your site's score on [isita
 
 Only ~4% of sites implement Content Signals and markdown negotiation. Adding even the Quick Wins section puts you ahead of 96% of the web.
 
+> For a framework-agnostic audit that also covers the [is-agentic.com](https://is-agentic.com) rubric (behavioral checks + `npx is-agentic <domain>` CLI scanning), use the standalone `agent-ready` plugin from this marketplace. This reference stays the Rails-native implementation.
+
 ---
 
 ## Quick Wins

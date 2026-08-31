@@ -36,6 +36,7 @@ Once installed, skills activate automatically based on context. You can also inv
 
 | Skill | Category | Description |
 |-------|----------|-------------|
+| `agent-ready` | SEO | Audit and improve any site's AI-agent readiness — combined isitagentready.com + is-agentic.com rubric, with npx CLI scanning and drop-in fixes |
 | `code-spec` | Planning | Reverse-engineer a feature or project into a portable, implementation-ready specification |
 | `rails` → `rails-seo` | Rails | Audit and improve SEO for Ruby on Rails apps — head metadata, JSON-LD, sitemaps |
 | `rails` → `rails-authentication` | Rails | End-to-end Rails authentication — OAuth, 2FA, sessions |

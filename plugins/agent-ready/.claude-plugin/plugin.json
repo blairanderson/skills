@@ -1,0 +1,5 @@
+{
+  "name": "agent-ready",
+  "description": "Audit and improve any website's AI-agent readiness against both scoring standards — isitagentready.com (Cloudflare five-dimension rubric) and is-agentic.com (essential/recommended behavioral checks with CLI scanning)",
+  "version": "1.0.0"
+}
