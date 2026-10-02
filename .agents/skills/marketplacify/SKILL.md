@@ -122,7 +122,7 @@ Add the new plugin to the "Available Skills" table in `README.md`:
 Run the mirror script to copy and transform the SKILL.md to `skills-openai`:
 
 ```bash
-.claude/skills/marketplacify/bin/mirror_to_codex <plugin-name>
+.agents/skills/marketplacify/bin/mirror_to_codex <plugin-name>
 ```
 
 This strips `version` and `argument-hint` from frontmatter (Codex rejects them), then writes
@@ -132,9 +132,9 @@ the plugin to `~/dev/skills-openai/plugins/<plugin-name>/SKILL.md`.
 
 ### Claude validator
 ```bash
-.claude/skills/marketplacify/bin/validate_plugin <plugin-name>
+.agents/skills/marketplacify/bin/validate_plugin <plugin-name>
 # or
-.claude/skills/marketplacify/bin/validate_plugin --all
+.agents/skills/marketplacify/bin/validate_plugin --all
 ```
 
 ### Codex validator (run from skills-openai)

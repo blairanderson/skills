@@ -16,7 +16,7 @@ Users install skills via:
 
 ```
 .claude-plugin/marketplace.json   ← Central marketplace manifest (version + plugin registry)
-.claude/skills/bump/SKILL.md      ← Local skill for version bumping
+.agents/skills/bump/SKILL.md      ← Local skill for version bumping
 plugins/<name>/                   ← Each published plugin
   .claude-plugin/plugin.json      ← Plugin metadata (name, description, version)
   skills/<name>/SKILL.md          ← The actual skill definition

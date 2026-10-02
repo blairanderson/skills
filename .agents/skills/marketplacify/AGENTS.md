@@ -1,18 +1,18 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to agents that work on this skill.
 
 ## What This Skill Is
 
-`marketplacify` is a local Claude Code skill (not a published plugin) that guides users through publishing a new plugin to the `blairanderson/skills` marketplace. It lives at `.claude/skills/marketplacify/SKILL.md` and is invoked via `/marketplacify`.
+`marketplacify` is a local agent skill (not a published plugin) that guides users through publishing a new plugin to the `blairanderson/skills` marketplace. It lives at `.agents/skills/marketplacify/SKILL.md` and is invoked via `/marketplacify`.
 
 ## Single File
 
-This skill is entirely contained in `SKILL.md`. There are no scripts, references, or other files. All logic is prose instructions that Claude follows at runtime.
+This skill is entirely contained in `SKILL.md`. There are no scripts, references, or other files. All logic is prose instructions that the agent follows at runtime.
 
 ## How the Skill Works
 
-When invoked, Claude reads `SKILL.md` and executes the 6-step checklist:
+When invoked, the agent reads `SKILL.md` and executes the 6-step checklist:
 
 1. Create `plugins/<name>/.claude-plugin/plugin.json`
 2. Create `plugins/<name>/skills/<name>/SKILL.md` with YAML frontmatter
@@ -23,7 +23,7 @@ When invoked, Claude reads `SKILL.md` and executes the 6-step checklist:
 
 ## SKILL.md Frontmatter Contract
 
-The `description` field controls when Claude auto-activates this skill. Edit it carefully — it is the trigger condition, not a summary.
+The `description` field controls when an agent activates this skill. Edit it carefully — it is the trigger condition, not a summary.
 
 ```yaml
 ---
